@@ -9,7 +9,7 @@
         {
             this.SellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.BuyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
-            this.Orders=new List<Order>();
+            this.Orders = new List<Order>();
         }
 
         public List<Order> Orders { get; set; }
@@ -39,10 +39,12 @@
                         {
                             var newAmount = sell.Amount - order.Amount;
 
-                            var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == order.Side).FirstOrDefault();
+                            var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
 
                             findSellOrder.Amount = newAmount;
 
+                            SellOrderQueue.Dequeue();
+                            SellOrderQueue.Enqueue(findSellOrder, findSellOrder);
                             Orders.Remove(order);
                         }
                         else
@@ -60,6 +62,10 @@
                             BuyOrderQueue.Enqueue(res1, res1);
                         }
 
+                    }
+                    else
+                    {
+                        BuyOrderQueue.Enqueue(order, order);
                     }
                 }
                 else
@@ -85,11 +91,14 @@
                         }
                         else if (order.Amount < buy.Amount)
                         {
+                            BuyOrderQueue.Dequeue();
+
                             var newAmount = buy.Amount - order.Amount;
 
-                            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == order.Side).FirstOrDefault();
+                            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
 
                             findBuyOrder.Amount = newAmount;
+                            BuyOrderQueue.Enqueue(findBuyOrder, findBuyOrder);
 
                             Orders.Remove(order);
                         }
@@ -103,9 +112,14 @@
                             var res1 = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
 
                             res1.Amount = order.Amount - buy.Amount;
-                            
+
                             SellOrderQueue.Enqueue(res1, res1);
                         }
+
+                    }
+                    else
+                    {
+                        SellOrderQueue.Enqueue(order, order);
 
                     }
                 }
