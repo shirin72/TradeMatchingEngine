@@ -1,6 +1,6 @@
 ﻿namespace TradeMatchingEngine
 {
-    internal class StockMarketMatchEngine
+    public class StockMarketMatchEngine
     {
         private readonly PriorityQueue<Order, Order> SellOrderQueue;
         private readonly PriorityQueue<Order, Order> BuyOrderQueue;
@@ -31,8 +31,9 @@
                         if (order.Amount == sell.Amount)
                         {
                             SellOrderQueue.Dequeue();
-                            var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == order.Side).FirstOrDefault();
-                            Orders.Remove(findSellOrder);
+                            var sellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
+                            Orders.Remove(sellOrder);
+                            Orders.Remove(order);
                         }
                         else if (order.Amount < sell.Amount)
                         {
@@ -46,7 +47,7 @@
                         }
                         else
                         {
-                            var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == order.Side).FirstOrDefault();
+                            var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
 
                             Orders.Remove(findSellOrder);
 
@@ -78,8 +79,9 @@
                         if (order.Amount == buy.Amount)
                         {
                             BuyOrderQueue.Dequeue();
-                            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == order.Side).FirstOrDefault();
+                            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
                             Orders.Remove(findBuyOrder);
+                            Orders.Remove(order);
                         }
                         else if (order.Amount < buy.Amount)
                         {
@@ -93,18 +95,16 @@
                         }
                         else
                         {
-                            var findSellOrder = Orders.Where(x => x.Id == buy.Id && x.Side == order.Side).FirstOrDefault();
+                            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
 
-                            Orders.Remove(findSellOrder);
-
+                            Orders.Remove(findBuyOrder);
+                            BuyOrderQueue.Dequeue();
 
                             var res1 = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
 
                             res1.Amount = order.Amount - buy.Amount;
-
-                            BuyOrderQueue.Dequeue();
                             
-                            BuyOrderQueue.Enqueue(res1, res1);
+                            SellOrderQueue.Enqueue(res1, res1);
                         }
 
                     }
@@ -122,6 +122,18 @@
         {
             return Orders;
         }
+
+
+        public PriorityQueue<Order, Order> GetSellOrderQueue()
+        {
+            return SellOrderQueue;
+        }
+
+        public PriorityQueue<Order, Order> GetBuyOrderQueue()
+        {
+            return BuyOrderQueue;
+        }
+
 
     }
 }
