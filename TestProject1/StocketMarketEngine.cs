@@ -16,6 +16,7 @@ namespace TestProject1
 
             
         }
+
         [Fact]
         public void EnqueueBuyWithoughtAnySellOrder_ShouldEnqueueBuy()
         {
@@ -138,7 +139,6 @@ namespace TestProject1
             Assert.NotNull(res);
 
         }
-
 
         [Fact]
         public void StockMarketMatchEngine_TradeWithBuyOrder_ShouldTradeCountOne()
@@ -528,7 +528,6 @@ namespace TestProject1
             Assert.Equal(4, sut.Orders.LastOrDefault().Id);
         }
 
-
         [Fact]
         public void StockMarketMatchEngine_SellOrderEnters3WithDefferBuyPriceInQueue_OneTradeMustBeExecuted()
         {
@@ -808,11 +807,8 @@ namespace TestProject1
             Assert.Equal(2, sut.Orders.Where(x => x.Side == Side.Buy).Sum(x => x.Amount));
         }
 
-
-
-
         [Fact]
-        public void StockMarketMatchEngine_()
+        public void StockMarketMatchEngine_Enter3SellAnd2Buys_TowTradeShouldBeExecuted()
         {
             //Arrange
 
