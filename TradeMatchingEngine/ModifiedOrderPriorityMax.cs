@@ -1,23 +1,10 @@
 ﻿namespace TradeMatchingEngine
 {
-    public class ModifiedOrderPriorityMax : IComparer<Order>
+    public class ModifiedOrderPriorityMax : IComparer<PriceInQueue>
     {
-        public int Compare(Order? x, Order? y)
+        public int Compare(PriceInQueue? x, PriceInQueue? y)
         {
-            if (x.Price == y.Price)
-            {
-                if (x.Id < y.Id)
-                {
-                    return -1;
-                }
-                else if (x.Id > y.Id)
-                {
-                    return 1;
-                }
-
-                return 0;
-            }
-            else if (x.Price < y.Price)
+          if (x.Price < y.Price)
             {
                 return 1;
             }

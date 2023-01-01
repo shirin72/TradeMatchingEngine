@@ -5,8 +5,11 @@ using Xunit;
 
 namespace TestProject1
 {
+
     public class StocketMarketEngine
     {
+
+
         [Fact]
         public void StockMarketMatchEngine_EnqueueBuyWithoughtAnySellOrder_ShouldEnqueueBuy()
         {
@@ -346,26 +349,265 @@ namespace TestProject1
             Assert.Equal(stockMarketMatchEngine.Orders.Count, 2);
             Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 1);
         }
-        #region Private
-        private PriorityQueue<Order, Order> MakeSellOrderEnqueu(Order order)
+
+        [Fact]
+        public void StockMarketMatchEngine_SellOrderEntersWithDefferPricesAndAmounts_TheOrdersMustEnqueu()
         {
+            //Arrange
+
+            var orderSell1 = new Order()
+            {
+                Amount = 4,
+                Id = 1,
+                Price = 100,
+                Side = Side.Sell
+            };
+
+            var orderSell2 = new Order()
+            {
+                Amount = 4,
+                Id = 2,
+                Price = 120,
+                Side = Side.Sell
+            };
+            var orderSell3 = new Order()
+            {
+                Amount = 2,
+                Id = 3,
+                Price = 100,
+                Side = Side.Sell
+            };
+            var orderSell4 = new Order()
+            {
+                Amount = 5,
+                Id = 4,
+                Price = 90,
+                Side = Side.Sell
+            };
+
+
             var stockMarketMatchEngine = new StockMarketMatchEngine();
 
-            stockMarketMatchEngine.Trade(order);
+           
 
-            return stockMarketMatchEngine.GetSellOrderQueue();
+            //Action
+            stockMarketMatchEngine.Trade(orderSell1);
+            stockMarketMatchEngine.Trade(orderSell2);
+            stockMarketMatchEngine.Trade(orderSell3);
+            stockMarketMatchEngine.Trade(orderSell4);
 
+            //Assert
+            Assert.Equal(stockMarketMatchEngine.TradeCount, 0);
+            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 3);
+            Assert.Equal(stockMarketMatchEngine.Orders.Count, 4);
+            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 0);
         }
 
-        private PriorityQueue<Order, Order> MakeBuyOrderEnqueu(Order order)
+        [Fact]
+        public void StockMarketMatchEngine_BuyOrderEntersWithDefferPricesAndAmounts_TheOrdersMustEnqueu()
         {
+            //Arrange
+
+            var orderSell1 = new Order()
+            {
+                Amount = 4,
+                Id = 1,
+                Price = 100,
+                Side = Side.Buy
+            };
+
+            var orderSell2 = new Order()
+            {
+                Amount = 4,
+                Id = 2,
+                Price = 120,
+                Side = Side.Buy
+            };
+            var orderSell3 = new Order()
+            {
+                Amount = 2,
+                Id = 3,
+                Price = 100,
+                Side = Side.Buy
+            };
+            var orderSell4 = new Order()
+            {
+                Amount = 5,
+                Id = 4,
+                Price = 90,
+                Side = Side.Buy
+            };
+
+
             var stockMarketMatchEngine = new StockMarketMatchEngine();
 
-            stockMarketMatchEngine.Trade(order);
 
-            return stockMarketMatchEngine.GetBuyOrderQueue();
+
+            //Action
+            stockMarketMatchEngine.Trade(orderSell1);
+            stockMarketMatchEngine.Trade(orderSell2);
+            stockMarketMatchEngine.Trade(orderSell3);
+            stockMarketMatchEngine.Trade(orderSell4);
+
+            //Assert
+            Assert.Equal(stockMarketMatchEngine.TradeCount, 0);
+            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 0);
+            Assert.Equal(stockMarketMatchEngine.Orders.Count, 4);
+            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 3);
         }
-        #endregion
+
+
+        [Fact]
+        public void StockMarketMatchEngine_BuyOrderEnters3WithDefferSellPriceInQueue_OneTradeMustBeExecuted()
+        {
+            //Arrange
+
+            var orderSell1 = new Order()
+            {
+                Amount = 4,
+                Id = 1,
+                Price = 100,
+                Side = Side.Buy
+            };
+
+            var orderSell2 = new Order()
+            {
+                Amount = 4,
+                Id = 2,
+                Price = 120,
+                Side = Side.Buy
+            };
+            var orderSell3 = new Order()
+            {
+                Amount = 2,
+                Id = 3,
+                Price = 100,
+                Side = Side.Buy
+            };
+
+            var orderSell4 = new Order()
+            {
+                Amount = 5,
+                Id = 4,
+                Price = 90,
+                Side = Side.Buy
+            };
+
+            var sell = new Order()
+            {
+                Amount = 5,
+                Id = 4,
+                Price = 90,
+                Side = Side.Sell
+            };
+
+
+
+
+            var stockMarketMatchEngine = new StockMarketMatchEngine();
+
+
+
+            //Action
+            stockMarketMatchEngine.Trade(orderSell1);
+            stockMarketMatchEngine.Trade(orderSell2);
+            stockMarketMatchEngine.Trade(orderSell3);
+            stockMarketMatchEngine.Trade(orderSell4);
+            stockMarketMatchEngine.Trade(sell);
+
+            //Assert
+            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
+            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 0);
+            Assert.Equal(stockMarketMatchEngine.Orders.Count, 3);
+            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 2);
+        }
+
+        [Fact]
+        public void StockMarketMatchEngine_SellOrderEnters3WithDefferBuyPriceInQueue_OneTradeMustBeExecuted()
+        {
+            //Arrange
+
+            var orderSell1 = new Order()
+            {
+                Amount = 4,
+                Id = 1,
+                Price = 100,
+                Side = Side.Sell
+            };
+
+            var orderSell2 = new Order()
+            {
+                Amount = 4,
+                Id = 2,
+                Price = 120,
+                Side = Side.Sell
+            };
+            var orderSell3 = new Order()
+            {
+                Amount = 2,
+                Id = 3,
+                Price = 100,
+                Side = Side.Sell
+            };
+
+            var orderSell4 = new Order()
+            {
+                Amount = 5,
+                Id = 4,
+                Price = 90,
+                Side = Side.Sell
+            };
+
+            var buyOrder = new Order()
+            {
+                Amount = 5,
+                Id = 4,
+                Price = 90,
+                Side = Side.Buy
+            };
+
+
+
+
+            var stockMarketMatchEngine = new StockMarketMatchEngine();
+
+
+
+            //Action
+            stockMarketMatchEngine.Trade(orderSell1);
+            stockMarketMatchEngine.Trade(orderSell2);
+            stockMarketMatchEngine.Trade(orderSell3);
+            stockMarketMatchEngine.Trade(orderSell4);
+            stockMarketMatchEngine.Trade(buyOrder);
+
+            //Assert
+            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
+            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 2);
+            Assert.Equal(stockMarketMatchEngine.Orders.Count, 3);
+            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 0);
+        }
+
+
+        //#region Private
+        //private PriorityQueue<pt, Order> MakeSellOrderEnqueu(Order order)
+        //{
+        //    var stockMarketMatchEngine = new StockMarketMatchEngine();
+
+        //    stockMarketMatchEngine.Trade(order);
+
+        //    return stockMarketMatchEngine.GetSellOrderQueue();
+
+        //}
+
+        //private PriorityQueue<Order, Order> MakeBuyOrderEnqueu(Order order)
+        //{
+        //    var stockMarketMatchEngine = new StockMarketMatchEngine();
+
+        //    stockMarketMatchEngine.Trade(order);
+
+        //    return stockMarketMatchEngine.GetBuyOrderQueue();
+        //}
+        //#endregion
 
 
     }
