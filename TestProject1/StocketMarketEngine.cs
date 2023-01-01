@@ -737,5 +737,68 @@ namespace TestProject1
             Assert.Equal(2, sut.Orders.Where(x => x.Side == Side.Buy).Sum(x => x.Amount));
         }
 
+
+
+
+        [Fact]
+        public void StockMarketMatchEngine_()
+        {
+            //Arrange
+
+            var orderSell1 = new Order()
+            {
+                Amount = 10,
+                Id = 1,
+                Price = 110,
+                Side = Side.Sell
+            };
+
+            var orderSell2 = new Order()
+            {
+                Amount = 3,
+                Id = 2,
+                Price = 110,
+                Side = Side.Sell
+            };
+            var orderSell3 = new Order()
+            {
+                Amount = 2,
+                Id = 3,
+                Price = 100,
+                Side = Side.Sell
+            };
+
+            var buyOrder = new Order()
+            {
+                Amount = 8,
+                Id = 4,
+                Price = 110,
+                Side = Side.Buy
+            };
+
+            var buyOrder1 = new Order()
+            {
+                Amount = 8,
+                Id = 5,
+                Price = 50,
+                Side = Side.Buy
+            };
+
+            sut.Trade(orderSell1);
+            sut.Trade(orderSell2);
+            sut.Trade(orderSell3);
+            sut.Trade(orderSell3);
+            sut.Trade(buyOrder1);
+
+            //Action
+            sut.Trade(buyOrder);
+
+            //Assert
+            //Assert.Equal(2, sut.TradeCount);
+            //Assert.Equal(0, sut.GetSellOrderQueue().Count);
+            //Assert.Equal(1, sut.Orders.Count);
+            //Assert.Equal(1, sut.GetBuyOrderQueue().Count);
+            //Assert.Equal(2, sut.Orders.Where(x => x.Side == Side.Buy).Sum(x => x.Amount));
+        }
     }
 }
