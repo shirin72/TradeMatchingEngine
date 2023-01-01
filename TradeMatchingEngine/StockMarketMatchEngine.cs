@@ -57,14 +57,13 @@
                 var sell = SellOrderQueue.Peek();
                 if (sell.Price <= order.Price)
                 {
+                    TradeCount++;
                     if (order.Amount == sell.Amount)
                     {
                         SellOrderQueue.Dequeue();
                         var sellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
                         Orders.Remove(sellOrder);
                         Orders.Remove(order);
-
-                        TradeCount++;
                     }
                     else if (order.Amount < sell.Amount)
                     {
@@ -77,8 +76,6 @@
                         SellOrderQueue.Dequeue();
                         SellOrderQueue.Enqueue(findSellOrder, findSellOrder);
                         Orders.Remove(order);
-
-                        TradeCount++;
                     }
                     else
                     {
@@ -93,8 +90,6 @@
                         res1.Amount = order.Amount - sell.Amount;
 
                         BuyOrderQueue.Enqueue(res1, res1);
-
-                        TradeCount++;
                     }
 
                 }
@@ -117,15 +112,13 @@
                 var buy = BuyOrderQueue.Peek();
                 if (buy.Price >= order.Price)
                 {
-
+                    TradeCount++;
                     if (order.Amount == buy.Amount)
                     {
                         BuyOrderQueue.Dequeue();
                         var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
                         Orders.Remove(findBuyOrder);
                         Orders.Remove(order);
-
-                        TradeCount++;
                     }
                     else if (order.Amount < buy.Amount)
                     {
@@ -139,8 +132,6 @@
                         BuyOrderQueue.Enqueue(findBuyOrder, findBuyOrder);
 
                         Orders.Remove(order);
-
-                        TradeCount++;
                     }
                     else
                     {
@@ -154,8 +145,6 @@
                         res1.Amount = order.Amount - buy.Amount;
 
                         SellOrderQueue.Enqueue(res1, res1);
-
-                        TradeCount++;
                     }
 
                 }
