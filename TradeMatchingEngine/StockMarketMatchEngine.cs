@@ -36,7 +36,6 @@
             Orders = Orders.OrderBy(x => x.Id).ToList();
         }
 
-
         public PriorityQueue<PriceInQueue, PriceInQueue> GetSellOrderQueue()
         {
             return SellOrderQueue;
@@ -169,7 +168,6 @@
                                 {
                                     SellOrderQueue.Dequeue();
                                 }
-
                             }
 
                             break;
@@ -218,7 +216,6 @@
                     {
                         SellOrderQueue.Enqueue(price, price);
                     }
-
                 }
             }
             else
