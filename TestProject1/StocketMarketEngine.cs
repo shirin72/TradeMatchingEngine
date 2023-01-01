@@ -259,8 +259,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-
-
             var stockMarketMatchEngine = new StockMarketMatchEngine();
 
             stockMarketMatchEngine.Trade(orderSell);
@@ -294,7 +292,6 @@ namespace TestProject1
                 Price = 90,
                 Side = Side.Buy
             };
-
 
             var stockMarketMatchEngine = new StockMarketMatchEngine();
 
@@ -331,8 +328,6 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-
-
             var stockMarketMatchEngine = new StockMarketMatchEngine();
 
             stockMarketMatchEngine.Trade(orderBuy);
@@ -346,27 +341,6 @@ namespace TestProject1
             Assert.Equal(stockMarketMatchEngine.Orders.Count, 2);
             Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 1);
         }
-        #region Private
-        private PriorityQueue<Order, Order> MakeSellOrderEnqueu(Order order)
-        {
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(order);
-
-            return stockMarketMatchEngine.GetSellOrderQueue();
-
-        }
-
-        private PriorityQueue<Order, Order> MakeBuyOrderEnqueu(Order order)
-        {
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(order);
-
-            return stockMarketMatchEngine.GetBuyOrderQueue();
-        }
-        #endregion
-
 
     }
 }
