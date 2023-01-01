@@ -155,6 +155,16 @@
                 SellOrderQueue.Enqueue(order, order);
             }
         }
+
+        public int GetBuyOrderCount()
+        {
+            return Orders.Where(x => x.Side == Side.Buy).GroupBy(x => x.Price).Count();
+        }
+
+        public int GetSellOrderCount()
+        {
+            return Orders.Where(x => x.Side == Side.Sell).GroupBy(x => x.Price).Count();
+        }
         #endregion
 
 
