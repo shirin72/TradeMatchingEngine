@@ -70,7 +70,6 @@
                         var newAmount = sell.Amount - order.Amount;
 
                         var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
-
                         findSellOrder.Amount = newAmount;
 
                         SellOrderQueue.Dequeue();
@@ -85,11 +84,10 @@
 
                         SellOrderQueue.Dequeue();
 
-                        var res1 = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
+                        var findOrder = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
+                        findOrder.Amount = order.Amount - sell.Amount;
 
-                        res1.Amount = order.Amount - sell.Amount;
-
-                        BuyOrderQueue.Enqueue(res1, res1);
+                        BuyOrderQueue.Enqueue(findOrder, findOrder);
                     }
 
                 }
@@ -127,7 +125,6 @@
                         var newAmount = buy.Amount - order.Amount;
 
                         var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
-
                         findBuyOrder.Amount = newAmount;
                         BuyOrderQueue.Enqueue(findBuyOrder, findBuyOrder);
 
@@ -140,11 +137,10 @@
                         Orders.Remove(findBuyOrder);
                         BuyOrderQueue.Dequeue();
 
-                        var res1 = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
+                        var findOrder = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
+                        findOrder.Amount = order.Amount - buy.Amount;
 
-                        res1.Amount = order.Amount - buy.Amount;
-
-                        SellOrderQueue.Enqueue(res1, res1);
+                        SellOrderQueue.Enqueue(findOrder, findOrder);
                     }
 
                 }
