@@ -38,7 +38,78 @@ namespace TestProject1
             Assert.NotNull(res);
             Assert.NotNull(getBuyQueue);
         }
+        [Fact]
+        public void Enter3SellsWith2DefferPrice_ShouldEnqueue2Sell()
+        {
+            //Arrange
+            var order1 = new Order()
+            {
+                Amount = 5,
+                Id = 1,
+                Price = 110,
+                Side = Side.Sell
+            };
+            var order2 = new Order()
+            {
+                Amount = 5,
+                Id = 2,
+                Price = 100,
+                Side = Side.Sell
+            };
+            var order3 = new Order()
+            {
+                Amount = 5,
+                Id = 2,
+                Price = 100,
+                Side = Side.Sell
+            };
+            //Action
+            sut.Trade(order1);
+            sut.Trade(order2);
+            sut.Trade(order3);
 
+
+            //Assert
+           
+            Assert.Equal(2,sut.GetSellOrderQueue().Count);
+            Assert.Equal(3,sut.Orders.Count);
+        }
+        [Fact]
+        public void Enter3BuysWith2DefferPrice_ShouldEnqueue2Buys()
+        {
+            //Arrange
+            var order1 = new Order()
+            {
+                Amount = 5,
+                Id = 1,
+                Price = 110,
+                Side = Side.Buy
+            };
+            var order2 = new Order()
+            {
+                Amount = 5,
+                Id = 2,
+                Price = 100,
+                Side = Side.Buy
+            };
+            var order3 = new Order()
+            {
+                Amount = 5,
+                Id = 2,
+                Price = 100,
+                Side = Side.Buy
+            };
+            //Action
+            sut.Trade(order1);
+            sut.Trade(order2);
+            sut.Trade(order3);
+
+
+            //Assert
+
+            Assert.Equal(2, sut.GetBuyOrderQueue().Count);
+            Assert.Equal(3, sut.Orders.Count);
+        }
         [Fact]
         public void StockMarketMatchEngine_EnqueueBuyWithoughtAnyBuyOrder_ShouldEnqueuSell()
         {
@@ -784,21 +855,22 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
+            sut.Trade(buyOrder1);
             sut.Trade(orderSell1);
             sut.Trade(orderSell2);
             sut.Trade(orderSell3);
-            sut.Trade(orderSell3);
-            sut.Trade(buyOrder1);
+           
 
             //Action
             sut.Trade(buyOrder);
 
             //Assert
-            //Assert.Equal(2, sut.TradeCount);
-            //Assert.Equal(0, sut.GetSellOrderQueue().Count);
-            //Assert.Equal(1, sut.Orders.Count);
-            //Assert.Equal(1, sut.GetBuyOrderQueue().Count);
-            //Assert.Equal(2, sut.Orders.Where(x => x.Side == Side.Buy).Sum(x => x.Amount));
+
+             Assert.Equal(2, sut.TradeCount);
+             Assert.Equal(1, sut.GetSellOrderQueue().Count);
+             Assert.Equal(3, sut.Orders.Count);
+             Assert.Equal(1, sut.GetBuyOrderQueue().Count);
+             Assert.Equal(8, sut.Orders.Where(x => x.Side == Side.Buy).Sum(x => x.Amount));
         }
     }
 }

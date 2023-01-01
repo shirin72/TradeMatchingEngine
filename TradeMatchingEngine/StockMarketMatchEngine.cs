@@ -33,7 +33,7 @@
                     {
                        
 
-                        var orderSellOrdersList = Orders.Where(o => o.Price <= sell.Price && o.Side == Side.Sell).OrderBy(o => o.Price).ToList();
+                        var orderSellOrdersList = Orders.Where(o => o.Price <= o.Price && o.Side == Side.Sell).OrderBy(o => o.Price).ToList();
                         bool hasBuyEnqued = false;
 
                         for (int i = 0; i < orderSellOrdersList.Count; i++)
@@ -127,7 +127,7 @@
                     var buy = BuyOrderQueue.Peek();
                     if (buy.Price >= order.Price)
                     {
-                        var orderBuyOrdersList = Orders.Where(o => o.Price <= buy.Price && o.Side == Side.Buy).OrderByDescending(o => o.Price).ToList();
+                        var orderBuyOrdersList = Orders.Where(o => o.Price <= o.Price && o.Side == Side.Buy).OrderByDescending(o => o.Price).ToList();
 
                         
                         bool hasSellEnqued = false;
@@ -199,7 +199,10 @@
                     }
                     else
                     {
-                        SellOrderQueue.Enqueue(price, price);
+                        if (Orders.Where(o => o.Price == order.Price && o.Side == order.Side).ToList().Count == 1)
+                        {
+                            SellOrderQueue.Enqueue(price, price);
+                        }
 
                     }
                 }
