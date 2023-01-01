@@ -31,15 +31,16 @@
                     var sell = SellOrderQueue.Peek();
                     if (sell.Price <= order.Price)
                     {
-                        TradeCount++;
+                       
 
-                        var orderSellOrdersList = Orders.Where(o => o.Price >= sell.Price && o.Side == Side.Sell).OrderBy(o => o.Price).ToList();
+                        var orderSellOrdersList = Orders.Where(o => o.Price <= sell.Price && o.Side == Side.Sell).OrderBy(o => o.Price).ToList();
                         bool hasBuyEnqued = false;
 
                         for (int i = 0; i < orderSellOrdersList.Count; i++)
                         {
                             if (orderSellOrdersList[i].Amount == order.Amount)
                             {
+                                TradeCount++;
                                 Orders.Remove(orderSellOrdersList[i]);
                                 Orders.Remove(order);
                                 var top = SellOrderQueue.Peek();
@@ -47,11 +48,19 @@
                                 {
                                     SellOrderQueue.Dequeue();
                                 }
-
+                                if(BuyOrderQueue.Count>0)
+                                {
+                                    if (BuyOrderQueue.Peek().Price == order.Price)
+                                    {
+                                        BuyOrderQueue.Dequeue();
+                                    }
+                                    
+                                }
                                 break;
                             }
                             else if (orderSellOrdersList[i].Amount > order.Amount)
                             {
+                                TradeCount++;
                                 orderSellOrdersList[i].Amount = orderSellOrdersList[i].Amount - order.Amount;
                                 Orders.Remove(order);
 
@@ -67,6 +76,7 @@
                             }
                             else
                             {
+                                TradeCount++;
                                 order.Amount = order.Amount - orderSellOrdersList[i].Amount;
                                 Orders.Remove(orderSellOrdersList[i]);
 
@@ -79,45 +89,16 @@
                                     }
                                     if (!hasBuyEnqued)
                                     {
-                                        BuyOrderQueue.Enqueue(price, price);
-                                        hasBuyEnqued = true;
+                                        if (order.Amount > 0)
+                                        {
+                                            BuyOrderQueue.Enqueue(price, price);
+                                            hasBuyEnqued = true;
+                                        }
+
                                     }
                                 }
                             }
                         }
-                        //if (order.Amount == sell.Amount)
-                        //{
-                        //    SellOrderQueue.Dequeue();
-                        //    var sellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
-                        //    Orders.Remove(sellOrder);
-                        //    Orders.Remove(order);
-                        //}
-                        //else if (order.Amount < sell.Amount)
-                        //{
-                        //    var newAmount = sell.Amount - order.Amount;
-
-                        //    var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
-
-                        //    findSellOrder.Amount = newAmount;
-
-                        //    SellOrderQueue.Dequeue();
-                        //    SellOrderQueue.Enqueue(findSellOrder, findSellOrder);
-                        //    Orders.Remove(order);
-                        //}
-                        //else
-                        //{
-                        //    var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
-
-                        //    Orders.Remove(findSellOrder);
-
-                        //    SellOrderQueue.Dequeue();
-
-                        //    var res1 = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
-
-                        //    res1.Amount = order.Amount - sell.Amount;
-
-                        //    BuyOrderQueue.Enqueue(res1, res1);
-                        //}
 
                     }
                     else
@@ -148,12 +129,13 @@
                     {
                         var orderBuyOrdersList = Orders.Where(o => o.Price <= buy.Price && o.Side == Side.Buy).OrderByDescending(o => o.Price).ToList();
 
-                        TradeCount++;
+                        
                         bool hasSellEnqued = false;
                         for (int i = 0; i < orderBuyOrdersList.Count; i++)
                         {
                             if (orderBuyOrdersList[i].Amount == order.Amount)
                             {
+                                TradeCount++;
                                 Orders.Remove(orderBuyOrdersList[i]);
                                 Orders.Remove(order);
                                 var top = BuyOrderQueue.Peek();
@@ -162,10 +144,22 @@
                                     BuyOrderQueue.Dequeue();
                                 }
 
+                                if (SellOrderQueue.Count > 0)
+                                {
+                                    if (SellOrderQueue.Peek().Price == order.Price)
+                                    {
+                                        SellOrderQueue.Dequeue();
+                                    }
+
+                                }
+
+
+
                                 break;
                             }
                             else if (orderBuyOrdersList[i].Amount > order.Amount)
                             {
+                                TradeCount++;
                                 orderBuyOrdersList[i].Amount = orderBuyOrdersList[i].Amount - order.Amount;
                                 Orders.Remove(order);
 
@@ -184,7 +178,7 @@
                             {
                                 order.Amount = order.Amount - orderBuyOrdersList[i].Amount;
                                 Orders.Remove(orderBuyOrdersList[i]);
-
+                                TradeCount++;
                                 var top = BuyOrderQueue.Peek();
                                 if (top.Price >= order.Price)
                                 {
@@ -201,39 +195,6 @@
 
                             }
                         }
-                        //if (order.Amount == buy.Amount)
-                        //{
-                        //    BuyOrderQueue.Dequeue();
-                        //    var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
-                        //    Orders.Remove(findBuyOrder);
-                        //    Orders.Remove(order);
-                        //}
-                        //else if (order.Amount < buy.Amount)
-                        //{
-                        //    BuyOrderQueue.Dequeue();
-
-                        //    var newAmount = buy.Amount - order.Amount;
-
-                        //    var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
-
-                        //    findBuyOrder.Amount = newAmount;
-                        //    BuyOrderQueue.Enqueue(findBuyOrder, findBuyOrder);
-
-                        //    Orders.Remove(order);
-                        //}
-                        //else
-                        //{
-                        //    var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
-
-                        //    Orders.Remove(findBuyOrder);
-                        //    BuyOrderQueue.Dequeue();
-
-                        //    var res1 = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
-
-                        //    res1.Amount = order.Amount - buy.Amount;
-
-                        //    SellOrderQueue.Enqueue(res1, res1);
-                        //}
 
                     }
                     else
@@ -253,12 +214,6 @@
             }
 
             Orders = Orders.OrderBy(x => x.Id).ToList();
-        }
-
-
-        public List<Order> GetAllOrdersList()
-        {
-            return Orders;
         }
 
 

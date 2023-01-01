@@ -51,6 +51,6 @@ stockMarket.Trade(buyOrder);
 stockMarket.Trade(sellOrder3);
 //stockMarket.Trade(sellOrder1);
 
-stockMarket.GetAllOrdersList();
+//stockMarket.GetAllOrdersList();
 stockMarket.GetBuyOrderQueue();
 Console.WriteLine("Hello, World!");
