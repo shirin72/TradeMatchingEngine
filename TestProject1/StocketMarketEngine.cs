@@ -7,6 +7,12 @@ namespace TestProject1
 {
     public class StocketMarketEngine
     {
+        private StockMarketMatchEngine sut =new StockMarketMatchEngine();
+        public StocketMarketEngine()
+        {
+            sut = new StockMarketMatchEngine();
+        }
+
         [Fact]
         public void StockMarketMatchEngine_EnqueueBuyWithoughtAnySellOrder_ShouldEnqueueBuy()
         {
@@ -19,20 +25,14 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            var orders = stockMarketMatchEngine.Orders;
+            var orders = sut.Orders;
 
             //Action
-            stockMarketMatchEngine.Trade(order);
-
-            var res = orders.Where(x => x.Side == Side.Buy).SingleOrDefault();
-
-            var getBuyQueue = stockMarketMatchEngine.GetBuyOrderQueue();
+            sut.Trade(order);
 
             //Assert
-            Assert.NotNull(res);
-            Assert.NotNull(getBuyQueue);
+            Assert.NotNull(orders.Where(x => x.Side == Side.Buy).SingleOrDefault());
+            Assert.NotNull(sut.GetBuyOrderQueue());
         }
 
         [Fact]
@@ -47,20 +47,12 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            var orders = stockMarketMatchEngine.Orders;
-
             //Action
-            stockMarketMatchEngine.Trade(order);
-
-            var res = orders.Where(x => x.Side == Side.Sell).SingleOrDefault();
-
-            var getSellQueue = stockMarketMatchEngine.GetSellOrderQueue();
+            sut.Trade(order);
 
             //Assert
-            Assert.NotNull(getSellQueue);
-            Assert.NotNull(res);
+            Assert.NotNull(sut.GetSellOrderQueue());
+            Assert.NotNull(sut.Orders.Where(x => x.Side == Side.Sell).SingleOrDefault());
 
         }
 
@@ -86,17 +78,16 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
 
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Action
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 0);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 0);
+            Assert.Equal(1,sut.TradeCount);
+            Assert.Equal(0,sut.GetSellOrderQueue().Count);
+            Assert.Equal(0,sut.GetBuyOrderQueue().Count);
         }
 
         [Fact]
@@ -111,7 +102,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-
             var orderSell = new Order()
             {
                 Amount = 5,
@@ -120,18 +110,15 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Action
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 0);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 0);
-
+            Assert.Equal(1,sut.TradeCount);
+            Assert.Equal(0,sut.GetSellOrderQueue().Count);
+            Assert.Equal(0,sut.GetBuyOrderQueue().Count);
 
         }
 
@@ -156,18 +143,16 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Action
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 1);
-            Assert.Equal(stockMarketMatchEngine.Orders.Count, 1);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 0);
+            Assert.Equal(1,sut.TradeCount);
+            Assert.Equal(1,sut.GetSellOrderQueue().Count);
+            Assert.Equal(1,sut.Orders.Count);
+            Assert.Equal(0,sut.GetBuyOrderQueue().Count);
         }
 
         [Fact]
@@ -190,18 +175,16 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Action
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 0);
-            Assert.Equal(stockMarketMatchEngine.Orders.Count, 1);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 1);
+            Assert.Equal(1,sut.TradeCount);
+            Assert.Equal(0, sut.GetSellOrderQueue().Count);
+            Assert.Equal(1,sut.Orders.Count);
+            Assert.Equal(1,sut.GetBuyOrderQueue().Count);
         }
 
         [Fact]
@@ -224,18 +207,16 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Action
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 0);
-            Assert.Equal(stockMarketMatchEngine.Orders.Count, 1);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 1);
+            Assert.Equal(1,sut.TradeCount);
+            Assert.Equal(0,sut.GetSellOrderQueue().Count);
+            Assert.Equal(1,sut.Orders.Count);
+            Assert.Equal(1,sut.GetBuyOrderQueue().Count);
         }
 
 
@@ -259,18 +240,16 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Action
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 1);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 1);
-            Assert.Equal(stockMarketMatchEngine.Orders.Count, 1);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 0);
+            Assert.Equal(1,sut.TradeCount);
+            Assert.Equal(1,sut.GetSellOrderQueue().Count);
+            Assert.Equal(1,sut.Orders.Count);
+            Assert.Equal(0,sut.GetBuyOrderQueue().Count);
         }
 
         [Fact]
@@ -293,18 +272,16 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Action
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 0);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 1);
-            Assert.Equal(stockMarketMatchEngine.Orders.Count, 2);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 1);
+            Assert.Equal(0,sut.TradeCount);
+            Assert.Equal(1,sut.GetSellOrderQueue().Count);
+            Assert.Equal(2,sut.Orders.Count);
+            Assert.Equal(1,sut.GetBuyOrderQueue().Count);
         }
 
         [Fact]
@@ -328,18 +305,16 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-            var stockMarketMatchEngine = new StockMarketMatchEngine();
-
-            stockMarketMatchEngine.Trade(orderBuy);
+            sut.Trade(orderBuy);
 
             //Action
-            stockMarketMatchEngine.Trade(orderSell);
+            sut.Trade(orderSell);
 
             //Assert
-            Assert.Equal(stockMarketMatchEngine.TradeCount, 0);
-            Assert.Equal(stockMarketMatchEngine.GetSellOrderQueue().Count, 1);
-            Assert.Equal(stockMarketMatchEngine.Orders.Count, 2);
-            Assert.Equal(stockMarketMatchEngine.GetBuyOrderQueue().Count, 1);
+            Assert.Equal(0,sut.TradeCount);
+            Assert.Equal(1,sut.GetSellOrderQueue().Count);
+            Assert.Equal(2,sut.Orders.Count);
+            Assert.Equal(1,sut.GetBuyOrderQueue().Count);
         }
 
     }
