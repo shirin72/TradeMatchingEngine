@@ -11,10 +11,7 @@ namespace TestProject1
         private readonly StockMarketMatchEngine sut;   
         public StocketMarketEngine( )
         {
-
             sut =new StockMarketMatchEngine();
-
-            
         }
 
         [Fact]
@@ -64,6 +61,7 @@ namespace TestProject1
                 Price = 100,
                 Side = Side.Sell
             };
+
             //Action
             sut.Trade(order1);
             sut.Trade(order2);
@@ -71,7 +69,6 @@ namespace TestProject1
 
 
             //Assert
-           
             Assert.Equal(2,sut.GetSellOrderQueue().Count);
             Assert.Equal(3,sut.Orders.Count);
         }
@@ -100,6 +97,7 @@ namespace TestProject1
                 Price = 100,
                 Side = Side.Buy
             };
+
             //Action
             sut.Trade(order1);
             sut.Trade(order2);
@@ -107,7 +105,6 @@ namespace TestProject1
 
 
             //Assert
-
             Assert.Equal(2, sut.GetBuyOrderQueue().Count);
             Assert.Equal(3, sut.Orders.Count);
         }
@@ -123,20 +120,12 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-           
-
-            var orders = sut.Orders;
-
             //Action
             sut.Trade(order);
 
-            var res = orders.Where(x => x.Side == Side.Sell).SingleOrDefault();
-
-            var getSellQueue = sut.GetSellOrderQueue();
-
             //Assert
-            Assert.NotNull(getSellQueue);
-            Assert.NotNull(res);
+            Assert.NotNull(sut.GetSellOrderQueue());
+            Assert.NotNull(sut.Orders.Where(x => x.Side == Side.Sell).SingleOrDefault());
 
         }
 
@@ -161,8 +150,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-            
-
             sut.Trade(orderSell);
 
             //Action
@@ -186,7 +173,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-
             var orderSell = new Order()
             {
                 Amount = 5,
@@ -194,8 +180,6 @@ namespace TestProject1
                 Price = 100,
                 Side = Side.Sell
             };
-
-            
 
             sut.Trade(orderBuy);
 
@@ -220,7 +204,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-
             var orderSell = new Order()
             {
                 Amount = 6,
@@ -228,8 +211,6 @@ namespace TestProject1
                 Price = 100,
                 Side = Side.Sell
             };
-
-         
 
             sut.Trade(orderBuy);
 
@@ -265,8 +246,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-            
-
             sut.Trade(orderSell);
 
             //Action
@@ -300,8 +279,6 @@ namespace TestProject1
                 Price = 100,
                 Side = Side.Sell
             };
-
-           
 
             sut.Trade(orderBuy);
 
@@ -338,10 +315,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-
-
-           
-
             sut.Trade(orderSell);
 
             //Action
@@ -374,9 +347,6 @@ namespace TestProject1
                 Price = 90,
                 Side = Side.Buy
             };
-
-
-            
 
             sut.Trade(orderSell);
 
@@ -411,8 +381,6 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-
-
             sut.Trade(orderBuy);
 
             //Action
@@ -429,7 +397,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_SellOrderEntersWithDefferPricesAndAmounts_TheOrdersMustEnqueu()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 4,
@@ -459,12 +426,12 @@ namespace TestProject1
                 Price = 90,
                 Side = Side.Sell
             };
+
             sut.Trade(orderSell1);
             sut.Trade(orderSell2);
             sut.Trade(orderSell3);
 
             //Action
-
             sut.Trade(orderSell4);
 
             //Assert
@@ -478,7 +445,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_BuyOrderEntersWithDefferPricesAndAmounts_TheOrdersMustEnqueu()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 4,
@@ -509,7 +475,6 @@ namespace TestProject1
                 Side = Side.Buy
             };
 
-
             sut.Trade(orderSell1);
             sut.Trade(orderSell2);
             sut.Trade(orderSell3);
@@ -519,7 +484,6 @@ namespace TestProject1
             sut.Trade(orderSell4);
 
             //Assert
-
             Assert.Equal(0,sut.TradeCount);
             Assert.Equal(0,sut.GetSellOrderQueue().Count);
             Assert.Equal(4,sut.Orders.Count);
@@ -532,7 +496,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_SellOrderEnters3WithDefferBuyPriceInQueue_OneTradeMustBeExecuted()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 4,
@@ -572,7 +535,6 @@ namespace TestProject1
                 Side = Side.Sell
             };
 
-
             sut.Trade(orderSell1);
             sut.Trade(orderSell2);
             sut.Trade(orderSell3);
@@ -593,7 +555,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_BuyOrderEnters3WithDefferSellPriceInQueue_OneTradeMustBeExecuted()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 4,
@@ -640,7 +601,6 @@ namespace TestProject1
 
 
             //Action
-
             sut.Trade(buyOrder);
 
             //Assert
@@ -655,7 +615,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_BuyOrderEntersAndPerforms2Trades_TowTradeMustBeExecutedAndOneSaleMustBeInQueue()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 5,
@@ -692,7 +651,6 @@ namespace TestProject1
             sut.Trade(orderSell3);
 
             //Action
-
             sut.Trade(buyOrder);
 
             //Assert
@@ -707,7 +665,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_SellOrderEntersAndPerforms3Trades_TowTradeMustBeExecutedAndOneBuyMustBeInQueue()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 5,
@@ -744,7 +701,6 @@ namespace TestProject1
             sut.Trade(orderSell3);
 
             //Action
-
             sut.Trade(buyOrder);
 
             //Assert
@@ -759,7 +715,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_SellOrderEntersAndPerforms2Trades_TowTradeMustBeExecutedAndOneBuyMustBeInQueue()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 5,
@@ -796,7 +751,6 @@ namespace TestProject1
             sut.Trade(orderSell3);
 
             //Action
-
             sut.Trade(buyOrder);
 
             //Assert
@@ -811,7 +765,6 @@ namespace TestProject1
         public void StockMarketMatchEngine_Enter3SellAnd2Buys_TowTradeShouldBeExecuted()
         {
             //Arrange
-
             var orderSell1 = new Order()
             {
                 Amount = 10,
@@ -861,7 +814,6 @@ namespace TestProject1
             sut.Trade(buyOrder);
 
             //Assert
-
              Assert.Equal(2, sut.TradeCount);
              Assert.Equal(1, sut.GetSellOrderQueue().Count);
              Assert.Equal(3, sut.Orders.Count);
