@@ -6,13 +6,13 @@
         {
             if (x.Price == y.Price)
             {
-                if (x.Id < y.Id)
-                {
-                    return -1;
-                }
-                else if (x.Id > y.Id)
+                if (x.Id > y.Id)
                 {
                     return 1;
+                }
+                else if (x.Id < y.Id)
+                {
+                    return -1;
                 }
 
                 return 0;
