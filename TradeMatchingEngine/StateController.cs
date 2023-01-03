@@ -2,16 +2,21 @@
 {
     public class StateController
     {
+        #region Private
         private StockMarketMatchEngine stockMarketMatchEngine;
         private List<Order> PreOrdersList;
-        private MarketStateEnum MarketState;
+        #endregion
 
+        #region Constructor
         public StateController(StockMarketMatchEngine stockMarketMatchEngine)
         {
             PreOrdersList = new List<Order>();
             this.stockMarketMatchEngine = stockMarketMatchEngine;
         }
+        #endregion
 
+
+        #region PublicMethod
         public void ChangeState(ChangeStateNotify changeStateNotify)
         {
             if (changeStateNotify == ChangeStateNotify.ForcedChange)
@@ -57,10 +62,8 @@
             Console.WriteLine("MarketStateEnum Has Changed! {0}", castObj.ChangeStateNotify);
 
             ChangeState(castObj.ChangeStateNotify);
-
-     
         }
+        #endregion
+
     }
-
-
 }

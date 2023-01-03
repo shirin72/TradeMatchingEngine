@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TradeMatchingEngine;
+﻿using TradeMatchingEngine;
 using Xunit;
 
 namespace TestProject1
@@ -42,6 +37,7 @@ namespace TestProject1
 
 
         }
+
         [Fact]
         public void StockMarketMatchEngine_1SellOrderEnters_MustEnQueueToPreOrderQueue()
         {
@@ -67,6 +63,7 @@ namespace TestProject1
 
 
         }
+
         [Fact]
         public void StockMarketMatchEngine_MultipleSellOrderEnters_MustEnQueueToPreOrderQueue()
         {
@@ -115,6 +112,7 @@ namespace TestProject1
 
 
         }
+
         [Fact]
         public void StockMarketMatchEngine_MultipleBuyOrderEnters_MustEnQueueToPreOrderQueue()
         {
@@ -163,6 +161,7 @@ namespace TestProject1
 
 
         }
+
         [Fact]
         public void StockMarketMatchEngine_MultipleBuyAndSellOrderEnters_MustEnQueueToPreOrderQueue()
         {

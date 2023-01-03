@@ -1,26 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TradeMatchingEngine;
+﻿using TradeMatchingEngine;
 using Xunit;
-using Moq;
 
 namespace TestProject1
 {
     public class StateControllerTests
     {
         private readonly StateController sut;
-        //private Mock<StateNotification>  stateNotification = new Mock<StateNotification>();
-        //private Mock<TradeMatchingEngine.StockMarketMatchEngine> stockMarketMatchEngine;
         private StockMarketMatchEngine stockMarketMatchEngine;
         public StateControllerTests()
         {
-            //this.stockMarketMatchEngine = new Mock<TradeMatchingEngine.StockMarketMatchEngine>();
-            stockMarketMatchEngine=new StockMarketMatchEngine();
+            stockMarketMatchEngine = new StockMarketMatchEngine();
             sut = new StateController(stockMarketMatchEngine);
         }
+
         [Trait("StateController","MarketState")]
         [Theory]
         [InlineData(ChangeStateNotify.NormalChange, MarketStateEnum.Close, MarketStateEnum.PreOpen)]
@@ -112,7 +104,6 @@ namespace TestProject1
             stockMarketMatchEngine.Trade(sellPreOrder3);
             stockMarketMatchEngine.Trade(buyPreOrder);
             stockMarketMatchEngine.Trade(buyPreOrder1);
-
 
             sut.ChangeState(ChangeStateNotify.NormalChange);
 

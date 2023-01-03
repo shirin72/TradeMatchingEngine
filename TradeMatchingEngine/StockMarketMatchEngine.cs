@@ -6,7 +6,6 @@
         private readonly PriorityQueue<Order, Order> SellOrderQueue;
         private readonly PriorityQueue<Order, Order> BuyOrderQueue;
         private MarketStateEnum marketState;
-
         private readonly Queue<Order> preOrderQueue;
         #endregion
 
@@ -80,6 +79,7 @@
         {
             return marketState;
         }
+
         public List<Order> GetAllOrdersList()
         {
             return Orders;
@@ -89,10 +89,12 @@
         {
             return SellOrderQueue;
         }
+
         public Queue<Order> GetPreOrderQueue()
         {
             return preOrderQueue;
         }
+
         public PriorityQueue<Order, Order> GetBuyOrderQueue()
         {
             return BuyOrderQueue;
@@ -511,7 +513,6 @@
             }
         }
 
-
         public int GetBuyOrderCount()
         {
             // return Orders.Where(x => x.Side == Side.Buy).GroupBy(x => x.Price).Count();
@@ -542,7 +543,6 @@
                 }
             }
         }
-
         #endregion
 
 
