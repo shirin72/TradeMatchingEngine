@@ -4,43 +4,30 @@ namespace TradeMatchingEngine
 {
     public class StateNotification
     {
-        public event EventHandler MarketStateChanged;
+        public virtual event EventHandler MarketStateChanged;
 
-        private MarketStateEnum MarketState;
-
-        private int StateCounter;
+        private ChangeStateNotify changeState;
 
         public StateNotification()
         {
-            this.StateCounter = 1;
         }
 
-        public void ChangeStateMarket()
+        public virtual void ChangeStateMarket()
         {
-            if (StateCounter == 1)
-            {
-                MarketState = MarketStateEnum.PreOpen;
-                StateCounter++;
-            }
-            else if (StateCounter == 2)
-            {
-                MarketState = MarketStateEnum.Open;
-                StateCounter++;
-            }
-            else
-            {
-                MarketState = MarketStateEnum.Close;
-                StateCounter = 1;
-            }
+            changeState = ChangeStateNotify.NormalChange;
 
-            Console.WriteLine(MarketState);
-
-            OnStateChanged(EventArgs.Empty);
+            OnStateChanged(new MarketStateEngine() { ChangeStateNotify = changeState });
         }
 
-        protected virtual void OnStateChanged(EventArgs e) 
+        protected virtual void OnStateChanged(MarketStateEngine e)
         {
-            MarketStateChanged?.Invoke(this,e);
+            MarketStateChanged?.Invoke(this, e);
         }
+    }
+
+    public enum ChangeStateNotify
+    {
+        NormalChange,
+        ForcedChange
     }
 }

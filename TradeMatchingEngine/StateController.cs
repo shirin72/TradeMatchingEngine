@@ -1,47 +1,65 @@
 ﻿namespace TradeMatchingEngine
 {
-    internal class StateController
+    public class StateController
     {
-        private StockMarketMatchEngine matchEngine;
+        private StockMarketMatchEngine stockMarketMatchEngine;
         private List<Order> PreOrdersList;
         private MarketStateEnum MarketState;
-        public StateController(StockMarketMatchEngine matchEngine)
+
+        public StateController(StockMarketMatchEngine stockMarketMatchEngine)
         {
             PreOrdersList = new List<Order>();
-            this.matchEngine = matchEngine;
+            this.stockMarketMatchEngine = stockMarketMatchEngine;
         }
 
-        public void Execute(Order order)
+        public void ChangeState(ChangeStateNotify changeStateNotify)
         {
-            switch (MarketState)
+            if (changeStateNotify == ChangeStateNotify.ForcedChange)
             {
-                case MarketStateEnum.Close:
-                    throw new Exception("Out Of Currect Time");
+                stockMarketMatchEngine.SetState(MarketStateEnum.Close);
+            }
+            else
+            {
+                var priviousState = MarketStateEnum.Close;
 
-                case MarketStateEnum.PreOpen:
-                    PreOrdersList.Add(order);
-                    break;
-                case MarketStateEnum.Open:
-                    if (PreOrdersList.Count>0)
+                var currentState = stockMarketMatchEngine.GetCurrentMarketState();
+
+                if (currentState == MarketStateEnum.Close)
+                {
+                    stockMarketMatchEngine.SetState(MarketStateEnum.PreOpen);
+                    priviousState = (MarketStateEnum.Close);
+                }
+                else if (currentState == MarketStateEnum.PreOpen)
+                {
+                    if (priviousState == MarketStateEnum.Close)
                     {
-                        foreach (var item in PreOrdersList)
-                        {
-                            matchEngine.Trade(item);
-                        }
+                        stockMarketMatchEngine.SetState(MarketStateEnum.Open);
+                        priviousState = (MarketStateEnum.PreOpen);
                     }
-
-                    matchEngine.Trade(order);
-                    break;
-                default:
-                    break;
+                    else if (priviousState == MarketStateEnum.Open)
+                    {
+                        stockMarketMatchEngine.SetState(MarketStateEnum.Close);
+                        priviousState = (MarketStateEnum.Open);
+                    }
+                }
+                else if (currentState == MarketStateEnum.Open)
+                {
+                    stockMarketMatchEngine.SetState(MarketStateEnum.PreOpen);
+                    priviousState = (MarketStateEnum.Open);
+                }
             }
         }
 
         public void MarketState_HasChanged(object sender, EventArgs e)
         {
-            Console.WriteLine("MarketStateEnum Has Changed!");
-        }
+            var castObj = e as MarketStateEngine;
 
+            Console.WriteLine("MarketStateEnum Has Changed! {0}", castObj.ChangeStateNotify);
+
+            ChangeState(castObj.ChangeStateNotify);
+
+     
+        }
     }
 
 

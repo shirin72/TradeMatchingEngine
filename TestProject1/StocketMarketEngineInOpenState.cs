@@ -5,12 +5,13 @@ using Xunit;
 
 namespace TestProject1
 {
-    public class StocketMarketEngine
+    public class StocketMarketEngineInOpenState
     {
-        private StockMarketMatchEngine sut = new StockMarketMatchEngine();
-        public StocketMarketEngine()
+        private StockMarketMatchEngine sut;
+        public StocketMarketEngineInOpenState()
         {
             sut = new StockMarketMatchEngine();
+            sut.SetState(MarketStateEnum.Open);
         }
         #region Commented Tests
         //    [Fact]
@@ -531,9 +532,11 @@ namespace TestProject1
         #endregion
 
         [Fact]
+        [Trait("StockMarketMatchEngine", "Open")]
         public void StockMarketMatchEngine_FirstSellOrderEnters_MustEnqueue1SellOrder()
         {
             //Arrange
+
             var sellOrder = new Order()
             {
                 Id = 1,
@@ -551,7 +554,7 @@ namespace TestProject1
             Assert.Equal(0,sut.GetBuyOrderCount());
             Assert.Equal(1,sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_FirstBuyOrderEnters_MustEnqueue1BuyOrder()
         {
@@ -573,7 +576,7 @@ namespace TestProject1
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralSellOrderEnters_MustEnqueueAllOrder()
         {
@@ -628,6 +631,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(5, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralBuyOrderEnters_MustEnqueueAllOrder()
         {
@@ -682,7 +686,7 @@ namespace TestProject1
             Assert.Equal(5, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralBuyAndSellOrderEnters_MustEnqueueAllOrder()
         {
@@ -737,7 +741,7 @@ namespace TestProject1
             Assert.Equal(2, sut.GetBuyOrderCount());
             Assert.Equal(3, sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SellEntersFirstBuyOrderEntersWithSamePriceAndAmount_MustExecute1Trade()
         {
@@ -768,6 +772,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_BuyEntersFirstSellOrderEntersWithSamePriceAndAmount_MustExecute1Trade()
         {
@@ -798,6 +803,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_BuyEntersFirstSellOrderEntersWithHigherAmount_MustExecute1TradeAndEnqueue1Sell()
         {
@@ -829,7 +835,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SellEntersFirstBuyOrderEntersWithHigherAmount_MustExecute1TradeAndEnqueue1Buy()
         {
@@ -862,6 +868,7 @@ namespace TestProject1
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_BuyEntersFirstSellOrderEntersWithLowerAmount_MustExecute1TradeAndEnqueue1Buy()
         {
@@ -894,6 +901,7 @@ namespace TestProject1
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SellEntersFirstSBuyOrderEntersWithLowerAmount_MustExecute1TradeAndEnqueue1Sell()
         {
@@ -926,6 +934,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralSellsEntersFirstSBuyOrderEntersWithCoverOfAllAmount_MustExecute2TradeAndClearAllQueues()
         {
@@ -967,6 +976,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
 
         [Fact]
         public void StockMarketMatchEngine_SeveralBuysEntersFirstSSellOrderEntersWithCoverOfAllAmount_MustExecute2TradeAndClearAllQueues()
@@ -1009,7 +1019,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralSellsEntersFirstSBuyOrderEntersWithCoverOf1AndHalfOfSecondSell_MustExecute2TradeAndEnQueueSecondSell()
         {
@@ -1060,7 +1070,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(2, sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralBuysEntersFirstSellOrderEntersWithCoverOf1AndHalfOfSecondBuy_MustExecute2TradeAndEnQueueSecondBuy()
         {
@@ -1111,6 +1121,7 @@ namespace TestProject1
             Assert.Equal(2, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralSellsEntersFirstBuyOrderEntersWithHigherAmount_MustExecute3TradeAndEnQueue1Buy()
         {
@@ -1161,6 +1172,7 @@ namespace TestProject1
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralBuysEntersFirstSellOrderEntersWithHigherAmount_MustExecute3TradeAndEnQueue1Sell()
         {
@@ -1212,6 +1224,7 @@ namespace TestProject1
             Assert.Equal(1, sut.GetSellOrderCount());
         }
         [Fact]
+        [Trait("StockMarketMatchEngine", "Open")]
         public void StockMarketMatchEngine_SeveralSellsEntersFirstBuyOrderEntersWithLowerAmount_MustExecute1TradeAndEnQueueFirstSell()
         {
             //Arrange
@@ -1262,6 +1275,7 @@ namespace TestProject1
             Assert.Equal(3, sut.GetSellOrderCount());
         }
         [Fact]
+        [Trait("StockMarketMatchEngine", "Open")]
         public void StockMarketMatchEngine_SeveralBuysEntersFirstSellOrderEntersWithLowerAmount_MustExecute1TradeAndEnQueueFirstBuy()
         {
             //Arrange
@@ -1311,7 +1325,7 @@ namespace TestProject1
             Assert.Equal(3, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
-
+        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public void StockMarketMatchEngine_SeveralSellsEntersWithDefferPriceFirstBuyOrderEntersWithLowerAmount_MustExecute1TradeAndEnQueueFirstSell()
         {
@@ -1380,6 +1394,7 @@ namespace TestProject1
             Assert.Equal(5, sut.GetSellOrderCount());
         }
         [Fact]
+        [Trait("StockMarketMatchEngine", "Open")]
         public void StockMarketMatchEngine_SeveralBuysEntersWithDefferPriceFirstSellOrderEntersWithLowerAmount_MustExecute1TradeAndEnQueueFirstBuy()
         {
             //Arrange
@@ -1447,6 +1462,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetSellOrderCount());
         }
         [Fact]
+        [Trait("StockMarketMatchEngine", "Open")]
         public void StockMarketMatchEngine_SeveralBuysWithDefferPriceEntersFirstSellOrderEntersWithHigherAmount_MustExecute1TradeAndEnQueueFirstSell()
         {
             //Arrange
@@ -1487,6 +1503,7 @@ namespace TestProject1
             Assert.Equal(1, sut.GetSellOrderCount());
         }
         [Fact]
+        [Trait("StockMarketMatchEngine", "Open")]
         public void StockMarketMatchEngine_SeveralSellsWithDefferPriceEntersFirstBuyOrderEntersWithHigherAmount_MustExecute1TradeAndEnQueueFirstBuy()
         {
             //Arrange

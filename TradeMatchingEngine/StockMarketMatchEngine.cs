@@ -5,6 +5,9 @@
         #region PrivateField
         private readonly PriorityQueue<Order, Order> SellOrderQueue;
         private readonly PriorityQueue<Order, Order> BuyOrderQueue;
+        private MarketStateEnum marketState;
+
+        private readonly Queue<Order> preOrderQueue;
         #endregion
 
         public StockMarketMatchEngine()
@@ -12,6 +15,8 @@
             this.SellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.BuyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
             this.Orders = new List<Order>();
+            this.marketState = MarketStateEnum.Close;
+            preOrderQueue = new Queue<Order>();
         }
 
         #region Properties
@@ -22,18 +27,59 @@
         #region Method
         public void Trade(Order order)
         {
-            Orders.Add(order);
+            switch (marketState)
+            {
+                case MarketStateEnum.PreOpen:
+                    preOrderQueue.Enqueue(order);
+                    Orders.Add(order);
+                    break;
+                case MarketStateEnum.Open:
+                    if (preOrderQueue.Count > 0)
+                    {
+                        int cnt = preOrderQueue.Count;
+                        for (int i = 0; i <cnt; i++)
+                        {
+                            var preOrderdOrder = (preOrderQueue.Peek());
 
-            if (order.Side == Side.Buy)
-            {
-                Buy(order);
-            }
-            else if (order.Side == Side.Sell)
-            {
-                Sell(order);
+                            if (preOrderdOrder.Side == Side.Buy)
+                            {
+                                Buy(preOrderdOrder);
+                            }
+                            else if (preOrderdOrder.Side == Side.Sell)
+                            {
+                                Sell(preOrderdOrder);
+                            }
+
+                            preOrderQueue.Dequeue();
+                        }
+                    }
+                    else
+                    {
+                        if (order != null)
+                        {
+                            Orders.Add(order);
+                            if (order.Side == Side.Buy)
+                            {
+                                Buy(order);
+                            }
+                            else if (order.Side == Side.Sell)
+                            {
+                                Sell(order);
+                            }
+                        }
+                    }
+                    break;
+                case MarketStateEnum.Close:
+                    throw new Exception("This Stock Has been Closed");
+                default:
+                    break;
             }
         }
 
+        public virtual MarketStateEnum GetCurrentMarketState()
+        {
+            return marketState;
+        }
         public List<Order> GetAllOrdersList()
         {
             return Orders;
@@ -43,7 +89,10 @@
         {
             return SellOrderQueue;
         }
-
+        public Queue<Order> GetPreOrderQueue()
+        {
+            return preOrderQueue;
+        }
         public PriorityQueue<Order, Order> GetBuyOrderQueue()
         {
             return BuyOrderQueue;
@@ -81,7 +130,7 @@
                             {
 
                                 var nextSell = SellOrderQueue.Peek();
-                                if (nextSell.Price>order.Price)
+                                if (nextSell.Price > order.Price)
                                 {
                                     if (BuyOrderQueue.Count > 0)
                                     {
@@ -302,7 +351,7 @@
                                         {
                                             SellOrderQueue.Enqueue(order, order);
                                         }
-                                        
+
                                     }
                                     else
                                     {
@@ -474,6 +523,26 @@
             // return Orders.Where(x => x.Side == Side.Sell).GroupBy(x => x.Price).Count();
             return SellOrderQueue.Count;
         }
+
+        public virtual void SetState(MarketStateEnum marketStateEnum)
+        {
+            this.marketState = marketStateEnum;
+
+            if (marketStateEnum == MarketStateEnum.Close)
+            {
+                BuyOrderQueue.Clear();
+                SellOrderQueue.Clear();
+            }
+
+            if (marketState == MarketStateEnum.Open)
+            {
+                if (preOrderQueue.Count > 0)
+                {
+                    Trade(null);
+                }
+            }
+        }
+
         #endregion
 
 
