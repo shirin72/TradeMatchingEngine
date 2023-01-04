@@ -4,13 +4,11 @@
     {
         #region Private
         private StockMarketMatchEngine stockMarketMatchEngine;
-        private List<Order> PreOrdersList;
         #endregion
 
         #region Constructor
         public StateController(StockMarketMatchEngine stockMarketMatchEngine)
         {
-            PreOrdersList = new List<Order>();
             this.stockMarketMatchEngine = stockMarketMatchEngine;
         }
         #endregion

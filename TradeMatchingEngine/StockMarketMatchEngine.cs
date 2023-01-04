@@ -1,16 +1,18 @@
 ﻿namespace TradeMatchingEngine
 {
-    public class StockMarketMatchEngine
+    public partial class StockMarketMatchEngine:IStockMarketEngine
     {
         #region PrivateField
         private readonly PriorityQueue<Order, Order> SellOrderQueue;
         private readonly PriorityQueue<Order, Order> BuyOrderQueue;
         private MarketStateEnum marketState;
         private readonly Queue<Order> preOrderQueue;
+        private StockMarketMatchState state;
         #endregion
 
         public StockMarketMatchEngine()
         {
+            state = new CloseState(this);
             this.SellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.BuyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
             this.Orders = new List<Order>();
@@ -512,6 +514,10 @@
                 SellOrderQueue.Enqueue(order, order);
             }
         }
+        private void close()
+        {
+            throw new NotImplementedException();
+        }
 
         public int GetBuyOrderCount()
         {
@@ -542,6 +548,16 @@
                     Trade(null);
                 }
             }
+        }
+
+        public void Open()
+        {
+            state.Open();
+        }
+
+        public void Close()
+        {
+            state.Close();
         }
         #endregion
 
