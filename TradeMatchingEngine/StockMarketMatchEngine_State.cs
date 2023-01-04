@@ -11,6 +11,7 @@ namespace TradeMatchingEngine
         class StockMarketState : IStockMarketMatchEngine
         {
             public MarcketState Code;
+
             protected StockMarketMatchEngine StockMarketMatchEngine;
 
             public StockMarketState(StockMarketMatchEngine stockMarketMatchEngine)
@@ -27,7 +28,7 @@ namespace TradeMatchingEngine
                 throw new NotImplementedException();
             }
 
-            public virtual  void Open()
+            public virtual void Open()
             {
                 throw new NotImplementedException();
             }
@@ -43,16 +44,9 @@ namespace TradeMatchingEngine
             {
             }
 
-            public override void Open()
-            {
-                StockMarketMatchEngine.open();
-                StockMarketMatchEngine.state = new Opened(StockMarketMatchEngine);
-            }
-
             public void PreOpen(StockMarketMatchEngine stockMarketMatchEngine)
             {
-
-                stockMarketMatchEngine.StockMarketMatchEngineState = new PreOpened();
+                stockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
             }
         }
         class Opened : StockMarketState
@@ -61,9 +55,6 @@ namespace TradeMatchingEngine
             {
             }
 
-            public override void Open()
-            {
-             }
             public override void Enqueue(int price, int amount, Side side)
             {
                 StockMarketMatchEngine.enqueue(price, amount, side);
@@ -80,13 +71,16 @@ namespace TradeMatchingEngine
             {
                 StockMarketMatchEngine.open();
             }
+
+            public override void Close()
+            {
+                StockMarketMatchEngine.close();
+            }
+
             public override void Enqueue(int price, int amount, Side side)
             {
                 StockMarketMatchEngine.enqueue(price, amount, side);
             }
-
         }
-
-
     }
 }

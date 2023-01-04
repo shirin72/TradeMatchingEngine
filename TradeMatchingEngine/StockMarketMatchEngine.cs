@@ -412,6 +412,11 @@
         {
             
         }
+
+        private void close()
+        {
+
+        }
         private void enqueue(int price, int amount, Side side)
         {
             
