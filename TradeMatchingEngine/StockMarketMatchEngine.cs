@@ -1,12 +1,14 @@
 ﻿namespace TradeMatchingEngine
 {
-    public class StockMarketMatchEngine
+    public partial class StockMarketMatchEngine:IStockMarketMatchEngine
     {
         #region PrivateField
         private readonly PriorityQueue<Order, Order> SellOrderQueue;
         private readonly PriorityQueue<Order, Order> BuyOrderQueue;
-        private MarketStateEnum marketState;
         private readonly Queue<Order> preOrderQueue;
+        private StockMarketState state;
+        public MarcketState State => state.Code;
+
         #endregion
 
         public StockMarketMatchEngine()
@@ -14,8 +16,8 @@
             this.SellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.BuyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
             this.Orders = new List<Order>();
-            this.marketState = MarketStateEnum.Close;
             preOrderQueue = new Queue<Order>();
+            state = new Closed(this);
         }
 
         #region Properties
@@ -26,63 +28,55 @@
         #region Method
         public void Trade(Order order)
         {
-            switch (marketState)
+            if (state is Closed)
             {
-                case MarketStateEnum.PreOpen:
-                    preOrderQueue.Enqueue(order);
-                    Orders.Add(order);
-                    break;
-                case MarketStateEnum.Open:
-                    if (preOrderQueue.Count > 0)
-                    {
-                        int cnt = preOrderQueue.Count;
-                        for (int i = 0; i <cnt; i++)
-                        {
-                            var preOrderdOrder = (preOrderQueue.Peek());
-
-                            if (preOrderdOrder.Side == Side.Buy)
-                            {
-                                Buy(preOrderdOrder);
-                            }
-                            else if (preOrderdOrder.Side == Side.Sell)
-                            {
-                                Sell(preOrderdOrder);
-                            }
-
-                            preOrderQueue.Dequeue();
-                        }
-                    }
-                    else
-                    {
-                        if (order != null)
-                        {
-                            Orders.Add(order);
-                            if (order.Side == Side.Buy)
-                            {
-                                Buy(order);
-                            }
-                            else if (order.Side == Side.Sell)
-                            {
-                                Sell(order);
-                            }
-                        }
-                    }
-                    break;
-                case MarketStateEnum.Close:
-                    throw new Exception("This Stock Has been Closed");
-                default:
-                    break;
+                throw new Exception("This Stock Has been Closed");
             }
-        }
+            else if (state is Opened)
+            {
+                if (preOrderQueue.Count > 0)
+                {
+                    int cnt = preOrderQueue.Count;
+                    for (int i = 0; i < cnt; i++)
+                    {
+                        var preOrderdOrder = (preOrderQueue.Peek());
 
-        public virtual MarketStateEnum GetCurrentMarketState()
-        {
-            return marketState;
-        }
+                        if (preOrderdOrder.Side == Side.Buy)
+                        {
+                            Buy(preOrderdOrder);
+                        }
+                        else if (preOrderdOrder.Side == Side.Sell)
+                        {
+                            Sell(preOrderdOrder);
+                        }
 
-        public List<Order> GetAllOrdersList()
-        {
-            return Orders;
+                        preOrderQueue.Dequeue();
+                    }
+                }
+                else
+                {
+                    if (order != null)
+                    {
+                        Orders.Add(order);
+                        switch (order.Side)
+                        {
+                            case Side.Sell:
+                                Sell(order);
+                                break;
+                            case Side.Buy:
+                                Buy(order);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+            else if (state is PreOpened)
+            {
+                preOrderQueue.Enqueue(order);
+                Orders.Add(order);
+            }
         }
 
         public PriorityQueue<Order, Order> GetSellOrderQueue()
@@ -248,56 +242,6 @@
                     BuyOrderQueue.Enqueue(order, order);
 
                 }
-
-
-                #region Commented Old Buy procedure
-                //    if (sell.Price <= order.Price)
-                //    {
-                //        TradeCount++;
-                //        if (order.Amount == sell.Amount)
-                //        {
-                //            SellOrderQueue.Dequeue();
-                //            var sellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
-                //            Orders.Remove(sellOrder);
-                //            Orders.Remove(order);
-                //        }
-                //        else if (order.Amount < sell.Amount)
-                //        {
-                //            var newAmount = sell.Amount - order.Amount;
-
-                //            var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
-                //            findSellOrder.Amount = newAmount;
-
-                //            SellOrderQueue.Dequeue();
-                //            SellOrderQueue.Enqueue(findSellOrder, findSellOrder);
-                //            Orders.Remove(order);
-                //        }
-                //        else
-                //        {
-                //            var findSellOrder = Orders.Where(x => x.Id == sell.Id && x.Side == sell.Side).FirstOrDefault();
-
-                //            Orders.Remove(findSellOrder);
-
-                //            SellOrderQueue.Dequeue();
-
-                //            var findOrder = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
-                //            findOrder.Amount = order.Amount - sell.Amount;
-
-                //            BuyOrderQueue.Enqueue(findOrder, findOrder);
-                //        }
-
-                //    }
-                //    else
-                //    {
-                //        BuyOrderQueue.Enqueue(order, order);
-                //    }
-                //}
-                //else
-                //{
-                //    BuyOrderQueue.Enqueue(order, order);
-                //}
-                #endregion
-
             }
             else
             {
@@ -458,90 +402,49 @@
                 {
                     SellOrderQueue.Enqueue(order, order);
                 }
-                #region Commented Old Sell Procedure
-                //    if (buy.Price >= order.Price)
-                //    {
-                //        TradeCount++;
-                //        if (order.Amount == buy.Amount)
-                //        {
-                //            BuyOrderQueue.Dequeue();
-                //            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
-                //            Orders.Remove(findBuyOrder);
-                //            Orders.Remove(order);
-                //        }
-                //        else if (order.Amount < buy.Amount)
-                //        {
-                //            BuyOrderQueue.Dequeue();
-
-                //            var newAmount = buy.Amount - order.Amount;
-
-                //            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
-                //            findBuyOrder.Amount = newAmount;
-                //            BuyOrderQueue.Enqueue(findBuyOrder, findBuyOrder);
-
-                //            Orders.Remove(order);
-                //        }
-                //        else
-                //        {
-                //            var findBuyOrder = Orders.Where(x => x.Id == buy.Id && x.Side == buy.Side).FirstOrDefault();
-
-                //            Orders.Remove(findBuyOrder);
-                //            BuyOrderQueue.Dequeue();
-
-                //            var findOrder = Orders.Where(x => x.Id == order.Id && x.Side == order.Side).FirstOrDefault();
-                //            findOrder.Amount = order.Amount - buy.Amount;
-
-                //            SellOrderQueue.Enqueue(findOrder, findOrder);
-                //        }
-
-                //    }
-                //    else
-                //    {
-                //        SellOrderQueue.Enqueue(order, order);
-
-                //    }
-                //}
-                //else
-                //{
-                //    SellOrderQueue.Enqueue(order, order);
-                //}
-                #endregion
             }
             else
             {
                 SellOrderQueue.Enqueue(order, order);
             }
         }
+        private void open()
+        {
+            
+        }
+        private void enqueue(int price, int amount, Side side)
+        {
+            
+        }
 
         public int GetBuyOrderCount()
         {
-            // return Orders.Where(x => x.Side == Side.Buy).GroupBy(x => x.Price).Count();
             return BuyOrderQueue.Count;
         }
 
         public int GetSellOrderCount()
         {
-            // return Orders.Where(x => x.Side == Side.Sell).GroupBy(x => x.Price).Count();
             return SellOrderQueue.Count;
         }
 
-        public virtual void SetState(MarketStateEnum marketStateEnum)
+        public void Close()
         {
-            this.marketState = marketStateEnum;
+            
+        }
 
-            if (marketStateEnum == MarketStateEnum.Close)
-            {
-                BuyOrderQueue.Clear();
-                SellOrderQueue.Clear();
-            }
+        public void PreOpen()
+        {
+            throw new NotImplementedException();
+        }
 
-            if (marketState == MarketStateEnum.Open)
-            {
-                if (preOrderQueue.Count > 0)
-                {
-                    Trade(null);
-                }
-            }
+        public void Open()
+        {
+            state.Open();
+        }
+
+        public void Enqueue(int price, int amount, Side side)
+        {
+            state.Enqueue(price, amount, side);
         }
         #endregion
 

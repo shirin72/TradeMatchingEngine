@@ -9,7 +9,7 @@ namespace TestProject1
         public StocketMarketEngineInPreOpenState()
         {
             sut = new StockMarketMatchEngine();
-            sut.SetState(MarketStateEnum.PreOpen);
+            sut.StockMarketMatchEngineState = new PreOpened();
         }
 
         [Fact]
