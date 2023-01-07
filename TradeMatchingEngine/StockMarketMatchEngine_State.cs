@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TradeMatchingEngine
+﻿namespace TradeMatchingEngine
 {
     public partial class StockMarketMatchEngine
     {
@@ -44,9 +38,13 @@ namespace TradeMatchingEngine
             {
             }
 
-            public void PreOpen(StockMarketMatchEngine stockMarketMatchEngine)
+            public override void PreOpen()
             {
-                stockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
+               // StockMarketMatchEngine.preOpen(amount,price,side);
+
+                StockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
+
+                Code = MarcketState.PreOpen;
             }
         }
         class Opened : StockMarketState
@@ -54,11 +52,16 @@ namespace TradeMatchingEngine
             public Opened(StockMarketMatchEngine stockMarketMatchEngine) : base(stockMarketMatchEngine)
             {
             }
-
-            public override void Enqueue(int price, int amount, Side side)
+            public override void PreOpen()
             {
-                StockMarketMatchEngine.enqueue(price, amount, side);
+                StockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
+                Code = MarcketState.PreOpen;
             }
+            
+            //public override void Enqueue(int price, int amount, Side side)
+            //{
+            //    StockMarketMatchEngine.enqueue(price, amount, side);
+            //}
 
         }
         class PreOpened : StockMarketState
@@ -70,6 +73,9 @@ namespace TradeMatchingEngine
             public override void Open()
             {
                 StockMarketMatchEngine.open();
+                StockMarketMatchEngine.state = new Opened(StockMarketMatchEngine);
+                Code = MarcketState.Open;
+                StockMarketMatchEngine.Trade(null);
             }
 
             public override void Close()
@@ -77,10 +83,10 @@ namespace TradeMatchingEngine
                 StockMarketMatchEngine.close();
             }
 
-            public override void Enqueue(int price, int amount, Side side)
-            {
-                StockMarketMatchEngine.enqueue(price, amount, side);
-            }
+            //public override void Enqueue(int price, int amount, Side side)
+            //{
+            //    StockMarketMatchEngine.enqueue(price, amount, side);
+            //}
         }
     }
 }

@@ -25,7 +25,7 @@
         public int TradeCount { get; set; }
         #endregion
 
-        #region Method
+        #region Public Method
         public void Trade(Order order)
         {
             if (state is Closed)
@@ -92,6 +92,60 @@
         public PriorityQueue<Order, Order> GetBuyOrderQueue()
         {
             return BuyOrderQueue;
+        }
+
+        public int GetBuyOrderCount()
+        {
+            return BuyOrderQueue.Count;
+        }
+
+        public int GetSellOrderCount()
+        {
+            return SellOrderQueue.Count;
+        }
+
+        public void Close()
+        {
+            state.Close();
+        }
+
+        public void PreOpen()
+        {
+            state.PreOpen();
+        }
+
+        public void Open()
+        {
+            state.Open();
+        }
+
+        public void Enqueue(int price, int amount, Side side)
+        {
+            state.Enqueue(price, amount, side);
+        }
+        #endregion
+
+        #region Private Method
+        private void open()
+        {
+
+        }
+        private void close()
+        {
+
+        }
+        private void enqueue(int price, int amount, Side side)
+        {
+
+        }
+
+        private void preOpen(int price, int amount, Side side)
+        {
+            var order = new Order { Amount = amount, Price = price, Side = side };
+
+            preOrderQueue.Enqueue(order);
+
+            Orders.Add(order);
         }
 
         private void Buy(Order order)
@@ -248,7 +302,6 @@
                 BuyOrderQueue.Enqueue(order, order);
             }
         }
-
         private void Sell(Order order)
         {
             var buyAvailble = BuyOrderQueue.Count;
@@ -407,49 +460,6 @@
             {
                 SellOrderQueue.Enqueue(order, order);
             }
-        }
-        private void open()
-        {
-            
-        }
-
-        private void close()
-        {
-
-        }
-        private void enqueue(int price, int amount, Side side)
-        {
-            
-        }
-
-        public int GetBuyOrderCount()
-        {
-            return BuyOrderQueue.Count;
-        }
-
-        public int GetSellOrderCount()
-        {
-            return SellOrderQueue.Count;
-        }
-
-        public void Close()
-        {
-            
-        }
-
-        public void PreOpen()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Open()
-        {
-            state.Open();
-        }
-
-        public void Enqueue(int price, int amount, Side side)
-        {
-            state.Enqueue(price, amount, side);
         }
         #endregion
 
