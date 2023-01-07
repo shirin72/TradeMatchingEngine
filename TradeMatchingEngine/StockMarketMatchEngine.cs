@@ -1,6 +1,6 @@
 ﻿namespace TradeMatchingEngine
 {
-    public partial class StockMarketMatchEngine:IStockMarketMatchEngine
+    public partial class StockMarketMatchEngine : IStockMarketMatchEngine
     {
         #region PrivateField
         private readonly PriorityQueue<Order, Order> SellOrderQueue;
@@ -8,7 +8,6 @@
         private readonly Queue<Order> preOrderQueue;
         private StockMarketState state;
         public MarcketState State => state.Code;
-
         #endregion
 
         public StockMarketMatchEngine()
@@ -26,128 +25,53 @@
         #endregion
 
         #region Public Method
-        public void Trade(Order order)
-        {
-            if (state is Closed)
-            {
-                throw new Exception("This Stock Has been Closed");
-            }
-            else if (state is Opened)
-            {
-                if (preOrderQueue.Count > 0)
-                {
-                    int cnt = preOrderQueue.Count;
-                    for (int i = 0; i < cnt; i++)
-                    {
-                        var preOrderdOrder = (preOrderQueue.Peek());
-
-                        if (preOrderdOrder.Side == Side.Buy)
-                        {
-                            Buy(preOrderdOrder);
-                        }
-                        else if (preOrderdOrder.Side == Side.Sell)
-                        {
-                            Sell(preOrderdOrder);
-                        }
-
-                        preOrderQueue.Dequeue();
-                    }
-                }
-                else
-                {
-                    if (order != null)
-                    {
-                        Orders.Add(order);
-                        switch (order.Side)
-                        {
-                            case Side.Sell:
-                                Sell(order);
-                                break;
-                            case Side.Buy:
-                                Buy(order);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-            else if (state is PreOpened)
-            {
-                preOrderQueue.Enqueue(order);
-                Orders.Add(order);
-            }
-        }
-
         public PriorityQueue<Order, Order> GetSellOrderQueue()
         {
             return SellOrderQueue;
         }
-
         public Queue<Order> GetPreOrderQueue()
         {
             return preOrderQueue;
         }
-
+        public int GetPreOrderQueueCount()
+        {
+            return preOrderQueue.Count;
+        }
         public PriorityQueue<Order, Order> GetBuyOrderQueue()
         {
             return BuyOrderQueue;
         }
-
         public int GetBuyOrderCount()
         {
             return BuyOrderQueue.Count;
         }
-
         public int GetSellOrderCount()
         {
             return SellOrderQueue.Count;
         }
-
-        public void Close()
+        public void ClearQueue()
         {
-            state.Close();
+            state.ClearQueue();
         }
-
-        public void PreOpen()
-        {
-            state.PreOpen();
-        }
-
-        public void Open()
-        {
-            state.Open();
-        }
-
         public void Enqueue(int price, int amount, Side side)
         {
             state.Enqueue(price, amount, side);
         }
+        public void PreOpen()
+        {
+            state.PreOpen();
+        }
+        public void Open()
+        {
+            state.Open();
+        }
+        public void Close()
+        {
+            state.Close();
+        }
         #endregion
 
         #region Private Method
-        private void open()
-        {
-
-        }
-        private void close()
-        {
-
-        }
-        private void enqueue(int price, int amount, Side side)
-        {
-
-        }
-
-        private void preOpen(int price, int amount, Side side)
-        {
-            var order = new Order { Amount = amount, Price = price, Side = side };
-
-            preOrderQueue.Enqueue(order);
-
-            Orders.Add(order);
-        }
-
         private void Buy(Order order)
         {
             var sellAvailble = SellOrderQueue.Count;
@@ -459,6 +383,56 @@
             else
             {
                 SellOrderQueue.Enqueue(order, order);
+            }
+        }
+        private void clearQueue()
+        {
+            this.SellOrderQueue.Clear();
+            this.BuyOrderQueue.Clear();
+            this.Orders.Clear();
+        }
+        private void enqueue(int price, int amount, Side side)
+        {
+            var order = new Order() { Amount = amount, Side = side, Price = price };
+
+            preOrderQueue.Enqueue(order);
+            Orders.Add(order);
+        }
+        private void enqueueOrder(int price, int amount, Side side)
+        {
+            var order = new Order { Amount = amount, Price = price, Side = side };
+
+            if (preOrderQueue.Count > 0)
+            {
+                int cnt = preOrderQueue.Count;
+                for (int i = 0; i < cnt; i++)
+                {
+                    var preOrderdOrder = (preOrderQueue.Peek());
+
+                    if (preOrderdOrder.Side == Side.Buy)
+                    {
+                        Buy(preOrderdOrder);
+                    }
+                    else if (preOrderdOrder.Side == Side.Sell)
+                    {
+                        Sell(preOrderdOrder);
+                    }
+
+                    preOrderQueue.Dequeue();
+                }
+            }
+
+            Orders.Add(order);
+            switch (order.Side)
+            {
+                case Side.Sell:
+                    Sell(order);
+                    break;
+                case Side.Buy:
+                    Buy(order);
+                    break;
+                default:
+                    break;
             }
         }
         #endregion

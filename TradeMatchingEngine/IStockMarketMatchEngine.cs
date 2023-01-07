@@ -2,10 +2,8 @@
 {
     public interface IStockMarketMatchEngine
     {
-        void Close();
+        void Enqueue(int price, int amount, Side side);
 
-        void PreOpen();
-
-        void Open();
+        void ClearQueue();
     }
 }

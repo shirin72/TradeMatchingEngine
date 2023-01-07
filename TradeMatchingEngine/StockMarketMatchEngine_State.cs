@@ -12,12 +12,8 @@
             {
                 this.StockMarketMatchEngine = stockMarketMatchEngine;
             }
-            public virtual void Close()
-            {
-                throw new NotImplementedException();
-            }
 
-            public virtual void Enqueue(int price, int amount, Side side)
+            public virtual void PreOpen()
             {
                 throw new NotImplementedException();
             }
@@ -27,7 +23,17 @@
                 throw new NotImplementedException();
             }
 
-            public virtual void PreOpen()
+            public virtual void Close ()
+            {
+                throw new NotImplementedException();
+            }
+
+            public virtual void Enqueue(int price, int amount, Side side)
+            {
+                throw new NotImplementedException();
+            }
+
+            public virtual void ClearQueue()
             {
                 throw new NotImplementedException();
             }
@@ -40,11 +46,18 @@
 
             public override void PreOpen()
             {
-               // StockMarketMatchEngine.preOpen(amount,price,side);
-
                 StockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
+                StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
+            }
 
-                Code = MarcketState.PreOpen;
+            public override void Enqueue(int price, int amount, Side side)
+            {
+                StockMarketMatchEngine.enqueue(price, amount, side);
+            }
+
+            public override void ClearQueue()
+            {
+                StockMarketMatchEngine.clearQueue();
             }
         }
         class Opened : StockMarketState
@@ -52,16 +65,17 @@
             public Opened(StockMarketMatchEngine stockMarketMatchEngine) : base(stockMarketMatchEngine)
             {
             }
+
             public override void PreOpen()
             {
                 StockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
-                Code = MarcketState.PreOpen;
+                StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
             }
-            
-            //public override void Enqueue(int price, int amount, Side side)
-            //{
-            //    StockMarketMatchEngine.enqueue(price, amount, side);
-            //}
+
+            public override void Enqueue(int price, int amount, Side side)
+            {
+                StockMarketMatchEngine.enqueueOrder(price, amount, side);
+            }
 
         }
         class PreOpened : StockMarketState
@@ -70,23 +84,27 @@
             {
             }
 
-            public override void Open()
-            {
-                StockMarketMatchEngine.open();
-                StockMarketMatchEngine.state = new Opened(StockMarketMatchEngine);
-                Code = MarcketState.Open;
-                StockMarketMatchEngine.Trade(null);
-            }
-
             public override void Close()
             {
-                StockMarketMatchEngine.close();
+                StockMarketMatchEngine.state = new Closed(StockMarketMatchEngine);
+                StockMarketMatchEngine.state.Code = MarcketState.Close;
             }
 
-            //public override void Enqueue(int price, int amount, Side side)
-            //{
-            //    StockMarketMatchEngine.enqueue(price, amount, side);
-            //}
+            public override void Open()
+            {
+                StockMarketMatchEngine.state = new Opened(StockMarketMatchEngine);
+                StockMarketMatchEngine.state.Code = MarcketState.Open;
+            }
+
+            public override void Enqueue(int price, int amount, Side side)
+            {
+                StockMarketMatchEngine.enqueue(price, amount, side);
+            }
+
+            public override void ClearQueue()
+            {
+                StockMarketMatchEngine.clearQueue();
+            }
         }
     }
 }
