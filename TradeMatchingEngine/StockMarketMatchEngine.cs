@@ -393,14 +393,15 @@
         }
         private void enqueue(int price, int amount, Side side)
         {
-            var order = new Order() { Amount = amount, Side = side, Price = price };
-
+            var order = CreateOrderRequest( price,  amount,  side);
+            order.Id = SetId();
             preOrderQueue.Enqueue(order);
             Orders.Add(order);
         }
         private void enqueueOrder(int price, int amount, Side side)
         {
-            var order = new Order { Amount = amount, Price = price, Side = side };
+            var order = CreateOrderRequest(price, amount, side);
+            order.Id = SetId();
 
             if (preOrderQueue.Count > 0)
             {
@@ -434,6 +435,26 @@
                 default:
                     break;
             }
+        }
+
+        private int SetId()
+        {
+            int id = 0;
+            if (Orders.Count == 0)
+            {
+                id = 1;
+            }
+            else
+            {
+                id = Orders.Max(x => x.Id) + 1;
+            }
+
+            return id;
+        }
+
+        private Order CreateOrderRequest(int price, int amount, Side side)
+        {
+            return new Order() { Amount = amount, Side = side, Price = price };
         }
         #endregion
 
