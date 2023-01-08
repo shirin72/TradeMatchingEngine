@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using TradeMatchingEngine;
 using Xunit;
 
@@ -22,11 +23,11 @@ namespace TestProject1
             sut.Enqueue(100, 10, Side.Sell);
 
             //Assert
-            Assert.Equal(0,sut.TradeCount);
-            Assert.Equal(1,sut.Orders.Count);
-            Assert.Equal(0,sut.GetBuyOrderCount());
-            Assert.Equal(0,sut.GetSellOrderCount());
-            Assert.Equal(1, sut.GetPreOrderQueueCount());
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(1, sut.Orders.Count);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.PreOpen, sut.State);
         }
 
@@ -81,7 +82,7 @@ namespace TestProject1
             sut.Close();
 
             //Action
-            sut.ClearQueue();
+            
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -107,8 +108,8 @@ namespace TestProject1
             Assert.Equal(0, sut.TradeCount);
             Assert.Equal(1, sut.Orders.Count);
             Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(0, sut.GetSellOrderCount());
-            Assert.Equal(1, sut.GetPreOrderQueueCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.PreOpen, sut.State);
         }
 
@@ -125,61 +126,41 @@ namespace TestProject1
             Assert.Throws<NotImplementedException>(() => sut.Close());
         }
 
-        //    [Trait("StockMarketMatchEngine", "Open")]
-        //    [Fact]
-        //    public void StockMarketMatchEngine_SeveralSellOrderEnters_MustEnqueueAllOrder()
-        //    {
-        //        //Arrange
-        //        var sellOrder1 = new Order()
-        //        {
-        //            Id = 1,
-        //            Price = 100,
-        //            Amount = 10,
-        //            Side = Side.Sell
-        //        };
+        [Trait("StockMarketMatchEngine", "Open")]
+        [Fact]
+        public async Task StockMarketMatchEngine_SeveralSellOrderEnters_MustEnqueueAllOrder()
+        {
+            //Arrange
+            sut.PreOpen();
+            //Action
+            await sut.ProcessOrderAsync(100,
+                  10,
+                  Side.Sell); 
+            await sut.ProcessOrderAsync(100,
+                  10,
+                  Side.Sell);
+            await sut.ProcessOrderAsync(100,
+                  10,
+                  Side.Sell);
+            await sut.ProcessOrderAsync(120,
+                  10,
+                  Side.Sell); 
+            await sut.ProcessOrderAsync(110,
+                  10,
+                  Side.Sell);
 
-        //        var sellOrder2 = new Order()
-        //        {
-        //            Id = 3,
-        //            Price = 100,
-        //            Amount = 10,
-        //            Side = Side.Sell
-        //        };
+           
 
-        //        var sellOrder3 = new Order()
-        //        {
-        //            Id = 2,
-        //            Price = 110,
-        //            Amount = 10,
-        //            Side = Side.Sell
-        //        };
-        //        var sellOrder4 = new Order()
-        //        {
-        //            Id = 5,
-        //            Price = 100,
-        //            Amount = 10,
-        //            Side = Side.Sell
-        //        };
-        //        var sellOrder5 = new Order()
-        //        {
-        //            Id = 4,
-        //            Price = 120,
-        //            Amount = 10,
-        //            Side = Side.Sell
-        //        };
-        //        //Action
-        //        sut.Trade(sellOrder1);
-        //        sut.Trade(sellOrder2);
-        //        sut.Trade(sellOrder3);
-        //        sut.Trade(sellOrder4);
-        //        sut.Trade(sellOrder5);
+            //Assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Empty(sut.Trades);   
 
-        //        //Assert
-        //        Assert.Equal(0, sut.TradeCount);
-        //        Assert.Equal(5, sut.Orders.Count);
-        //        Assert.Equal(0, sut.GetBuyOrderCount());
-        //        Assert.Equal(5, sut.GetSellOrderCount());
-        //    }
+            Assert.Equal(5, sut.Orders.Count);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(5, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
+            
+        }
 
         //    [Trait("StockMarketMatchEngine", "Open")]
         //    [Fact]

@@ -2,8 +2,8 @@
 {
     public interface IStockMarketMatchEngine
     {
-        void Enqueue(int price, int amount, Side side);
+         Task<int> Enqueue(int price, int amount, Side side);
 
-        void ClearQueue();
+       // void ClearQueue();
     }
 }

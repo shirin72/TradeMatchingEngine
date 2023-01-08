@@ -23,12 +23,12 @@
                 throw new NotImplementedException();
             }
 
-            public virtual void Close ()
+            public virtual void Close()
             {
                 throw new NotImplementedException();
             }
 
-            public virtual void Enqueue(int price, int amount, Side side)
+            public virtual async Task<int> Enqueue(int price, int amount, Side side)
             {
                 throw new NotImplementedException();
             }
@@ -50,15 +50,15 @@
                 StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
             }
 
-            public override void Enqueue(int price, int amount, Side side)
+            public override async Task<int> Enqueue(int price, int amount, Side side)
             {
-                StockMarketMatchEngine.enqueue(price, amount, side);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side);
             }
 
-            public override void ClearQueue()
-            {
-                StockMarketMatchEngine.clearQueue();
-            }
+            //public override void ClearQueue()
+            //{
+            //    StockMarketMatchEngine.clearQueue();
+            //}
         }
         class Opened : StockMarketState
         {
@@ -72,9 +72,9 @@
                 StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
             }
 
-            public override void Enqueue(int price, int amount, Side side)
+            public override async Task<int> Enqueue(int price, int amount, Side side)
             {
-                StockMarketMatchEngine.enqueueOrder(price, amount, side);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side);
             }
 
         }
@@ -96,15 +96,15 @@
                 StockMarketMatchEngine.state.Code = MarcketState.Open;
             }
 
-            public override void Enqueue(int price, int amount, Side side)
+            public override async Task<int> Enqueue(int price, int amount, Side side)
             {
-                StockMarketMatchEngine.enqueue(price, amount, side);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side);
             }
 
-            public override void ClearQueue()
-            {
-                StockMarketMatchEngine.clearQueue();
-            }
+            //public override void ClearQueue()
+            //{
+            //    StockMarketMatchEngine.clearQueue();
+            //}
         }
     }
 }
