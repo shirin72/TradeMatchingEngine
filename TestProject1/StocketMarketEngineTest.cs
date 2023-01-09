@@ -24,10 +24,27 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(1, sut.Orders.Count);
+            Assert.Equal(1, sut.AllOrders.Count);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
+            Assert.Equal(MarcketState.PreOpen, sut.State);
+        }
+
+        [Fact]
+        public async Task StockMarketMatchEngine_FirstPreOrderBuyEnters_MustEnqueue1PreOrderBuy()
+        {
+            //Arrange
+            sut.PreOpen();
+
+            //Action
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+
+            //Assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(1, sut.AllOrders.Count);
+            Assert.Equal(0, sut.GetSellOrderCount());
+            Assert.Equal(1, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.PreOpen, sut.State);
         }
 
@@ -67,7 +84,7 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(1, sut.TradeCount);
-            Assert.Equal(0, sut.Orders.Count);
+            Assert.Equal(0, sut.AllOrders.Count);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
@@ -86,7 +103,7 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(0, sut.Orders.Count);
+            Assert.Equal(0, sut.AllOrders.Count);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
@@ -106,7 +123,7 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(1, sut.Orders.Count);
+            Assert.Equal(1, sut.AllOrders.Count);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
@@ -143,7 +160,7 @@ namespace TestProject1
             //Assert
             Assert.Equal(0, sut.TradeCount);
             Assert.Empty(sut.TradeInfo);
-            Assert.Equal(5, sut.Orders.Count);
+            Assert.Equal(5, sut.AllOrders.Count);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(5, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
@@ -166,7 +183,22 @@ namespace TestProject1
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ProcessOrderAsync_ShouldOnTradeCommitedAndOneSellEnqueuWithNewAmount()
+        public async void ProcessOrderAsync_Should_Not_Execute_Expired_SellOrder()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, DateTime.Now.AddDays(-1));
+
+            //action
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+
+            //assert
+            Assert.Equal(0, sut.TradeCount);
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldOnTradeCommitedAndOneSellEnqueuWithNewAmount()
         {
             //arrenge
             sut.PreOpen();
@@ -185,7 +217,7 @@ namespace TestProject1
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ProcessOrderAsync_ShouldOnTradeCommitedAndOneBuyOrderEnqueuWithNewAmount()
+        public async void ProcessOrderAsync_ShouldOnTradeCommitedAndOneBuyOrderEnqueuWithNewAmount()
         {
             //arrenge
             sut.PreOpen();
@@ -201,6 +233,163 @@ namespace TestProject1
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldOnTradeCommitedAndOneSellOrderEnqueuWithNewAmount()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+
+            //action
+            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+
+            //assert
+            Assert.Equal(1, sut.TradeCount);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldTwoTradeCommited()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 100, Side.Sell);
+            await sut.ProcessOrderAsync(10, 50, Side.Buy);
+
+            //action
+            await sut.ProcessOrderAsync(10, 50, Side.Buy);
+
+            //assert
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndOneSellOrderShouldBeEnteredWithNewAmount()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 2, Side.Sell);
+
+            //action
+            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+
+            //assert
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndOneBuyOrderShouldBeEnteredWithNewAmount()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+
+            //action
+            await sut.ProcessOrderAsync(10, 6, Side.Sell);
+
+            //assert
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(1, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldTwoTradeCommitedAndThreeBuyOrderShouldBeRemained()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+            await sut.ProcessOrderAsync(10, 1, Side.Buy);
+            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+
+            //action
+            await sut.ProcessOrderAsync(10, 6, Side.Sell);
+
+            //assert
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(3, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldTwoTradeCommitedAndThreeSellOrderShouldBeRemained()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 2, Side.Sell);
+            await sut.ProcessOrderAsync(10, 1, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+
+            //action
+            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+
+            //assert
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(3, sut.GetSellOrderCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldBuyOrderEnqueInPreQueue()
+        {
+            //Arrange
+            sut.PreOpen();
+            sut.Open();
+            sut.PreOpen();
+
+            //Action
+            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+
+            //Assert
+            Assert.Equal(MarcketState.PreOpen, sut.State);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+            Assert.Equal(1, sut.GetPreOrderQueue().Count);
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldSellOrderEnqueInPreQueue()
+        {
+            //Arrange
+            sut.PreOpen();
+            sut.Open();
+            sut.PreOpen();
+
+            //Action
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+
+            //Assert
+            Assert.Equal(MarcketState.PreOpen, sut.State);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueue().Count);
         }
 
         //    [Trait("StockMarketMatchEngine", "Open")]
