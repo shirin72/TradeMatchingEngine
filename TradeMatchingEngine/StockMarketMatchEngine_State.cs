@@ -28,7 +28,7 @@
                 throw new NotImplementedException();
             }
 
-            public virtual async Task<int> Enqueue(int price, int amount, Side side)
+            public virtual async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
             {
                 throw new NotImplementedException();
             }
@@ -50,9 +50,9 @@
                 StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
             }
 
-            public override async Task<int> Enqueue(int price, int amount, Side side)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side,  expireTime);
             }
 
             //public override void ClearQueue()
@@ -72,9 +72,9 @@
                 StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
             }
 
-            public override async Task<int> Enqueue(int price, int amount, Side side)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime);
             }
 
         }
@@ -96,9 +96,9 @@
                 StockMarketMatchEngine.state.Code = MarcketState.Open;
             }
 
-            public override async Task<int> Enqueue(int price, int amount, Side side)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side,  expireTime);
             }
 
             //public override void ClearQueue()

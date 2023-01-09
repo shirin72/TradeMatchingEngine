@@ -2,8 +2,8 @@
 {
     public interface IStockMarketMatchEngine
     {
-         Task<int> Enqueue(int price, int amount, Side side);
+         Task<int> ProcessOrderAsync(int price, int amount, Side side,DateTime? expireTime=null);
 
-       // void ClearQueue();
+         //void ClearQueue();
     }
 }

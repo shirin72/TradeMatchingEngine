@@ -6,7 +6,7 @@
         private readonly PriorityQueue<Order, Order> SellOrderQueue, BuyOrderQueue;
         private readonly Queue<Order> preOrderQueue;
         private StockMarketState state;
-        public List<TradeInfo> Trades = new List<TradeInfo>();
+        public List<TradeInfo> TradeInfo = new();
         public MarcketState State => state.Code;
         #endregion
 
@@ -53,10 +53,6 @@
         {
             state.ClearQueue();
         }
-        public async Task<int> Enqueue(int price, int amount, Side side)
-        {
-            return await state.Enqueue(price, amount, side);
-        }
         public void PreOpen()
         {
             state.PreOpen();
@@ -70,9 +66,20 @@
             state.Close();
         }
 
-        public async Task<int> ProcessOrderAsync(int price, int amount, Side side)
+        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null)
         {
-            return await state.Enqueue(price, amount, side);
+            return await state.ProcessOrderAsync(price, amount, side, expireTime);
+        }
+
+        public IEnumerable<int> ShowId()
+        {
+            var lst = new List<int>();
+            foreach (var item in Orders)
+            {
+                lst.Add(item.Id);
+            }
+
+            return lst;
         }
         #endregion
 
@@ -449,32 +456,31 @@
         //            break;
         //    }
         //}
+
+        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime = null)
+        {
+            return new Order() { Amount = amount, Side = side, Price = price, Id = SetId(), ExpireTime = expireTime ?? DateTime.MaxValue };
+        }
+
         private int SetId()
         {
-            int id = 0;
+            int id;
             if (Orders.Count == 0)
             {
                 id = 1;
+
+                return id;
             }
-            else
-            {
-                id = Orders.Max(x => x.Id) + 1;
-            }
+            var findMaxId = Orders.Max(x => x.Id);
 
-            return id;
+            return Interlocked.Increment(ref findMaxId);
         }
-        private Order CreateOrderRequest(int price, int amount, Side side)
+
+        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null)
         {
+            var order = CreateOrderRequest(price, amount, side, expireTime);
 
-            return new Order() { Amount = amount, Side = side, Price = price, Id = SetId() };
-        }
-        #endregion
-
-        private async Task<int> processOrderAsync(int price, int amount, Side side)
-        {
-            var order = CreateOrderRequest(price, amount, side);
-
-            PriorityQueue<Order, Order> orders, otherSideOrders;
+            PriorityQueue<Order, Order> ordersQueu, otherSideOrders;
 
             Func<bool> priceCheck;
 
@@ -484,21 +490,36 @@
 
                     Orders.Add(order);
 
-                    FindSide();
+                    initiateTheQueueSideAndPriceCheck();
 
                     while (order.Amount > 0 && otherSideOrders.Count > 0 && priceCheck())
                     {
-                        TradeCount++;
                         var peekedOrder = otherSideOrders.Peek();
-                        int remain = peekedOrder.Amount = peekedOrder.Amount - order.Amount;
-                        order.Amount = remain;
+                        if (peekedOrder.ExpireTime < DateTime.Now)
+                        {
+                            otherSideOrders.Dequeue();
+                            Orders.Remove(peekedOrder);
+                            continue;
+                        }
+
+                        TradeCount++;
+
+                        var orderRemainingAmount = order.Amount - peekedOrder.Amount;
+                        peekedOrder.Amount -= order.Amount;
+                        order.Amount = orderRemainingAmount;
+
+                        //int remainOrderAmount = peekedOrder.Amount > order.Amount ? 0 : order.Amount- peekedOrder.Amount;
+
+                        //peekedOrder.Amount = peekedOrder.Amount < order.Amount ? 0 : peekedOrder.Amount- order.Amount;
+
+                        //order.Amount = remainOrderAmount;
 
                         if (peekedOrder.HasCompleted)
                         {
                             otherSideOrders.Dequeue();
                             Orders.Remove(peekedOrder);
 
-                            if (remain == 0)
+                            if (orderRemainingAmount <= 0)
                                 Orders.Remove(order);
 
                             continue;
@@ -508,10 +529,9 @@
 
                     if (order.Amount > 0)
                     {
-                        orders.Enqueue(order, order);
+                        ordersQueu.Enqueue(order, order);
                         return order.Id;
                     }
-
 
                     if (order.Amount <= 0)
                         Orders.Remove(order);
@@ -520,20 +540,17 @@
 
                 case MarcketState.PreOpen:
 
-
                     Orders.Add(order);
 
                     if (order.Side == Side.Sell)
                     {
                         this.SellOrderQueue.Enqueue(order, order);
                         return order.Id;
-
                     }
 
                     preOrderQueue.Enqueue(order);
 
                     return order.Id;
-
 
                 case MarcketState.Close:
                     throw new Exception("Market is Close!");
@@ -541,19 +558,17 @@
                 default:
                     return order.Id;
 
-                    void FindSide()
+                    void initiateTheQueueSideAndPriceCheck()
                     {
-
-
                         if (order.Side == Side.Sell)
                         {
-                            orders = SellOrderQueue;
+                            ordersQueu = SellOrderQueue;
                             otherSideOrders = BuyOrderQueue;
                             priceCheck = () => order.Price <= otherSideOrders.Peek().Price;
                             return;
                         }
 
-                        orders = BuyOrderQueue;
+                        ordersQueu = BuyOrderQueue;
                         otherSideOrders = SellOrderQueue;
                         priceCheck = () => order.Price >= otherSideOrders.Peek().Price;
                     }
@@ -561,21 +576,16 @@
 
             async Task makeTrade(Order order, Order otherSideOrder)
             {
-                var orders = new List<Order>();
-                orders.Add(order);
-                orders.Add(otherSideOrder);
-
                 var trade = new TradeInfo()
                 {
                     Amount = order.Amount,
                     Price = order.Price,
-                    BuyOrderId = orders.Where(o => o.Side == Side.Buy).Select(o => o.Id).First(),
-                    SellOrderId = orders.Where(o => o.Side == Side.Sell).Select(o => o.Id).First()
+                    BuyOrderId = order.Side==Side.Buy ? order.Id:otherSideOrder.Id,
+                    SellOrderId = order.Side == Side.Sell ? order.Id : otherSideOrder.Id
                 };
-                Trades.Add(trade);
+                TradeInfo.Add(trade);
             }
-
         }
-
+        #endregion
     }
 }
