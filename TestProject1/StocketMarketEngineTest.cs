@@ -406,11 +406,11 @@ namespace TestProject1
             await sut.ProcessOrderAsync(10, 1, Side.Sell);
             await sut.ProcessOrderAsync(10, 5, Side.Sell);
 
-            string s1 = string.Empty;
+            string evetDescription = string.Empty;
             sut.ProcessCompleted += delegate (object sender, EventArgs e)
             {
-                var s = e as StockMarketMatchEngineEvents;
-                s1 = s.Description;
+                var stockMarketMatchEngineEvents = e as StockMarketMatchEngineEvents;
+                evetDescription = stockMarketMatchEngineEvents.Description;
 
             };
 
@@ -423,7 +423,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(3, sut.GetSellOrderCount());
             Assert.Equal(6, sut.TradeInfo.Sum(t => t.Amount));
-            Assert.NotEmpty(s1);
+            Assert.NotEmpty(evetDescription);
         }
 
 

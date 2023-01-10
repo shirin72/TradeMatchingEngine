@@ -12,7 +12,5 @@ namespace TradeMatchingEngine
 
         public object? EventObject { get; set; }
         public string Description { get; set; }
-
-        public int Threshold { get; set; }
     }
 }
