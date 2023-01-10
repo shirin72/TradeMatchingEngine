@@ -13,6 +13,7 @@
 
         public int Amount { get; set; }
 
+        public bool IsFillAndKill { get; set; } = false;
         public bool HasCompleted
         {
             get

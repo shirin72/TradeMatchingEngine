@@ -8,6 +8,8 @@
         private StockMarketState state;
         public List<TradeInfo> TradeInfo = new();
         public MarcketState State => state.Code;
+        public delegate void Notify();
+        public event Notify ProcessCompleted; // event
         #endregion
 
         public StockMarketMatchEngine()
@@ -65,7 +67,14 @@
         {
             state.Close();
         }
-
+        public List<TradeInfo> GetAllTradeInfo()
+        {
+            return this.TradeInfo.ToList();
+        }
+        public List<TradeInfo> GetAllTradeByOrderId(int orderId)
+        {
+            return this.TradeInfo.Where(x => x.OwnerId == orderId).ToList();
+        }
         public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null)
         {
             return await state.ProcessOrderAsync(price, amount, side, expireTime);
@@ -114,23 +123,36 @@
 
                         if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now)
                         {
+                            var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                            {
+                                EventObject = peekedOrder,
+                                eventType = EventType.OrderExpired,
+                                Description = $"Order with Id: {peekedOrder.Id} Is Expired And Removed From Orders"
+
+                            };
+                            OnProcessCompleted(stockMarketMatchEngineEvents);
+
                             AllOrders.Remove(peekedOrder);
                             otherSideOrdersQueue.Dequeue();
                             continue;
                         }
-                        var orderRemainingAmount = order.Amount - peekedOrder.Amount;
-                        peekedOrder.Amount -= order.Amount;
-                        order.Amount = orderRemainingAmount;
+
+
+
+                        //var orderRemainingAmount = order.Amount - peekedOrder.Amount;
+                        //peekedOrder.Amount -= order.Amount;
+                        //order.Amount = orderRemainingAmount;
 
                         TradeCount++;
                         await makeTrade(order, peekedOrder).ConfigureAwait(false);
+
 
                         if (peekedOrder.HasCompleted)
                         {
                             otherSideOrdersQueue.Dequeue();
                             AllOrders.Remove(peekedOrder);
 
-                            if (orderRemainingAmount <= 0)
+                            if (order.Amount <= 0)
                             {
                                 AllOrders.Remove(order);
                             }
@@ -139,9 +161,22 @@
                         }
                     }
 
-                    if (order.Amount > 0)
+                    if (order.Amount > 0 && order.IsFillAndKill != true)
                     {
+
                         ordersQueue.Enqueue(order, order);
+
+
+                        var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                        {
+
+                            eventType = EventType.OrderEnqued,
+                            Description = $"Order With Id: {order.Id} Has been Enqueued",
+                            EventObject = order,
+
+
+                        };
+                        OnProcessCompleted(stockMarketMatchEngineEvents);
                         return order.Id;
                     }
 
@@ -237,14 +272,39 @@
             {
                 var trade = new TradeInfo()
                 {
-                    Amount = order.Amount,
-                    Price = order.Price,
+                    Amount = otherSideOrder.Amount <= order.Amount ? otherSideOrder.Amount : otherSideOrder.Amount - order.Amount,
+                    Price = order.Side == Side.Sell ? order.Price : otherSideOrder.Price,
+                    OwnerId = order.Id,
                     BuyOrderId = order.Side == Side.Buy ? order.Id : otherSideOrder.Id,
                     SellOrderId = order.Side == Side.Sell ? order.Id : otherSideOrder.Id
                 };
+
+                int orderRemainingAmount = otherSideOrder.Amount > order.Amount ? 0 : order.Amount - otherSideOrder.Amount;
+
+                otherSideOrder.Amount = otherSideOrder.Amount < order.Amount ? 0 : otherSideOrder.Amount - order.Amount;
+
+                order.Amount = orderRemainingAmount;
+
                 TradeInfo.Add(trade);
+
+                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                {
+                    EventObject = trade,
+                    eventType = EventType.TradeExecuted,
+                    Description = $"Trade Has Been Executed For Order{trade.OwnerId}" +
+                    $" with Price of {trade.Price} and Amount of {order.Amount}"
+                };
+
+
+                OnProcessCompleted(stockMarketMatchEngineEvents);
             }
         }
         #endregion
+
+        protected virtual void OnProcessCompleted(EventArgs eventArgs)
+        {
+            var result = eventArgs as StockMarketMatchEngineEvents;
+            ProcessCompleted?.Invoke();
+        }
     }
 }

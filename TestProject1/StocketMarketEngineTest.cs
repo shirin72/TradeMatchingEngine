@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using Xunit;
@@ -354,6 +355,7 @@ namespace TestProject1
             Assert.Equal(2, sut.TradeCount);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(3, sut.GetSellOrderCount());
+            Assert.Equal(6, sut.TradeInfo.Sum(t => t.Amount));
         }
 
         [Fact]
@@ -391,6 +393,8 @@ namespace TestProject1
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueue().Count);
         }
+
+
 
         //    [Trait("StockMarketMatchEngine", "Open")]
         //    [Fact]

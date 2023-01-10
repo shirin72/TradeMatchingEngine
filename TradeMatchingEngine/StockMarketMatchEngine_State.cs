@@ -48,6 +48,15 @@
             {
                 StockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
                 StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
+
+                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                {
+
+                    eventType = EventType.MarketPreOpened,
+                    Description = "State Of Market Is Changed to PreOpened"
+
+                };
+                StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
             public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
@@ -70,6 +79,15 @@
             {
                 StockMarketMatchEngine.state = new PreOpened(StockMarketMatchEngine);
                 StockMarketMatchEngine.state.Code = MarcketState.PreOpen;
+
+                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                {
+
+                    eventType = EventType.MarketPreOpened,
+                    Description = "State Of Market Is Changed to PreOpened"
+
+                };
+                StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
             public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
@@ -88,12 +106,30 @@
             {
                 StockMarketMatchEngine.state = new Closed(StockMarketMatchEngine);
                 StockMarketMatchEngine.state.Code = MarcketState.Close;
+
+                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                {
+                    
+                    eventType = EventType.MarketClosed,
+                    Description = "State Of Market Is Changed to Closed" 
+                    
+                };
+                StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
             public override void Open()
             {
                 StockMarketMatchEngine.state = new Opened(StockMarketMatchEngine);
                 StockMarketMatchEngine.state.Code = MarcketState.Open;
+
+                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                {
+
+                    eventType = EventType.MarketOpened,
+                    Description = "State Of Market Is Changed to Opened"
+
+                };
+                StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
             public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
