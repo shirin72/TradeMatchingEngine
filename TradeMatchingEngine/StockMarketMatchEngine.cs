@@ -9,7 +9,7 @@
         public List<TradeInfo> TradeInfo = new();
         public MarcketState State => state.Code;
         public delegate void Notify(Object sender, EventArgs e);
-        public event Notify ProcessCompleted; // event
+        public event Notify ProcessCompleted;
         #endregion
 
         public StockMarketMatchEngine()
@@ -79,7 +79,6 @@
         {
             return await state.ProcessOrderAsync(price, amount, side, expireTime);
         }
-
         #endregion
 
         #region Private Method
@@ -248,10 +247,12 @@
         }
         #endregion
 
+        #region ProtectedMethod
         protected virtual void OnProcessCompleted(EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
             ProcessCompleted?.Invoke(this, result);
         }
+        #endregion
     }
 }
