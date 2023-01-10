@@ -167,7 +167,6 @@
                         return order.Id;
                     }
 
-
                     if (order.Amount <= 0)
                         AllOrders.Remove(order);
 
