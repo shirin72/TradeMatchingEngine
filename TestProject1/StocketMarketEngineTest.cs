@@ -394,6 +394,37 @@ namespace TestProject1
             Assert.Equal(0, sut.GetPreOrderQueue().Count);
         }
 
+        [Fact]
+        public async void ProcessOrderAsync()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 2, Side.Sell);
+            await sut.ProcessOrderAsync(10, 1, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+
+            string s1 = string.Empty;
+            sut.ProcessCompleted += delegate (object sender, EventArgs e)
+            {
+                var s = e as StockMarketMatchEngineEvents;
+                s1 = s.Description;
+
+            };
+
+
+            //action
+            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+
+            //assert
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(3, sut.GetSellOrderCount());
+            Assert.Equal(6, sut.TradeInfo.Sum(t => t.Amount));
+            Assert.NotEmpty(s1);
+        }
 
 
         //    [Trait("StockMarketMatchEngine", "Open")]

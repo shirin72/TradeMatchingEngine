@@ -8,7 +8,7 @@
         private StockMarketState state;
         public List<TradeInfo> TradeInfo = new();
         public MarcketState State => state.Code;
-        public delegate void Notify();
+        public delegate void Notify(Object sender, EventArgs e);
         public event Notify ProcessCompleted; // event
         #endregion
 
@@ -270,9 +270,10 @@
 
             async Task makeTrade(Order order, Order otherSideOrder)
             {
+                var amount = otherSideOrder.Amount <= order.Amount ? otherSideOrder.Amount : otherSideOrder.Amount - order.Amount;
                 var trade = new TradeInfo()
                 {
-                    Amount = otherSideOrder.Amount <= order.Amount ? otherSideOrder.Amount : otherSideOrder.Amount - order.Amount,
+                    Amount = amount,
                     Price = order.Side == Side.Sell ? order.Price : otherSideOrder.Price,
                     OwnerId = order.Id,
                     BuyOrderId = order.Side == Side.Buy ? order.Id : otherSideOrder.Id,
@@ -291,8 +292,8 @@
                 {
                     EventObject = trade,
                     eventType = EventType.TradeExecuted,
-                    Description = $"Trade Has Been Executed For Order{trade.OwnerId}" +
-                    $" with Price of {trade.Price} and Amount of {order.Amount}"
+                    Description = $"Trade Has Been Executed For Order {trade.OwnerId}" +
+                    $" with Price of {trade.Price} and Amount of {amount}"
                 };
 
 
@@ -304,7 +305,7 @@
         protected virtual void OnProcessCompleted(EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
-            ProcessCompleted?.Invoke();
+            ProcessCompleted?.Invoke(this, result);
         }
     }
 }
