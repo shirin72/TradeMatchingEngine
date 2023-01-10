@@ -137,12 +137,6 @@
                             continue;
                         }
 
-
-
-                        //var orderRemainingAmount = order.Amount - peekedOrder.Amount;
-                        //peekedOrder.Amount -= order.Amount;
-                        //order.Amount = orderRemainingAmount;
-
                         TradeCount++;
                         await makeTrade(order, peekedOrder).ConfigureAwait(false);
 
@@ -166,7 +160,6 @@
 
                         ordersQueue.Enqueue(order, order);
 
-
                         var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                         {
 
@@ -185,52 +178,6 @@
                         AllOrders.Remove(order);
 
                     return order.Id;
-
-                //Orders.Add(order);
-
-                //initiateTheQueueSideAndPriceCheck();
-
-                //while (order.Amount > 0 && otherSideOrders.Count > 0 && priceCheck())
-                //{
-                //    var peekedOrder = otherSideOrders.Peek();
-                //    if (peekedOrder.ExpireTime < DateTime.Now)
-                //    {
-                //        otherSideOrders.Dequeue();
-                //        Orders.Remove(peekedOrder);
-                //        continue;
-                //    }
-
-                //    TradeCount++;
-
-                //    int remainOrderAmount = peekedOrder.Amount > order.Amount ? 0 : order.Amount - peekedOrder.Amount;
-
-                //    peekedOrder.Amount = peekedOrder.Amount < order.Amount ? 0 : peekedOrder.Amount - order.Amount;
-
-                //    order.Amount = remainOrderAmount;
-
-                //    if (peekedOrder.HasCompleted)
-                //    {
-                //        otherSideOrders.Dequeue();
-                //        Orders.Remove(peekedOrder);
-
-                //        if (remainOrderAmount <= 0)
-                //            Orders.Remove(order);
-
-                //        continue;
-                //    }
-                //    await makeTrade(order, peekedOrder).ConfigureAwait(false);
-                //}
-
-                //if (order.Amount > 0)
-                //{
-                //    ordersQueu.Enqueue(order, order);
-                //    return order.Id;
-                //}
-
-                //if (order.Amount <= 0)
-                //    Orders.Remove(order);
-
-                //return order.Id;
 
                 case MarcketState.PreOpen:
 
