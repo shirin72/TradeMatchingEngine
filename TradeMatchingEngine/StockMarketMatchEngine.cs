@@ -117,7 +117,6 @@
 
                     while (order.Amount > 0 && otherSideOrdersQueue.Count > 0 && priceCheck())
                     {
-
                         var peekedOrder = otherSideOrdersQueue.Peek();
 
                         if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now)
@@ -127,7 +126,6 @@
                                 EventObject = peekedOrder,
                                 eventType = EventType.OrderExpired,
                                 Description = $"Order with Id: {peekedOrder.Id} Is Expired And Removed From Orders"
-
                             };
                             OnProcessCompleted(stockMarketMatchEngineEvents);
 
@@ -138,7 +136,6 @@
 
                         TradeCount++;
                         await makeTrade(order, peekedOrder).ConfigureAwait(false);
-
 
                         if (peekedOrder.HasCompleted)
                         {
@@ -154,21 +151,19 @@
                         }
                     }
 
-                    if (order.Amount > 0 && order.IsFillAndKill != true)
+                    if (order.Amount > 0 && !order.IsFillAndKill)
                     {
-
                         ordersQueue.Enqueue(order, order);
 
                         var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                         {
-
                             eventType = EventType.OrderEnqued,
                             Description = $"Order With Id: {order.Id} Has been Enqueued",
                             EventObject = order,
-
-
                         };
+
                         OnProcessCompleted(stockMarketMatchEngineEvents);
+
                         return order.Id;
                     }
 
