@@ -296,7 +296,6 @@
                     $" with Price of {trade.Price} and Amount of {amount}"
                 };
 
-
                 OnProcessCompleted(stockMarketMatchEngineEvents);
             }
         }

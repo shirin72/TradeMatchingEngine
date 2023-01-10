@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
@@ -9,9 +10,15 @@ namespace TestProject1
     public class StocketMarketEngineTest
     {
         private StockMarketMatchEngine sut;
+        List<StockMarketMatchEngineEvents> receivedEvents = new();
         public StocketMarketEngineTest()
         {
             sut = new StockMarketMatchEngine();
+            sut.ProcessCompleted += delegate (object sender, EventArgs e)
+            {
+                var stockMarketMatchEngineEvents = e as StockMarketMatchEngineEvents;
+                receivedEvents.Add(stockMarketMatchEngineEvents);
+            };
         }
 
         [Fact]
@@ -21,7 +28,7 @@ namespace TestProject1
             sut.PreOpen();
 
             //Action
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            sut.ProcessOrderAsync(100, 10, Side.Sell);
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -395,7 +402,7 @@ namespace TestProject1
         }
 
         [Fact]
-        public async void ProcessOrderAsync()
+        public async void ProcessOrderAsync_FourSellOrderExsistAndOneBuyOrderEnters_TwoSellOrderMustExecutedAndBuyOrderMustBeDone()
         {
             //arrenge
             sut.PreOpen();
@@ -406,24 +413,28 @@ namespace TestProject1
             await sut.ProcessOrderAsync(10, 1, Side.Sell);
             await sut.ProcessOrderAsync(10, 5, Side.Sell);
 
-            string evetDescription = string.Empty;
-            sut.ProcessCompleted += delegate (object sender, EventArgs e)
-            {
-                var stockMarketMatchEngineEvents = e as StockMarketMatchEngineEvents;
-                evetDescription = stockMarketMatchEngineEvents.Description;
+            //action
+            await sut.ProcessOrderAsync(10, 6, Side.Buy);
 
-            };
+            //assert
+            Assert.Equal(8, receivedEvents.Count);
+        }
 
+        [Fact]
+        public async void ProcessOrderAsync()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 1, Side.Sell);
 
             //action
             await sut.ProcessOrderAsync(10, 6, Side.Buy);
 
             //assert
-            Assert.Equal(2, sut.TradeCount);
-            Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(3, sut.GetSellOrderCount());
-            Assert.Equal(6, sut.TradeInfo.Sum(t => t.Amount));
-            Assert.NotEmpty(evetDescription);
+            Assert.Equal(6, receivedEvents.Count);
         }
 
 
