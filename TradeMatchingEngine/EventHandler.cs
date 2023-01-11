@@ -5,7 +5,7 @@
         public  void bl_ProcessCompleted(object sender, EventArgs e)
         {
             var result = e as StockMarketMatchEngineEvents;
-            Console.WriteLine("Process Completed! {0}", result?.eventType.ToString());
+            Console.WriteLine("Process Completed! {0}", result?.EventType.ToString());
         }
     }
 }

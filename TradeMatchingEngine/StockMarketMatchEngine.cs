@@ -126,7 +126,7 @@
                             var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                             {
                                 EventObject = peekedOrder,
-                                eventType = EventType.OrderExpired,
+                                EventType = EventType.OrderExpired,
                                 Description = $"Order with Id: {peekedOrder.Id} Is Expired And Removed From Orders"
                             };
                             OnProcessCompleted(stockMarketMatchEngineEvents);
@@ -159,7 +159,7 @@
 
                         var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                         {
-                            eventType = EventType.OrderEnqued,
+                            EventType = EventType.OrderEnqued,
                             Description = $"Order With Id: {order.Id} Has been Enqueued",
                             EventObject = order,
                         };
@@ -232,7 +232,7 @@
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
                     EventObject = trade,
-                    eventType = EventType.TradeExecuted,
+                    EventType = EventType.TradeExecuted,
                     Description = $"Trade Has Been Executed For Order {tradeItem.OwnerId}" +
                     $" with Price of {tradeItem.Price} and Amount of {amount}"
                 };

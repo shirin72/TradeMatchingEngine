@@ -51,7 +51,7 @@
 
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
-                    eventType = EventType.MarketPreOpened,
+                    EventType = EventType.MarketPreOpened,
                     Description = "State Of Market Is Changed to PreOpened"
                 };
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
@@ -80,7 +80,7 @@
 
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
-                    eventType = EventType.MarketPreOpened,
+                    EventType = EventType.MarketPreOpened,
                     Description = "State Of Market Is Changed to PreOpened"
                 };
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
@@ -105,7 +105,7 @@
 
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
-                    eventType = EventType.MarketClosed,
+                    EventType = EventType.MarketClosed,
                     Description = "State Of Market Is Changed to Closed" 
                 };
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
@@ -118,7 +118,7 @@
 
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
-                    eventType = EventType.MarketOpened,
+                    EventType = EventType.MarketOpened,
                     Description = "State Of Market Is Changed to Opened"
                 };
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
