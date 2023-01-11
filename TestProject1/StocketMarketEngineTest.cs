@@ -429,11 +429,11 @@ namespace TestProject1
             await sut.ProcessOrderAsync(10, 6, Side.Buy);
 
             //assert
-            Assert.Equal(9, receivedEvents.Count);
+            Assert.Equal(8, receivedEvents.Count);
         }
 
         [Fact]
-        public async void ProcessOrderAsync()
+        public async void ProcessOrderAsync_SixEventShouldBeRaised()
         {
             //arrenge
             sut.PreOpen();

@@ -84,7 +84,7 @@
         #region Private Method
         private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime)
         {
-            return new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: DateTime.MaxValue);
+            return new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue);
         }
         private int SetId()
         {
@@ -218,22 +218,10 @@
                     amount: amount,
                     price: order.Side == Side.Sell ? order.Price : otherSideOrder.Price
                     );
-                
-                if (order.Amount >= otherSideOrder.Amount)
-                {
-                    int currentOrderAmount = order.Amount;
-                    order.DecreaseAmount(otherSideOrder.Amount);
-                    otherSideOrder.DecreaseAmount(currentOrderAmount);
-                }
-                else
-                {
-                    int currentOrderAmount = order.Amount;
-                    order.DecreaseAmount(otherSideOrder.Amount);
-                    otherSideOrder.DecreaseAmount(currentOrderAmount);
-                }
 
-                //int orderRemainingAmount = otherSideOrder.Amount > order.Amount ? 0 : order.DecreaseAmount(otherSideOrder.Amount);
-
+                int currentOrderAmount = order.Amount;
+                order.DecreaseAmount(otherSideOrder.Amount);
+                otherSideOrder.DecreaseAmount(currentOrderAmount);
 
                 trade.Add(tradeItem);
 
