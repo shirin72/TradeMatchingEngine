@@ -3,7 +3,7 @@
     public partial class StockMarketMatchEngine : IStockMarketMatchEngine
     {
         #region PrivateField
-        private readonly PriorityQueue<Order, Order> SellOrderQueue, BuyOrderQueue;
+        private readonly PriorityQueue<Order, Order> sellOrderQueue, buyOrderQueue;
         private readonly Queue<Order> preOrderQueue;
         private StockMarketState state;
         #endregion
@@ -12,13 +12,13 @@
         public MarcketState State => state.Code;
         public delegate void Notify(object sender, EventArgs e);
         public event Notify ProcessCompleted;
-        public int TradeCount { get { return tradeCount; } }
+        public int TradeCount =>tradeCount;
         #endregion
 
         public StockMarketMatchEngine()
         {
-            this.SellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
-            this.BuyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
+            this.sellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
+            this.buyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
             this.allOrders = new List<Order>();
             preOrderQueue = new Queue<Order>();
             state = new Closed(this);
@@ -37,7 +37,7 @@
         public int AllTradeCount() => trade.Count;
         public PriorityQueue<Order, Order> GetSellOrderQueue()
         {
-            return SellOrderQueue;
+            return sellOrderQueue;
         }
         public Queue<Order> GetPreOrderQueue()
         {
@@ -49,15 +49,15 @@
         }
         public PriorityQueue<Order, Order> GetBuyOrderQueue()
         {
-            return BuyOrderQueue;
+            return buyOrderQueue;
         }
         public int GetBuyOrderCount()
         {
-            return BuyOrderQueue.Count;
+            return buyOrderQueue.Count;
         }
         public int GetSellOrderCount()
         {
-            return SellOrderQueue.Count;
+            return sellOrderQueue.Count;
         }
         public void ClearQueue()
         {
@@ -180,7 +180,7 @@
 
                     if (order.Side == Side.Sell)
                     {
-                        this.SellOrderQueue.Enqueue(order, order);
+                        this.sellOrderQueue.Enqueue(order, order);
                         return order.Id;
                     }
 
@@ -198,14 +198,14 @@
                     {
                         if (order.Side == Side.Sell)
                         {
-                            ordersQueue = SellOrderQueue;
-                            otherSideOrdersQueue = BuyOrderQueue;
+                            ordersQueue = sellOrderQueue;
+                            otherSideOrdersQueue = buyOrderQueue;
                             priceCheck = () => order.Price <= otherSideOrdersQueue.Peek().Price;
                             return;
                         }
 
-                        ordersQueue = BuyOrderQueue;
-                        otherSideOrdersQueue = SellOrderQueue;
+                        ordersQueue = buyOrderQueue;
+                        otherSideOrdersQueue = sellOrderQueue;
                         priceCheck = () => order.Price >= otherSideOrdersQueue.Peek().Price;
                     }
             }

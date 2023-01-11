@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using Xunit;
@@ -682,6 +684,32 @@ namespace TestProject1
             Assert.Equal(1, sut.AllOrdersCount());
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldNotTrade2()
+        {
+            var queue = new ConcurrentQueue<int>();
+            var i = 0;
+            var t1=Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
+            var t2 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
+            var t3 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
+            var t4 = Task.Run(async () => {
+                var j = 0;
+                while(j<3)
+                {
+                    int x=0;
+                    queue.TryDequeue(out x);
+                    if (x == 0)
+                    {
+                        await Task.Delay(100);
+                        continue;
+                    }
+                    j++;
+                }
+            });
+
+            await Task.WhenAll(t1, t2, t3,t4);
         }
     }
 }
