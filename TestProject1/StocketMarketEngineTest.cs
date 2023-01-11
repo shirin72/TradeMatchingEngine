@@ -11,6 +11,7 @@ namespace TestProject1
     {
         private StockMarketMatchEngine sut;
         private List<StockMarketMatchEngineEvents> receivedEvents = new();
+
         public StocketMarketEngineTest()
         {
             sut = new StockMarketMatchEngine();
@@ -32,12 +33,12 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(1, sut.AllOrders.Count);
+            Assert.Equal(1, sut.AllOrdersCount());
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.PreOpen, sut.State);
-            Assert.Equal(0,sut.TradeInfo.Count);
+            Assert.Equal(0,sut.AllTradeCount ());
         }
 
         [Fact]
@@ -51,11 +52,11 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(1, sut.AllOrders.Count);
+            Assert.Equal(1, sut.AllOrdersCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(1, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.PreOpen, sut.State);
-            Assert.Equal(0, sut.TradeInfo.Count);
+            Assert.Equal(0, sut.AllTradeCount ());
         }
 
         [Fact]
@@ -82,12 +83,12 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(1, sut.TradeCount);
-            Assert.Equal(0, sut.AllOrders.Count);
+            Assert.Equal(0, sut.AllOrdersCount());
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.Open, sut.State);
-            Assert.Equal(1, sut.TradeInfo.Count);
+            Assert.Equal(1, sut.AllTradeCount ());
             Assert.Equal(4, receivedEvents.Count);
         }
 
@@ -102,12 +103,12 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(0, sut.AllOrders.Count);
+            Assert.Equal(0, sut.AllOrdersCount());
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.Close, sut.State);
-            Assert.Equal(0, sut.TradeInfo.Count);
+            Assert.Equal(0, sut.AllTradeCount ());
             Assert.Equal(2, receivedEvents.Count);
         }
 
@@ -124,12 +125,12 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(1, sut.AllOrders.Count);
+            Assert.Equal(1, sut.AllOrdersCount());
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(MarcketState.PreOpen, sut.State);
-            Assert.Equal(0, sut.TradeInfo.Count);
+            Assert.Equal(0, sut.AllTradeCount ());
             Assert.Equal(3, receivedEvents.Count);
         }
 
@@ -146,7 +147,6 @@ namespace TestProject1
             Assert.Throws<NotImplementedException>(() => sut.Close());
         }
 
-        [Trait("StockMarketMatchEngine", "Open")]
         [Fact]
         public async Task StockMarketMatchEngine_SeveralSellOrderEnters_MustEnqueueAllOrder()
         {
@@ -162,12 +162,12 @@ namespace TestProject1
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Empty(sut.TradeInfo);
-            Assert.Equal(5, sut.AllOrders.Count);
+            Assert.Empty(sut.Trade);
+            Assert.Equal(5, sut.AllOrdersCount());
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(5, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
-            Assert.Equal(0, sut.TradeInfo.Count);
+            Assert.Equal(0, sut.AllTradeCount ());
             Assert.Equal(1, receivedEvents.Count);
         }
 
@@ -184,7 +184,7 @@ namespace TestProject1
 
             //assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(0, sut.TradeInfo.Count);
+            Assert.Equal(0, sut.AllTradeCount ());
             Assert.Equal(5, receivedEvents.Count);
         }
 
@@ -201,7 +201,7 @@ namespace TestProject1
 
             //assert
             Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(0, sut.TradeInfo.Count);
+            Assert.Equal(0, sut.AllTradeCount ());
             Assert.Equal(5, receivedEvents.Count);
         }
 
@@ -221,9 +221,9 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
-            Assert.Equal(1, sut.TradeInfo.Count);
-            Assert.Equal(10, sut.TradeInfo.First().Price);
-            Assert.Equal(1, sut.TradeInfo.First().Amount);
+            Assert.Equal(1, sut.AllTradeCount ());
+            Assert.Equal(10, sut.Trade.First().Price);
+            Assert.Equal(1, sut.Trade.First().Amount);
             Assert.Equal(5, receivedEvents.Count);
         }
 
@@ -244,6 +244,10 @@ namespace TestProject1
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
+            Assert.Equal(1, sut.AllTradeCount ());
+            Assert.Equal(10, sut.Trade.First().Price);
+            Assert.Equal(1, sut.Trade.First().Amount);
+            Assert.Equal(5, receivedEvents.Count);
         }
 
         [Fact]
@@ -263,6 +267,10 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
+            Assert.Equal(1, sut.AllTradeCount ());
+            Assert.Equal(10, sut.Trade.First().Price);
+            Assert.Equal(3, sut.Trade.First().Amount);
+            Assert.Equal(4, receivedEvents.Count);
         }
 
         [Fact]
@@ -283,6 +291,7 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
+
         }
 
         [Fact]
@@ -365,7 +374,7 @@ namespace TestProject1
             Assert.Equal(2, sut.TradeCount);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(3, sut.GetSellOrderCount());
-            Assert.Equal(6, sut.TradeInfo.Sum(t => t.Amount));
+            Assert.Equal(6, sut.Trade.Sum(t => t.Amount));
         }
 
         [Fact]
@@ -420,7 +429,7 @@ namespace TestProject1
             await sut.ProcessOrderAsync(10, 6, Side.Buy);
 
             //assert
-            Assert.Equal(8, receivedEvents.Count);
+            Assert.Equal(9, receivedEvents.Count);
         }
 
         [Fact]

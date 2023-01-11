@@ -6,7 +6,6 @@
         private readonly PriorityQueue<Order, Order> SellOrderQueue, BuyOrderQueue;
         private readonly Queue<Order> preOrderQueue;
         private StockMarketState state;
-        public List<TradeInfo> TradeInfo = new();
         public MarcketState State => state.Code;
         public delegate void Notify(Object sender, EventArgs e);
         public event Notify ProcessCompleted;
@@ -16,17 +15,22 @@
         {
             this.SellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.BuyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
-            this.AllOrders = new List<Order>();
+            this.allOrders = new List<Order>();
             preOrderQueue = new Queue<Order>();
             state = new Closed(this);
         }
 
         #region Properties
-        public List<Order> AllOrders { get; set; }
+        private List<Order> allOrders;
+        private List<Trade> trade = new();
         public int TradeCount { get; set; }
         #endregion
 
         #region Public Method
+        public IEnumerable<Order> AllOrders => allOrders;
+        public int AllOrdersCount() => allOrders.Count;
+        public IEnumerable<ITrade> Trade => trade;
+        public int AllTradeCount() => trade.Count;
         public PriorityQueue<Order, Order> GetSellOrderQueue()
         {
             return SellOrderQueue;
@@ -67,13 +71,9 @@
         {
             state.Close();
         }
-        public List<TradeInfo> GetAllTradeInfo()
+        public IEnumerable<ITrade> GetAllTradeByOrderId(int orderId)
         {
-            return this.TradeInfo.ToList();
-        }
-        public List<TradeInfo> GetAllTradeByOrderId(int orderId)
-        {
-            return this.TradeInfo.Where(x => x.OwnerId == orderId).ToList();
+            return trade.Where(x => x.OwnerId == orderId).ToList();
         }
         public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null)
         {
@@ -82,25 +82,23 @@
         #endregion
 
         #region Private Method
-        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime = null)
+        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime)
         {
-            return new Order() { Amount = amount, Side = side, Price = price, Id = SetId(), ExpireTime = expireTime ?? DateTime.MaxValue };
+            return new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: DateTime.MaxValue);
         }
-
         private int SetId()
         {
             int id;
-            if (AllOrders.Count == 0)
+            if (AllOrdersCount() == 0)
             {
                 id = 1;
 
                 return id;
             }
-            var findMaxId = AllOrders.Max(x => x.Id);
+            var findMaxId = allOrders.Max(x => x.Id);
 
             return Interlocked.Increment(ref findMaxId);
         }
-
         private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null)
         {
             var order = CreateOrderRequest(price, amount, side, expireTime);
@@ -112,7 +110,7 @@
             switch (this.State)
             {
                 case MarcketState.Open:
-                    AllOrders.Add(order);
+                    allOrders.Add(order);
                     initiateTheQueueSideAndPriceCheck();
 
                     while (order.Amount > 0 && otherSideOrdersQueue.Count > 0 && priceCheck())
@@ -129,7 +127,7 @@
                             };
                             OnProcessCompleted(stockMarketMatchEngineEvents);
 
-                            AllOrders.Remove(peekedOrder);
+                            allOrders.Remove(peekedOrder);
                             otherSideOrdersQueue.Dequeue();
                             continue;
                         }
@@ -140,18 +138,18 @@
                         if (peekedOrder.HasCompleted)
                         {
                             otherSideOrdersQueue.Dequeue();
-                            AllOrders.Remove(peekedOrder);
+                            allOrders.Remove(peekedOrder);
 
                             if (order.Amount <= 0)
                             {
-                                AllOrders.Remove(order);
+                                allOrders.Remove(order);
                             }
 
                             continue;
                         }
                     }
 
-                    if (order.Amount > 0 && !order.IsFillAndKill)
+                    if (order.Amount > 0 && !order.IsFillAndKill.HasValue)
                     {
                         ordersQueue.Enqueue(order, order);
 
@@ -168,13 +166,13 @@
                     }
 
                     if (order.Amount <= 0)
-                        AllOrders.Remove(order);
+                        allOrders.Remove(order);
 
                     return order.Id;
 
                 case MarcketState.PreOpen:
 
-                    AllOrders.Add(order);
+                    allOrders.Add(order);
 
                     if (order.Side == Side.Sell)
                     {
@@ -211,29 +209,40 @@
             async Task makeTrade(Order order, Order otherSideOrder)
             {
                 var amount = otherSideOrder.Amount <= order.Amount ? otherSideOrder.Amount : otherSideOrder.Amount - order.Amount;
-                var trade = new TradeInfo()
+
+                var tradeItem = new Trade(
+                    tradeId: DateTime.Now.Ticks,
+                    ownerId: order.Id,
+                    buyOrderId: order.Side == Side.Buy ? order.Id : otherSideOrder.Id,
+                    sellOrderId: order.Side == Side.Sell ? order.Id : otherSideOrder.Id,
+                    amount: amount,
+                    price: order.Side == Side.Sell ? order.Price : otherSideOrder.Price
+                    );
+                
+                if (order.Amount >= otherSideOrder.Amount)
                 {
-                    Amount = amount,
-                    Price = order.Side == Side.Sell ? order.Price : otherSideOrder.Price,
-                    OwnerId = order.Id,
-                    BuyOrderId = order.Side == Side.Buy ? order.Id : otherSideOrder.Id,
-                    SellOrderId = order.Side == Side.Sell ? order.Id : otherSideOrder.Id
-                };
+                    int currentOrderAmount = order.Amount;
+                    order.DecreaseAmount(otherSideOrder.Amount);
+                    otherSideOrder.DecreaseAmount(currentOrderAmount);
+                }
+                else
+                {
+                    int currentOrderAmount = order.Amount;
+                    order.DecreaseAmount(otherSideOrder.Amount);
+                    otherSideOrder.DecreaseAmount(currentOrderAmount);
+                }
 
-                int orderRemainingAmount = otherSideOrder.Amount > order.Amount ? 0 : order.Amount - otherSideOrder.Amount;
+                //int orderRemainingAmount = otherSideOrder.Amount > order.Amount ? 0 : order.DecreaseAmount(otherSideOrder.Amount);
 
-                otherSideOrder.Amount = otherSideOrder.Amount < order.Amount ? 0 : otherSideOrder.Amount - order.Amount;
 
-                order.Amount = orderRemainingAmount;
-
-                TradeInfo.Add(trade);
+                trade.Add(tradeItem);
 
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
                     EventObject = trade,
                     eventType = EventType.TradeExecuted,
-                    Description = $"Trade Has Been Executed For Order {trade.OwnerId}" +
-                    $" with Price of {trade.Price} and Amount of {amount}"
+                    Description = $"Trade Has Been Executed For Order {tradeItem.OwnerId}" +
+                    $" with Price of {tradeItem.Price} and Amount of {amount}"
                 };
 
                 OnProcessCompleted(stockMarketMatchEngineEvents);

@@ -2,18 +2,36 @@
 {
     public class Order
     {
-        public Order()
+        internal Order(int id, Side side, int price, int amount,  DateTime expireTime, bool? isFillAndKill=null)
         {
+            Id = id;
+            Side = side;
+            Price = price;
+            Amount = amount;
+            IsFillAndKill = isFillAndKill;
+            ExpireTime = expireTime;
         }
-        public int Id { get; set; }
+        public int Id { get; }
 
-        public Side Side { get; set; }
+        public Side Side { get; }
 
-        public int Price { get; set; }
+        public int Price { get;  }
 
-        public int Amount { get; set; }
+        public int Amount { get; private set; }
 
-        public bool IsFillAndKill { get; set; } = false;
+        public int DecreaseAmount(int amount)
+        {
+            Amount = Amount - amount;
+            if(Amount <= 0)
+            {
+                Amount = 0;
+                
+            }
+
+            return Amount;
+        }
+
+        public bool? IsFillAndKill { get; } = false;
         public bool HasCompleted
         {
             get
@@ -23,8 +41,8 @@
                 return false;
             }
         }
-        public DateTime ExpireTime { get; set; }
+        public DateTime ExpireTime { get; }
 
-        public bool IsExpired { get; set; } = false;
+        public bool IsExpired => ExpireTime < DateTime.Now;
     }
 }
