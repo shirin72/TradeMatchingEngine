@@ -612,5 +612,32 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(2, sut.GetSellOrderCount());
         }
+
+        [Fact]
+        public async void ProcessOrderAsync_TwoTradeShouldBeExecutedAndToalAmountOfTradeShouldBeTwenty()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 15, Side.Buy);
+            await sut.ProcessOrderAsync(100, 5, Side.Buy);
+            await sut.ProcessOrderAsync(100, 20, Side.Buy);
+
+            //action
+            await sut.ProcessOrderAsync(90, 10, Side.Sell);
+            await sut.ProcessOrderAsync(90, 10, Side.Sell);
+
+            //assert
+            Assert.Equal(8, receivedEvents.Count);
+            Assert.Contains("Trade Has Been Executed", receivedEvents.Last().Description);
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(20, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(180, sut.Trade.Sum(x => x.Price));
+            Assert.Equal(30, sut.AllOrders.Sum(x => x.Amount));
+            Assert.Equal(3, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+        }
     }
 }
