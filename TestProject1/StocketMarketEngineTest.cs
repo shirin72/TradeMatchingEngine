@@ -662,5 +662,26 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldNotTrade()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true);
+
+            //action
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+
+            //assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(0, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(0, sut.Trade.Sum(x => x.Price));
+            Assert.Equal(1, sut.AllOrdersCount());
+            Assert.Equal(1, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+        }
     }
 }
