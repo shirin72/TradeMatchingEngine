@@ -589,7 +589,7 @@ namespace TestProject1
         }
 
         [Fact]
-        public async void ProcessOrderAsync()
+        public async void ProcessOrderAsync_TwoTradeShouldBeExecutedAndRmainAmountShouldBeFifteen()
         {
             //arrenge
             sut.PreOpen();
