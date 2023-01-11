@@ -268,8 +268,9 @@ namespace TestProject1
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(1, sut.AllTradeCount());
+            Assert.Equal(3, sut.AllOrders.Sum(x => x.Amount));
             Assert.Equal(10, sut.Trade.First().Price);
-            Assert.Equal(3, sut.Trade.First().Amount);
+            Assert.Equal(2, sut.Trade.First().Amount);
             Assert.Equal(4, receivedEvents.Count);
         }
 
@@ -538,7 +539,7 @@ namespace TestProject1
             Assert.Equal(1, sut.TradeCount);
             Assert.Equal(10, sut.Trade.First().Amount);
             Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
-            Assert.Equal(90, sut.Trade.Sum(x=>x.Price));
+            Assert.Equal(90, sut.Trade.Sum(x => x.Price));
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
@@ -585,6 +586,31 @@ namespace TestProject1
             Assert.Equal(100, sut.Trade.Sum(x => x.Price));
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 15, Side.Sell);
+            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+
+            //action
+            await sut.ProcessOrderAsync(110, 10, Side.Buy);
+            await sut.ProcessOrderAsync(110, 5, Side.Buy);
+
+            //assert
+            Assert.Equal(7, receivedEvents.Count);
+            Assert.Contains("Trade Has Been Executed", receivedEvents.Last().Description);
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(15, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(200, sut.Trade.Sum(x => x.Price));
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(2, sut.GetSellOrderCount());
         }
     }
 }

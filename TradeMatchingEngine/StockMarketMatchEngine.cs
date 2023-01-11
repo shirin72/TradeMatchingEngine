@@ -212,7 +212,7 @@
 
             async Task makeTrade(Order order, Order otherSideOrder)
             {
-                var amount = otherSideOrder.Amount <= order.Amount ? otherSideOrder.Amount : otherSideOrder.Amount - order.Amount;
+                var amount = otherSideOrder.Amount > order.Amount ?  order.Amount : otherSideOrder.Amount;
 
                 var tradeItem = new Trade(
                     tradeId: DateTime.Now.Ticks,
