@@ -79,16 +79,16 @@
         {
             return trade.Where(x => x.OwnerId == orderId).ToList();
         }
-        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null)
+        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
         {
-            return await state.ProcessOrderAsync(price, amount, side, expireTime);
+            return await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill);
         }
         #endregion
 
         #region Private Method
-        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime)
+        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill)
         {
-            return new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue);
+            return new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill);
         }
         private int SetId()
         {
@@ -103,9 +103,9 @@
 
             return Interlocked.Increment(ref findMaxId);
         }
-        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null)
+        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
         {
-            var order = CreateOrderRequest(price, amount, side, expireTime);
+            var order = CreateOrderRequest(price, amount, side, expireTime, fillAndKill);
 
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;
 
@@ -169,7 +169,7 @@
                         return order.Id;
                     }
 
-                    if (order.Amount <= 0)
+                    if (order.Amount <= 0 || order.IsFillAndKill.HasValue)
                         allOrders.Remove(order);
 
                     return order.Id;
@@ -212,7 +212,7 @@
 
             async Task makeTrade(Order order, Order otherSideOrder)
             {
-                var amount = otherSideOrder.Amount > order.Amount ?  order.Amount : otherSideOrder.Amount;
+                var amount = otherSideOrder.Amount > order.Amount ? order.Amount : otherSideOrder.Amount;
 
                 var tradeItem = new Trade(
                     tradeId: DateTime.Now.Ticks,

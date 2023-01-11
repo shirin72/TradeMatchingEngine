@@ -28,7 +28,7 @@
                 throw new NotImplementedException();
             }
 
-            public virtual async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
+            public virtual async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
             {
                 throw new NotImplementedException();
             }
@@ -57,9 +57,9 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side,  expireTime);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
             }
 
             //public override void ClearQueue()
@@ -86,9 +86,9 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
             }
 
         }
@@ -106,7 +106,7 @@
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
                     EventType = EventType.MarketClosed,
-                    Description = "State Of Market Is Changed to Closed" 
+                    Description = "State Of Market Is Changed to Closed"
                 };
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
@@ -124,9 +124,9 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime=null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side,  expireTime);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
             }
 
             //public override void ClearQueue()

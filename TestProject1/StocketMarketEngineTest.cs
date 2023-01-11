@@ -639,5 +639,28 @@ namespace TestProject1
             Assert.Equal(3, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldOneTradeBeCommitedAndRemainOrderShouldBeRemoved()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+
+            //action
+            await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true);
+
+            //assert
+            Assert.Equal(4, receivedEvents.Count);
+            Assert.Contains("Trade Has Been Executed", receivedEvents.Last().Description);
+            Assert.Equal(1, sut.TradeCount);
+            Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(90, sut.Trade.Sum(x => x.Price));
+            Assert.Equal(0, sut.AllOrdersCount());
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+        }
     }
 }
