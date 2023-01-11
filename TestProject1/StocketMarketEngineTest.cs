@@ -332,6 +332,11 @@ namespace TestProject1
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
+            Assert.Equal(5, sut.Trade.First().Amount);
+            Assert.Equal(1, sut.Trade.Last().Amount);
+            Assert.Equal(6, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(10, sut.Trade.First().Price);
+            Assert.Equal(1, sut.AllOrders.Where(x => x.Side == Side.Buy).Select(x => x.Amount).First());
         }
 
         [Fact]
@@ -411,6 +416,9 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueue().Count);
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
         }
 
         [Fact]
@@ -430,6 +438,13 @@ namespace TestProject1
 
             //assert
             Assert.Equal(8, receivedEvents.Count);
+            Assert.Equal(2, sut.TradeCount);
+            Assert.Equal(5, sut.Trade.First().Amount);
+            Assert.Equal(1, sut.Trade.Last().Amount);
+            Assert.Equal(6, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(10, sut.Trade.First().Price);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(3, sut.GetSellOrderCount());
         }
 
         [Fact]
@@ -447,6 +462,7 @@ namespace TestProject1
 
             //assert
             Assert.Equal(6, receivedEvents.Count);
+            Assert.Contains("Trade Has Been Executed", receivedEvents.Last().Description);
             Assert.Equal(2, sut.TradeCount);
             Assert.Equal(5, sut.Trade.First().Amount);
             Assert.Equal(1, sut.Trade.Last().Amount);
