@@ -471,5 +471,53 @@ namespace TestProject1
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndFiveEventBeRaised()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+
+            //action
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+
+            //assert
+            Assert.Equal(5, receivedEvents.Count);
+            Assert.Contains("Trade Has Been Executed", receivedEvents.Last().Description);
+            Assert.Equal(1, sut.TradeCount);
+            Assert.Equal(10, sut.Trade.First().Amount);
+            Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(100, sut.Trade.First().Price);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+
+            //action
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+
+            //assert
+            Assert.Equal(5, receivedEvents.Count);
+            Assert.Contains("Trade Has Been Executed", receivedEvents.Last().Description);
+            Assert.Equal(1, sut.TradeCount);
+            Assert.Equal(10, sut.Trade.First().Amount);
+            Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(100, sut.Trade.First().Price);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+        }
     }
 }
