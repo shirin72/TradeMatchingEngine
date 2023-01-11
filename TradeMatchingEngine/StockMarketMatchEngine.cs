@@ -6,9 +6,13 @@
         private readonly PriorityQueue<Order, Order> SellOrderQueue, BuyOrderQueue;
         private readonly Queue<Order> preOrderQueue;
         private StockMarketState state;
+        #endregion
+
+        #region PublicProperties
         public MarcketState State => state.Code;
-        public delegate void Notify(Object sender, EventArgs e);
+        public delegate void Notify(object sender, EventArgs e);
         public event Notify ProcessCompleted;
+        public int TradeCount { get { return tradeCount; } }
         #endregion
 
         public StockMarketMatchEngine()
@@ -23,7 +27,7 @@
         #region Properties
         private List<Order> allOrders;
         private List<Trade> trade = new();
-        public int TradeCount { get; set; }
+        private int tradeCount;
         #endregion
 
         #region Public Method
@@ -132,7 +136,7 @@
                             continue;
                         }
 
-                        TradeCount++;
+                        tradeCount++;
                         await makeTrade(order, peekedOrder).ConfigureAwait(false);
 
                         if (peekedOrder.HasCompleted)
