@@ -689,27 +689,219 @@ namespace TestProject1
         [Fact]
         public async void ProcessOrderAsync_ShouldNotTrade2()
         {
-            var queue = new ConcurrentQueue<int>();
-            var i = 0;
-            var t1=Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
-            var t2 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
-            var t3 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
-            var t4 = Task.Run(async () => {
-                var j = 0;
-                while(j<3)
+            var bCollection = new BlockingCollection<int>();
+            var tasks = new List<Task>();
+            for (int i = 0; i < 100; i++)
+            {
+                tasks.Add(Task.Run(async () =>
                 {
-                    int x=0;
-                    queue.TryDequeue(out x);
-                    if (x == 0)
+
+                    bCollection.Add(i);
+
+                }));
+            }
+            var completeTask = Task.WhenAll(tasks).ContinueWith(t => bCollection.CompleteAdding());
+
+            int k = 0;
+            Task consumer = Task.Run(() =>
+            {
+
+                while (!bCollection.IsCompleted)
+                {
+                    if (bCollection.TryTake(out int i))
                     {
-                        await Task.Delay(100);
-                        continue;
+
+                        k++;
                     }
-                    j++;
+
                 }
             });
 
-            await Task.WhenAll(t1, t2, t3,t4);
+            var allTasks = new List<Task>(tasks);
+            allTasks.Add(consumer);
+            allTasks.Add(completeTask);
+            await Task.WhenAll(allTasks);
+            Assert.Equal(100, k);
+            //var queue = new ConcurrentQueue<int>();
+            //var i = 0;
+            //var t1=Task.Run(() => queue.Enqueue(Interlocked.Increment(3)));
+            //var t2 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
+            //var t3 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
+            //var t4 = Task.Run(async () => {
+            //    var j = 0;
+            //    while(j<3)
+            //    {
+            //        int x=0;
+            //        queue.TryDequeue(out x);
+            //        if (x == 0)
+            //        {
+            //            await Task.Delay(100);
+            //            continue;
+            //        }
+            //        j++;
+            //    }
+            //});
+
+            //await Task.WhenAll(t1, t2, t3,t4);
         }
+
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldNotTrade3()
+        {
+            //arrange
+            sut.PreOpen();
+            sut.Open();
+
+            var bCollection = new BlockingCollection<Tuple<int, int, Side>>();
+
+            Task producer = Task.Factory.StartNew(() =>
+            {
+                bCollection.Add(new Tuple<int, int, Side>(10, 1, Side.Buy));
+                bCollection.Add(new Tuple<int, int, Side>(10, 1, Side.Sell));
+                bCollection.CompleteAdding();
+            });
+
+
+            //act
+
+            Task consumer = Task.Factory.StartNew(() =>
+            {
+                while (!bCollection.IsCompleted)
+                {
+                    var item = bCollection.Take();
+                    sut.ProcessOrderAsync(item.Item1, item.Item2, item.Item3);
+                }
+            });
+
+            Task.WaitAll(producer, consumer);
+
+            //assert
+            Assert.Equal(1, sut.TradeCount);
+        }
+        [Fact]
+        public async void ProcessOrderAsync_ShouldNotTrade4()
+        {
+            var bCollection = new BlockingCollection<int>();
+            var tasks = new List<Task>();
+            for (int i = 0; i < 5; i++)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+
+                    bCollection.Add(i);
+
+                }));
+            }
+            Task.WhenAll(tasks);
+
+            int k = 0;
+            Task consumer = Task.Run(() =>
+            {
+
+                while (!bCollection.IsCompleted)
+                {
+                    if (bCollection.TryTake(out int i)) { k++; }
+                    bCollection.Add(i + 2);
+                }
+            });
+
+            var allTasks = new List<Task>(tasks);
+            allTasks.Add(consumer);
+            //allTasks.Add(completeTask);
+            Task.WhenAll(allTasks.ToArray());
+            System.Threading.Thread.Sleep(10000);
+        }
+
+
+
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldNotTrade5()
+        {
+            var bCollection = new BlockingCollection<int>();
+            int i=0;
+            Task producer = Task.Run(async () =>
+           {
+               lock (bCollection)
+               {
+                   for (i = 0; i < 5; i++)
+                   {
+                       bCollection.Add(i);
+                   }
+               }
+
+
+           });
+
+            int k = 0;
+            Task consumer = Task.Run(() =>
+            {
+
+                while (!bCollection.IsCompleted)
+                {
+                    lock (bCollection)
+                    {
+                        var res = bCollection.TryTake(out int i);
+                        if (res)
+                        {
+                            bCollection.Add(i + 2);
+                            k++;
+                        }
+                    }
+                    
+                    
+                }
+                bCollection.CompleteAdding();
+            });
+
+            //var allTasks = new List<Task>(tasks);
+            //allTasks.Add(consumer);
+            //allTasks.Add(completeTask);
+            Task.WaitAll(producer, consumer);
+            Assert.Equal(100, k);
+
+        }
+
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldNotTrade8()
+        {
+            var bCollection = new BlockingCollection<int>();
+            var tasks = new List<Task>();
+            for (int i = 0; i < 5; i++)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+
+                    bCollection.Add(i);
+
+                }));
+            }
+            var completeTask = Task.WhenAll(tasks).ContinueWith(t => bCollection.CompleteAdding());
+
+            int k = 0;
+            Task consumer = Task.Run(() =>
+            {
+
+                while (!bCollection.IsCompleted)
+                {
+                    if (bCollection.TryTake(out int i))
+                    {
+
+                        k++;
+                    }
+
+                }
+            });
+
+            var allTasks = new List<Task>(tasks);
+            allTasks.Add(consumer);
+            allTasks.Add(completeTask);
+            await Task.WhenAll(allTasks);
+            Assert.Equal(100, k);
+           
+        }
+
     }
 }
