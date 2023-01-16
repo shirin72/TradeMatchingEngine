@@ -9,7 +9,6 @@ namespace TradeMatchingEngine
         private readonly Queue<Order> preOrderQueue;
         private StockMarketState state;
         private readonly BlockingQueue queue;
-        private readonly BlockingCollection<Order> blockingCollection;
         #endregion
 
         #region PublicProperties
@@ -87,18 +86,14 @@ namespace TradeMatchingEngine
         }
         public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
         {
-            return await queue.ExecuteAsync(async ()=> await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill));
+            return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill));
         }
         #endregion
 
         #region Private Method
         private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill)
         {
-            var order = new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill);
-
-            blockingCollection.Add(order);
-
-            return order;
+            return new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill);
         }
         private int SetId()
         {
@@ -120,109 +115,105 @@ namespace TradeMatchingEngine
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;
 
             Func<bool> priceCheck;
-            while (!blockingCollection.IsCompleted)
+
+            switch (this.State)
             {
-                switch (this.State)
-                {
-                    case MarcketState.Open:
-                        allOrders.Add(order);
-                        initiateTheQueueSideAndPriceCheck();
+                case MarcketState.Open:
+                    allOrders.Add(order);
+                    initiateTheQueueSideAndPriceCheck();
 
-                        while (order.Amount > 0 && otherSideOrdersQueue.Count > 0 && priceCheck())
+                    while (order.Amount > 0 && otherSideOrdersQueue.Count > 0 && priceCheck())
+                    {
+                        var peekedOrder = otherSideOrdersQueue.Peek();
+
+                        if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now)
                         {
-                            var peekedOrder = otherSideOrdersQueue.Peek();
-
-                            if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now)
-                            {
-                                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
-                                {
-                                    EventObject = peekedOrder,
-                                    EventType = EventType.OrderExpired,
-                                    Description = $"Order with Id: {peekedOrder.Id} Is Expired And Removed From Orders"
-                                };
-                                OnProcessCompleted(stockMarketMatchEngineEvents);
-
-                                allOrders.Remove(peekedOrder);
-                                otherSideOrdersQueue.Dequeue();
-                                continue;
-                            }
-
-                            tradeCount++;
-                            await makeTrade(order, peekedOrder).ConfigureAwait(false);
-
-                            if (peekedOrder.HasCompleted)
-                            {
-                                otherSideOrdersQueue.Dequeue();
-                                allOrders.Remove(peekedOrder);
-
-                                if (order.Amount <= 0)
-                                {
-                                    allOrders.Remove(order);
-                                }
-
-                                continue;
-                            }
-                        }
-
-                        if (order.Amount > 0 && !order.IsFillAndKill.HasValue)
-                        {
-                            ordersQueue.Enqueue(order, order);
-
                             var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                             {
-                                EventType = EventType.OrderEnqued,
-                                Description = $"Order With Id: {order.Id} Has been Enqueued",
-                                EventObject = order,
+                                EventObject = peekedOrder,
+                                EventType = EventType.OrderExpired,
+                                Description = $"Order with Id: {peekedOrder.Id} Is Expired And Removed From Orders"
                             };
-
                             OnProcessCompleted(stockMarketMatchEngineEvents);
 
-                            return order.Id;
+                            allOrders.Remove(peekedOrder);
+                            otherSideOrdersQueue.Dequeue();
+                            continue;
                         }
 
-                        if (order.Amount <= 0 || order.IsFillAndKill.HasValue)
-                            allOrders.Remove(order);
+                        tradeCount++;
+                        await makeTrade(order, peekedOrder).ConfigureAwait(false);
 
-                        return order.Id;
-
-                    case MarcketState.PreOpen:
-
-                        allOrders.Add(order);
-
-                        if (order.Side == Side.Sell)
+                        if (peekedOrder.HasCompleted)
                         {
-                            this.sellOrderQueue.Enqueue(order, order);
-                            return order.Id;
-                        }
+                            otherSideOrdersQueue.Dequeue();
+                            allOrders.Remove(peekedOrder);
 
-                        preOrderQueue.Enqueue(order);
-
-                        return order.Id;
-
-                    case MarcketState.Close:
-                        throw new Exception("Market is Close!");
-
-                    default:
-                        return order.Id;
-
-                        void initiateTheQueueSideAndPriceCheck()
-                        {
-                            if (order.Side == Side.Sell)
+                            if (order.Amount <= 0)
                             {
-                                ordersQueue = sellOrderQueue;
-                                otherSideOrdersQueue = buyOrderQueue;
-                                priceCheck = () => order.Price <= otherSideOrdersQueue.Peek().Price;
-                                return;
+                                allOrders.Remove(order);
                             }
 
-                            ordersQueue = buyOrderQueue;
-                            otherSideOrdersQueue = sellOrderQueue;
-                            priceCheck = () => order.Price >= otherSideOrdersQueue.Peek().Price;
+                            continue;
                         }
-                }
-               
+                    }
+
+                    if (order.Amount > 0 && !order.IsFillAndKill.HasValue)
+                    {
+                        ordersQueue.Enqueue(order, order);
+
+                        var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                        {
+                            EventType = EventType.OrderEnqued,
+                            Description = $"Order With Id: {order.Id} Has been Enqueued",
+                            EventObject = order,
+                        };
+
+                        OnProcessCompleted(stockMarketMatchEngineEvents);
+
+                        return order.Id;
+                    }
+
+                    if (order.Amount <= 0 || order.IsFillAndKill.HasValue)
+                        allOrders.Remove(order);
+
+                    return order.Id;
+
+                case MarcketState.PreOpen:
+
+                    allOrders.Add(order);
+
+                    if (order.Side == Side.Sell)
+                    {
+                        this.sellOrderQueue.Enqueue(order, order);
+                        return order.Id;
+                    }
+
+                    preOrderQueue.Enqueue(order);
+
+                    return order.Id;
+
+                case MarcketState.Close:
+                    throw new Exception("Market is Close!");
+
+                default:
+                    return order.Id;
+
+                    void initiateTheQueueSideAndPriceCheck()
+                    {
+                        if (order.Side == Side.Sell)
+                        {
+                            ordersQueue = sellOrderQueue;
+                            otherSideOrdersQueue = buyOrderQueue;
+                            priceCheck = () => order.Price <= otherSideOrdersQueue.Peek().Price;
+                            return;
+                        }
+
+                        ordersQueue = buyOrderQueue;
+                        otherSideOrdersQueue = sellOrderQueue;
+                        priceCheck = () => order.Price >= otherSideOrdersQueue.Peek().Price;
+                    }
             }
-            return order.Id;
 
             async Task makeTrade(Order order, Order otherSideOrder)
             {
