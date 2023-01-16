@@ -2,6 +2,8 @@
 {
     public class Order
     {
+
+
         internal Order(int id, Side side, int price, int amount, DateTime expireTime, bool? isFillAndKill = null)
         {
             Id = id;

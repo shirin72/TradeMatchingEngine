@@ -903,5 +903,45 @@ namespace TestProject1
            
         }
 
+
+        [Fact]
+        public async void ProcessOrderAsync_ShouldNotTrade9()
+        {
+            var bCollection = new BlockingCollection<int>();
+            var tasks = new List<Task>();
+            for (int i = 0; i < 5; i++)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+
+                    bCollection.Add(i);
+
+                }));
+            }
+            var completeTask = Task.WhenAll(tasks).ContinueWith(t => bCollection.CompleteAdding());
+
+            int k = 0;
+            Task consumer = Task.Run(() =>
+            {
+
+                while (!bCollection.IsCompleted)
+                {
+                    if (bCollection.TryTake(out int i))
+                    {
+
+                        k++;
+                    }
+
+                }
+            });
+
+            var allTasks = new List<Task>(tasks);
+            allTasks.Add(consumer);
+            allTasks.Add(completeTask);
+            await Task.WhenAll(allTasks);
+            Assert.Equal(100, k);
+
+        }
+
     }
 }
