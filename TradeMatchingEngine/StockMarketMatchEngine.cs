@@ -94,16 +94,7 @@ namespace TradeMatchingEngine
         }
         public async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
         {
-            try
-            {
-                return await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate));
-
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            return await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate));
         }
         #endregion
 
@@ -288,20 +279,11 @@ namespace TradeMatchingEngine
 
         private async Task<int> modifieOrder(int orderId, int price, int amount, DateTime expirationDate)
         {
-            await queue.ExecuteAsync(async () =>  cancellOrderAsync(orderId));
+            cancellOrderAsync(orderId);
 
             var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
 
-            try
-            {
-                return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, orderSide, expirationDate));
-
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            return await state.ProcessOrderAsync(price, amount, orderSide, expirationDate);
         }
 
         #endregion

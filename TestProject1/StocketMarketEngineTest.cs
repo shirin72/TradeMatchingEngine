@@ -812,6 +812,7 @@ namespace TestProject1
             //assert
             Assert.ThrowsAsync<NotImplementedException>(async () =>await  sut.CancelOrder(0));
         }
+
         [Fact]
         public async void ProcessOrderAsync_1SellOrderEntersOrderGetModified1BuyOrderEnters_OneTradeWithNewAmountShoudExecute()
         {

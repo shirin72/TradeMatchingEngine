@@ -21,7 +21,7 @@ namespace TradeMatchingEngine
                     try
                     {
                         var i = blockingCollection.Take();
-                        var result = await i.Execute();
+                        await i.Execute();
 
                     }
                     catch (Exception ex)
