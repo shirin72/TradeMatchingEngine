@@ -32,7 +32,14 @@
             {
                 throw new NotImplementedException();
             }
-
+            public virtual async Task<int> CancellOrderAsync(int orderId)
+            {
+                throw new NotImplementedException();
+            }
+            public virtual async Task<int> ModifieOrder(int orderId,int price,int amount, DateTime expirationDate)
+            {
+                throw new NotImplementedException();
+            }
             public virtual void ClearQueue()
             {
                 throw new NotImplementedException();
@@ -61,6 +68,7 @@
             {
                 return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
             }
+
 
             //public override void ClearQueue()
             //{
@@ -91,6 +99,14 @@
                 return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
             }
 
+            public override async Task<int> CancellOrderAsync(int orderId)
+            {
+                return  StockMarketMatchEngine.cancellOrderAsync(orderId);
+            }
+            public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
+            {
+                return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate);
+            }
         }
         class PreOpened : StockMarketState
         {
@@ -127,6 +143,16 @@
             public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
             {
                 return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
+            }
+
+            public override async Task<int> CancellOrderAsync(int orderId)
+            {
+                return  StockMarketMatchEngine.cancellOrderAsync(orderId);
+            }
+
+            public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
+            {
+                return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate);
             }
 
             //public override void ClearQueue()

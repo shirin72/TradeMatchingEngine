@@ -23,11 +23,10 @@ namespace TradeMatchingEngine
                         var i = blockingCollection.Take();
                         var result = await i.Execute();
 
-                        Console.WriteLine(result);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        continue;
+                       continue;
                     }
                 }
             });
@@ -44,6 +43,7 @@ namespace TradeMatchingEngine
         {
             var item = new QueueItem<T>(function);
             blockingCollection.Add(item);
+            
             return item.Completion;
         }
     }

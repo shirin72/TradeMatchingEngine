@@ -31,7 +31,7 @@ namespace TestProject1
             sut.PreOpen();
 
             //Action
-            sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell);
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -722,6 +722,7 @@ namespace TestProject1
             allTasks.Add(completeTask);
             await Task.WhenAll(allTasks);
             Assert.Equal(100, k);
+
             //var queue = new ConcurrentQueue<int>();
             //var i = 0;
             //var t1=Task.Run(() => queue.Enqueue(Interlocked.Increment(3)));
@@ -745,40 +746,6 @@ namespace TestProject1
             //await Task.WhenAll(t1, t2, t3,t4);
         }
 
-
-        [Fact]
-        public async void ProcessOrderAsync_ShouldNotTrade3()
-        {
-            //arrange
-            sut.PreOpen();
-            sut.Open();
-
-            var bCollection = new BlockingCollection<Tuple<int, int, Side>>();
-
-            Task producer = Task.Factory.StartNew(() =>
-            {
-                bCollection.Add(new Tuple<int, int, Side>(10, 1, Side.Buy));
-                bCollection.Add(new Tuple<int, int, Side>(10, 1, Side.Sell));
-                bCollection.CompleteAdding();
-            });
-
-
-            //act
-
-            Task consumer = Task.Factory.StartNew(() =>
-            {
-                while (!bCollection.IsCompleted)
-                {
-                    var item = bCollection.Take();
-                    sut.ProcessOrderAsync(item.Item1, item.Item2, item.Item3);
-                }
-            });
-
-            Task.WaitAll(producer, consumer);
-
-            //assert
-            Assert.Equal(1, sut.TradeCount);
-        }
         [Fact]
         public async void ProcessOrderAsync_ShouldNotTrade4()
         {
@@ -813,134 +780,58 @@ namespace TestProject1
             System.Threading.Thread.Sleep(10000);
         }
 
-
-
-
         [Fact]
-        public async void ProcessOrderAsync_ShouldNotTrade5()
+        public async void ProcessOrderAsync_1SellOrderEntersOrderSetToCancel1BuyOrderEnter_NoTradeShouldBeExecute()
         {
-            var bCollection = new BlockingCollection<int>();
-            int i=0;
-            Task producer = Task.Run(async () =>
-           {
-               lock (bCollection)
-               {
-                   for (i = 0; i < 5; i++)
-                   {
-                       bCollection.Add(i);
-                   }
-               }
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
 
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
+            await sut.CancelOrder(orderId);
 
-           });
+            //action
+            await sut.ProcessOrderAsync(90, 15, Side.Buy);
 
-            int k = 0;
-            Task consumer = Task.Run(() =>
-            {
-
-                while (!bCollection.IsCompleted)
-                {
-                    lock (bCollection)
-                    {
-                        var res = bCollection.TryTake(out int i);
-                        if (res)
-                        {
-                            bCollection.Add(i + 2);
-                            k++;
-                        }
-                    }
-                    
-                    
-                }
-                bCollection.CompleteAdding();
-            });
-
-            //var allTasks = new List<Task>(tasks);
-            //allTasks.Add(consumer);
-            //allTasks.Add(completeTask);
-            Task.WaitAll(producer, consumer);
-            Assert.Equal(100, k);
-
+            //assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(0, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(0, sut.Trade.Sum(x => x.Price));
+            Assert.Equal(1, sut.AllOrdersCount());
+            Assert.Equal(1, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
         }
 
-
         [Fact]
-        public async void ProcessOrderAsync_ShouldNotTrade8()
+        public async void ProcessOrderAsync_CancellNoneValidOrder_ThrowException()
         {
-            var bCollection = new BlockingCollection<int>();
-            var tasks = new List<Task>();
-            for (int i = 0; i < 5; i++)
-            {
-                tasks.Add(Task.Run(async () =>
-                {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
 
-                    bCollection.Add(i);
-
-                }));
-            }
-            var completeTask = Task.WhenAll(tasks).ContinueWith(t => bCollection.CompleteAdding());
-
-            int k = 0;
-            Task consumer = Task.Run(() =>
-            {
-
-                while (!bCollection.IsCompleted)
-                {
-                    if (bCollection.TryTake(out int i))
-                    {
-
-                        k++;
-                    }
-
-                }
-            });
-
-            var allTasks = new List<Task>(tasks);
-            allTasks.Add(consumer);
-            allTasks.Add(completeTask);
-            await Task.WhenAll(allTasks);
-            Assert.Equal(100, k);
-           
+            //assert
+            Assert.ThrowsAsync<NotImplementedException>(async () =>await  sut.CancelOrder(0));
         }
-
-
         [Fact]
-        public async void ProcessOrderAsync_ShouldNotTrade9()
+        public async void ProcessOrderAsync_1SellOrderEntersOrderGetModified1BuyOrderEnters_OneTradeWithNewAmountShoudExecute()
         {
-            var bCollection = new BlockingCollection<int>();
-            var tasks = new List<Task>();
-            for (int i = 0; i < 5; i++)
-            {
-                tasks.Add(Task.Run(async () =>
-                {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
 
-                    bCollection.Add(i);
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
+            await sut.ModifieOrder(orderId,100,5,DateTime.MaxValue);
 
-                }));
-            }
-            var completeTask = Task.WhenAll(tasks).ContinueWith(t => bCollection.CompleteAdding());
+            //action
+            await sut.ProcessOrderAsync(100, 15, Side.Buy);
 
-            int k = 0;
-            Task consumer = Task.Run(() =>
-            {
-
-                while (!bCollection.IsCompleted)
-                {
-                    if (bCollection.TryTake(out int i))
-                    {
-
-                        k++;
-                    }
-
-                }
-            });
-
-            var allTasks = new List<Task>(tasks);
-            allTasks.Add(consumer);
-            allTasks.Add(completeTask);
-            await Task.WhenAll(allTasks);
-            Assert.Equal(100, k);
-
+            //assert
+            Assert.Equal(1, sut.TradeCount);
+            Assert.Equal(5, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(100, sut.Trade.Sum(x => x.Price));
+            Assert.Equal(1, sut.AllOrdersCount());
+            Assert.Equal(1, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
         }
 
     }

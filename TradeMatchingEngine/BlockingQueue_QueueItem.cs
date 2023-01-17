@@ -19,7 +19,7 @@ namespace TradeMatchingEngine
                 this.action = action;
             }
 
-            private async Task<T> Execute()
+            private async Task<T> execute()
             {
                 var res = await action();
                 completionSource.SetResult(res);
@@ -28,7 +28,7 @@ namespace TradeMatchingEngine
 
             async Task<object?> ICommand.Execute()
             {
-                return await Execute();
+                return await execute();
             }
         }
     }

@@ -2,7 +2,7 @@
 {
     public class Order
     {
-
+        private  OrderState _state;
 
         internal Order(int id, Side side, int price, int amount, DateTime expireTime, bool? isFillAndKill = null)
         {
@@ -12,6 +12,7 @@
             Amount = amount;
             IsFillAndKill = isFillAndKill;
             ExpireTime = expireTime;
+            _state = OrderState.Register;
         }
 
         public int Id { get; }
@@ -49,5 +50,18 @@
         public DateTime ExpireTime { get; }
 
         public bool IsExpired => ExpireTime < DateTime.Now;
+        public OrderState GetOrderState() => _state;
+
+        public void SetStateCancelled()
+        {
+            _state = OrderState.Cancell;
+        }
+    }
+
+    public enum OrderState
+    {
+        Cancell,
+        Modifie,
+        Register
     }
 }

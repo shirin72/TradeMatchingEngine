@@ -84,9 +84,26 @@ namespace TradeMatchingEngine
         {
             return trade.Where(x => x.OwnerId == orderId).ToList();
         }
+        public async Task<int> CancelOrder(int orderId)
+        {
+            return await queue.ExecuteAsync(async () => await state.CancellOrderAsync(orderId));
+        }
         public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
         {
             return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill));
+        }
+        public async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
+        {
+            try
+            {
+                return await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate));
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
         #endregion
 
@@ -125,8 +142,8 @@ namespace TradeMatchingEngine
                     while (order.Amount > 0 && otherSideOrdersQueue.Count > 0 && priceCheck())
                     {
                         var peekedOrder = otherSideOrdersQueue.Peek();
-
-                        if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now)
+                        CheckForNotCanceled(peekedOrder);
+                        if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now || peekedOrder.GetOrderState() == OrderState.Cancell)
                         {
                             var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                             {
@@ -244,7 +261,49 @@ namespace TradeMatchingEngine
 
                 OnProcessCompleted(stockMarketMatchEngineEvents);
             }
+
+            bool CheckForNotCanceled(Order order)
+            {
+                var checkedOrder = allOrders.Where(o => o.Id == order.Id).Single();
+
+                if (checkedOrder.GetOrderState() == OrderState.Cancell)
+                {
+                    order.SetStateCancelled();
+
+                    return true;
+                }
+
+                return false;
+            }
         }
+
+        private int cancellOrderAsync(int orderId)
+        {
+            var findOrder = allOrders.Where(a => a.Id == orderId).Single();
+
+            findOrder.SetStateCancelled();
+
+            return findOrder.Id;
+        }
+
+        private async Task<int> modifieOrder(int orderId, int price, int amount, DateTime expirationDate)
+        {
+            await queue.ExecuteAsync(async () =>  cancellOrderAsync(orderId));
+
+            var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
+
+            try
+            {
+                return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, orderSide, expirationDate));
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
         #endregion
 
         #region ProtectedMethod
