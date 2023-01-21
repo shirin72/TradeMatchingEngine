@@ -28,15 +28,15 @@
                 throw new NotImplementedException();
             }
 
-            public virtual async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public virtual async Task<int> ProcessOrderAsync(int price, int amount, Side side,bool isForModifie, DateTime? expireTime = null, bool? fillAndKill = null)
             {
                 throw new NotImplementedException();
             }
-            public virtual async Task<int> CancellOrderAsync(int orderId)
+            public virtual async Task<int> CancellOrderAsync(int orderId, bool isForModifie)
             {
                 throw new NotImplementedException();
             }
-            public virtual async Task<int> ModifieOrder(int orderId,int price,int amount, DateTime expirationDate)
+            public virtual async Task<int> ModifieOrder(int orderId,int price,int amount, DateTime expirationDate,bool isForModifie)
             {
                 throw new NotImplementedException();
             }
@@ -64,9 +64,9 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, bool isForModifie, DateTime? expireTime = null, bool? fillAndKill = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, isForModifie, expireTime, fillAndKill);
             }
 
 
@@ -94,18 +94,18 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, bool isForModifie, DateTime? expireTime = null, bool? fillAndKill = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, isForModifie, expireTime , fillAndKill);
             }
 
-            public override async Task<int> CancellOrderAsync(int orderId)
+            public override async Task<int> CancellOrderAsync(int orderId,bool isForModifie)
             {
-                return  StockMarketMatchEngine.cancellOrderAsync(orderId);
+                return  StockMarketMatchEngine.cancellOrderAsync(orderId,isForModifie);
             }
-            public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
+            public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate, bool isForModifie)
             {
-                return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate);
+                return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate,isForModifie);
             }
         }
         class PreOpened : StockMarketState
@@ -140,19 +140,19 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, bool isForModifie,DateTime? expireTime = null, bool? fillAndKill = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side,isForModifie, expireTime, fillAndKill);
             }
 
-            public override async Task<int> CancellOrderAsync(int orderId)
+            public override async Task<int> CancellOrderAsync(int orderId,bool isForModifie)
             {
-                return  StockMarketMatchEngine.cancellOrderAsync(orderId);
+                return  StockMarketMatchEngine.cancellOrderAsync(orderId,isForModifie);
             }
 
-            public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
+            public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate,bool isForModifie)
             {
-                return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate);
+                return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate,isForModifie);
             }
         }
     }

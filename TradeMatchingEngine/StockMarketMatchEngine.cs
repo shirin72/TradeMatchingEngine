@@ -84,39 +84,60 @@ namespace TradeMatchingEngine
         {
             return trade.Where(x => x.OwnerId == orderId).ToList();
         }
-        public async Task<int> CancelOrder(int orderId)
+        public async Task<int> CancelOrder(int orderId, bool isForModifie)
         {
-            return await queue.ExecuteAsync(async () => await state.CancellOrderAsync(orderId));
+            return await queue.ExecuteAsync(async () => await state.CancellOrderAsync(orderId, isForModifie));
         }
-        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, bool isForModifie, DateTime? expireTime = null, bool? fillAndKill = null)
         {
-            return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill));
+            return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, side, isForModifie, expireTime, fillAndKill));
         }
         public async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
         {
-            return await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate));
+            var IsForModifie = true;
+
+            var result = await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate, IsForModifie));
+
+            return result;
         }
         #endregion
 
         #region Private Method
-        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill)
+        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, bool isForModifie)
         {
-             var order= new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill);
-           
-       
-                //var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
-                //{
-                //    EventObject = order,
-                //    EventType = EventType.OrderCreated,
-                //    Description = $"Order with Id: {order.Id} Is Created"
-                //};
-            
-           
+            var order = new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill);
+
+            switch (isForModifie)
+            {
+                case false:
+                    var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                    {
+                        EventObject = order,
+                        EventType = EventType.OrderCreated,
+                        Description = $"Order with Id: {order.Id} Is Created"
+
+                    };
+                    OnProcessCompleted(stockMarketMatchEngineEvents);
+
+                    break;
+
+                default:
+
+                    break;
+            }
+            //var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+            //{
+            //    EventObject = order,
+            //    EventType = EventType.OrderCreated,
+            //    Description = $"Order with Id: {order.Id} Is Created"
+            //};
+
+
 
             //OnProcessCompleted(stockMarketMatchEngineEvents);
             return order;
 
-         
+
 
         }
         private int SetId()
@@ -132,10 +153,10 @@ namespace TradeMatchingEngine
 
             return Interlocked.Increment(ref findMaxId);
         }
-        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+        private async Task<int> processOrderAsync(int price, int amount, Side side, bool isForModifie, DateTime? expireTime = null, bool? fillAndKill = null)
         {
-           
-            var order = CreateOrderRequest(price, amount, side, expireTime, fillAndKill);
+
+            var order = CreateOrderRequest(price, amount, side, expireTime, fillAndKill, isForModifie);
 
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;
 
@@ -285,31 +306,52 @@ namespace TradeMatchingEngine
             }
         }
 
-        private int cancellOrderAsync(int orderId)
+        private int cancellOrderAsync(int orderId, bool isForeModifie)
         {
             var findOrder = allOrders.Where(a => a.Id == orderId).Single();
 
             findOrder.SetStateCancelled();
-           
-                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
-                {
-                    EventObject = findOrder,
-                    EventType = EventType.OrderCreated,
-                    Description = $"Order with Id: {findOrder.Id} Is Expired And Removed From Orders"
-                };
-            
-            
+
+            switch (isForeModifie)
+            {
+                case true:
+                    break;
+
+                case false:
+
+                    var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                    {
+                        EventObject = findOrder,
+                        EventType = EventType.OrderCreated,
+                        Description = $"Order with Id: {findOrder.Id} Is Expired And Removed From Orders"
+                    };
+                    break;
+
+                default:
+            }
+
+
             return findOrder.Id;
         }
 
-        private async Task<int> modifieOrder(int orderId, int price, int amount, DateTime expirationDate)
+        private async Task<int> modifieOrder(int orderId, int price, int amount, DateTime expirationDate, bool isForModifie)
         {
 
-            cancellOrderAsync(orderId);
+            cancellOrderAsync(orderId, isForModifie);
 
             var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
 
-            return await state.ProcessOrderAsync(price, amount, orderSide, expirationDate);
+            var result = await state.ProcessOrderAsync(price, amount, orderSide, isForModifie, expirationDate);
+
+            var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+            {
+                
+                EventType = EventType.OrderCreated,
+                Description = $"Order with Id: {result} Is Updated"
+
+            };
+            OnProcessCompleted(stockMarketMatchEngineEvents);
+            return result;
         }
 
         #endregion
