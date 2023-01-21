@@ -154,11 +154,6 @@
             {
                 return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate);
             }
-
-            //public override void ClearQueue()
-            //{
-            //    StockMarketMatchEngine.clearQueue();
-            //}
         }
     }
 }

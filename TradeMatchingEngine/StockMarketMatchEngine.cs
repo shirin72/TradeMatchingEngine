@@ -101,7 +101,23 @@ namespace TradeMatchingEngine
         #region Private Method
         private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill)
         {
-            return new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill);
+             var order= new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill);
+           
+       
+                //var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                //{
+                //    EventObject = order,
+                //    EventType = EventType.OrderCreated,
+                //    Description = $"Order with Id: {order.Id} Is Created"
+                //};
+            
+           
+
+            //OnProcessCompleted(stockMarketMatchEngineEvents);
+            return order;
+
+         
+
         }
         private int SetId()
         {
@@ -118,6 +134,7 @@ namespace TradeMatchingEngine
         }
         private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
         {
+           
             var order = CreateOrderRequest(price, amount, side, expireTime, fillAndKill);
 
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;
@@ -273,12 +290,21 @@ namespace TradeMatchingEngine
             var findOrder = allOrders.Where(a => a.Id == orderId).Single();
 
             findOrder.SetStateCancelled();
-
+           
+                var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
+                {
+                    EventObject = findOrder,
+                    EventType = EventType.OrderCreated,
+                    Description = $"Order with Id: {findOrder.Id} Is Expired And Removed From Orders"
+                };
+            
+            
             return findOrder.Id;
         }
 
         private async Task<int> modifieOrder(int orderId, int price, int amount, DateTime expirationDate)
         {
+
             cancellOrderAsync(orderId);
 
             var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;

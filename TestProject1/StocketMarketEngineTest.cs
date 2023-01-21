@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using TradeMatchingEngine;
 using Xunit;
 
-namespace TestProject1
+namespace Test
 {
     public class StocketMarketEngineTest
     {

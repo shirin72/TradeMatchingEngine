@@ -2,6 +2,8 @@
 {
     public enum EventType
     {
+        OrderCreated,
+        OrderUpdated,
         TradeExecuted,
         MarketOpened,
         MarketClosed,
