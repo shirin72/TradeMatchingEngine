@@ -16,16 +16,20 @@ namespace TradeMatchingEngine
         public MarcketState State => state.Code;
         public delegate void Notify(object sender, EventArgs e);
         public  event Notify ProcessCompleted;
+        public event EventHandler <StockMarketMatchEngineEvents> OrderCreated;
+        public event EventHandler<StockMarketMatchEngineEvents> OrderModified;
+        public event EventHandler<StockMarketMatchEngineEvents> TradeCompleted;
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
 
         #endregion
 
-        public StockMarketMatchEngine()
+        public StockMarketMatchEngine(List<Order> orders)
         {
             this.sellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.buyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
-            this.allOrders = new List<Order>();
+            this.allOrders = orders;
+            
             preOrderQueue = new Queue<Order>();
             state = new Closed(this);
             queue = new BlockingQueue();
@@ -112,8 +116,8 @@ namespace TradeMatchingEngine
                 Description = $"Order with Id: {order.Id} Is Created"
             };
 
-            OnProcessCompleted(stockMarketMatchEngineEvents);
-            _lastOrder=order;
+            OnOrderAdded(stockMarketMatchEngineEvents);
+
             return order;
         }
 
@@ -132,7 +136,6 @@ namespace TradeMatchingEngine
         }
         private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null,int ? OrderParentId=null)
         {
-            var order = CreateOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
 
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;
 
@@ -141,6 +144,9 @@ namespace TradeMatchingEngine
             switch (this.State)
             {
                 case MarcketState.Open:
+
+                    var order = CreateOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
+                    initializeQueue();
                     allOrders.Add(order);
                     initiateTheQueueSideAndPriceCheck();
 
@@ -203,23 +209,25 @@ namespace TradeMatchingEngine
 
                 case MarcketState.PreOpen:
 
-                    allOrders.Add(order);
+                    var preOrder = CreateOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
 
-                    if (order.Side == Side.Sell)
+                    allOrders.Add(preOrder);
+
+                    if (preOrder.Side == Side.Sell)
                     {
-                        this.sellOrderQueue.Enqueue(order, order);
-                        return order.Id;
+                        this.sellOrderQueue.Enqueue(preOrder, preOrder);
+                        return preOrder.Id;
                     }
 
-                    preOrderQueue.Enqueue(order);
+                    preOrderQueue.Enqueue(preOrder);
 
-                    return order.Id;
+                    return preOrder.Id;
 
                 case MarcketState.Close:
                     throw new Exception("Market is Close!");
 
                 default:
-                    return order.Id;
+                    return 0;
 
                     void initiateTheQueueSideAndPriceCheck()
                     {
@@ -234,6 +242,20 @@ namespace TradeMatchingEngine
                         ordersQueue = buyOrderQueue;
                         otherSideOrdersQueue = sellOrderQueue;
                         priceCheck = () => order.Price >= otherSideOrdersQueue.Peek().Price;
+                    }
+
+                    void initializeQueue()
+                    {
+                        foreach (var item in allOrders)
+                        {
+                            if (item.Side == Side.Sell)
+                            {
+                                sellOrderQueue.Enqueue(item, item);
+                                continue;
+                            }
+
+                            buyOrderQueue.Enqueue(item, item);
+                        }
                     }
             }
 
@@ -264,7 +286,7 @@ namespace TradeMatchingEngine
                     $" with Price of {tradeItem.Price} and Amount of {amount}"
                 };
 
-                OnProcessCompleted(stockMarketMatchEngineEvents);
+                OnTradeCompleted(stockMarketMatchEngineEvents);
             }
 
             bool CheckForNotCanceled(Order order)
@@ -295,7 +317,7 @@ namespace TradeMatchingEngine
                 Description = $"Order with Id: {findOrder.Id} Is OrderCancelled From Orders"
             };
 
-            OnProcessCompleted(stockMarketMatchEngineEvents);
+            OnOrderModified(stockMarketMatchEngineEvents);
 
             return findOrder.Id;
         }
@@ -316,6 +338,23 @@ namespace TradeMatchingEngine
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
             ProcessCompleted?.Invoke(this, result);
+        }
+        protected virtual void OnOrderAdded(EventArgs eventArgs)
+        {
+            var result = eventArgs as StockMarketMatchEngineEvents;
+            OrderCreated?.Invoke(this, result);
+        }
+
+        protected virtual void OnOrderModified(EventArgs eventArgs)
+        {
+            var result = eventArgs as StockMarketMatchEngineEvents;
+            OrderModified?.Invoke(this, result);
+        }
+
+        protected virtual void OnTradeCompleted(EventArgs eventArgs)
+        {
+            var result = eventArgs as StockMarketMatchEngineEvents;
+            TradeCompleted?.Invoke(this, result);
         }
         #endregion
     }

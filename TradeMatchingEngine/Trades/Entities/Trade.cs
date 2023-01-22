@@ -1,6 +1,6 @@
 ﻿namespace TradeMatchingEngine
 {
-    internal class Trade : ITrade
+    public class Trade : ITrade
     {
         public Trade(long tradeId, int ownerId, int buyOrderId, int sellOrderId, int amount, int price)
         {

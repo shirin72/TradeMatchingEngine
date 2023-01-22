@@ -16,7 +16,7 @@ namespace Test
 
         public StocketMarketEngineTest()
         {
-            sut = new StockMarketMatchEngine();
+            sut = new StockMarketMatchEngine(new List<Order>());
             sut.ProcessCompleted += delegate (object sender, EventArgs e)
             {
                 var stockMarketMatchEngineEvents = e as StockMarketMatchEngineEvents;

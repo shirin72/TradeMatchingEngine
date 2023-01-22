@@ -1,7 +1,9 @@
-﻿namespace TradeMatchingEngine.Trades.Repositories.Command
+﻿using TradeMatchingEngine.Trades.Dto;
+
+namespace TradeMatchingEngine.Trades.Repositories.Command
 {
     public interface ITradeCommand
     {
-        Task<long> CreateTrade(ITrade trade);
+        Task<long> CreateTrade(TradeDto trade);
     }
 }

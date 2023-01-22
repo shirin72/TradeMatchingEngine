@@ -12,7 +12,8 @@ namespace Infrastructure
         }
         public Task<int> SaveChange()
         {
-            return tradeMatchingEngineContext.SaveChangesAsync();
+            var result = tradeMatchingEngineContext.SaveChangesAsync();
+            return result;
         }
     }
 }
