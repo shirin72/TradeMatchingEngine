@@ -1,20 +1,22 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using TradeMatchingEngine;
 
-namespace Repository
+namespace Infrastructure
 {
     public class TradeMatchingEngineContext : DbContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
-            optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=TradeMatchingEngineDB;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer("Server=.;Initial Catalog=TradeMatchingEngine;Integrated Security=true;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //modelBuilder.Entity<TradeOrder>().HasKey(sc => new { sc.TradeId, sc.OrderId });
         }
 
-        public DbSet<Orders> Orders { get; set; }
-        public DbSet<Trades> Trades { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<ITrade> Trades { get; set; }
     }
 }

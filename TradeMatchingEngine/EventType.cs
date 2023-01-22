@@ -5,6 +5,7 @@
         OrderCreated,
         OrderUpdated,
         TradeExecuted,
+        OrderCancelled,
         MarketOpened,
         MarketClosed,
         MarketPreOpened,

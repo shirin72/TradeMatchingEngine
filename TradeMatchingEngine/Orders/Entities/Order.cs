@@ -2,9 +2,9 @@
 {
     public class Order
     {
-        private  OrderState _state;
+        private OrderState _state;
 
-        internal Order(int id, Side side, int price, int amount, DateTime expireTime, bool? isFillAndKill = null)
+        public Order(int id, Side side, int price, int amount, DateTime expireTime, bool? isFillAndKill = null, int? OrderParentId = null)
         {
             Id = id;
             Side = side;
@@ -56,6 +56,9 @@
         {
             _state = OrderState.Cancell;
         }
+
+        public int? OrderParentId { get; }
+
     }
 
     public enum OrderState

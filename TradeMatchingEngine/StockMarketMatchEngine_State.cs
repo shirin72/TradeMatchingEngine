@@ -28,7 +28,7 @@
                 throw new NotImplementedException();
             }
 
-            public virtual async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public virtual async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, int? orderParentId = null)
             {
                 throw new NotImplementedException();
             }
@@ -36,7 +36,7 @@
             {
                 throw new NotImplementedException();
             }
-            public virtual async Task<int> ModifieOrder(int orderId,int price,int amount, DateTime expirationDate)
+            public virtual async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
             {
                 throw new NotImplementedException();
             }
@@ -64,9 +64,9 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null,int? orderParentId = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill,orderParentId);
             }
 
 
@@ -94,14 +94,14 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, int? orderParentId = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill,  orderParentId);
             }
 
             public override async Task<int> CancellOrderAsync(int orderId)
             {
-                return  StockMarketMatchEngine.cancellOrderAsync(orderId);
+                return StockMarketMatchEngine.cancellOrderAsync(orderId);
             }
             public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
             {
@@ -140,14 +140,14 @@
                 StockMarketMatchEngine.OnProcessCompleted(stockMarketMatchEngineEvents);
             }
 
-            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null)
+            public override async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, int? orderParentId = null)
             {
-                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill);
+                return await StockMarketMatchEngine.processOrderAsync(price, amount, side, expireTime, fillAndKill,orderParentId);
             }
 
             public override async Task<int> CancellOrderAsync(int orderId)
             {
-                return  StockMarketMatchEngine.cancellOrderAsync(orderId);
+                return StockMarketMatchEngine.cancellOrderAsync(orderId);
             }
 
             public override async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
