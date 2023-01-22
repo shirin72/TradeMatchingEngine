@@ -1,9 +1,6 @@
 ﻿using Application.OrderService.OrderCommandHandlers;
-using EndPoints.Model;
 using Microsoft.AspNetCore.Mvc;
 using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Repositories.Command;
-using TradeMatchingEngine.UnitOfWork;
 
 namespace EndPoints.Controller
 {
@@ -15,12 +12,6 @@ namespace EndPoints.Controller
         public OrderController(IAddOrderCommandHandlers addOrderCommandHandlers)
         {
             this.addOrderCommandHandlers = addOrderCommandHandlers;
-        }
-
-        [HttpGet]
-        public async Task<string> Index()
-        {
-            return "test";
         }
 
         /// <summary>
