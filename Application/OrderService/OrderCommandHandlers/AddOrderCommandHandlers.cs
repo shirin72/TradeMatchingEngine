@@ -43,13 +43,13 @@ namespace Application.OrderService.OrderCommandHandlers
             return result;
         }
 
-        private void SubscribeToEvent(StockMarketMatchEngine stockMarketMatchEngine)
+        private async Task SubscribeToEvent(StockMarketMatchEngine stockMarketMatchEngine)
         {
-            stockMarketMatchEngine.OrderCreated += OnOrderCreated;
-            stockMarketMatchEngine.TradeCompleted += OnTradeCompleted;
+            stockMarketMatchEngine.OrderCreated += async (sender, args) => await this.OnOrderCreated(sender, args);
+            stockMarketMatchEngine.TradeCompleted += async (sender, args) => await this.OnTradeCompleted(sender, args);
         }
 
-        public void OnOrderCreated(object sender, EventArgs eventArgs)
+        public async Task OnOrderCreated(object sender, EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
 
@@ -65,15 +65,15 @@ namespace Application.OrderService.OrderCommandHandlers
                 Price = castEventObject.Price,
 
             };
-            _orderCommand.CreateOrder(orderDto);
+
+            await _orderCommand.CreateOrder(orderDto);
         }
 
-        public void OnTradeCompleted(object sender, EventArgs eventArgs)
+        public async Task OnTradeCompleted(object sender, EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
 
-            // var castEventObject = result.EventObject as ITrade;
-            var castEventObject =(Trade) result.EventObject;
+            var castEventObject = result.EventObject as Trade;
 
             var tradeDto = new TradeDto()
             {
@@ -85,7 +85,8 @@ namespace Application.OrderService.OrderCommandHandlers
                 SellOrderId = castEventObject.SellOrderId,
             };
 
-            _tradeCommand.CreateTrade(tradeDto);
+            await _tradeCommand.CreateTrade(tradeDto);
+
         }
 
     }

@@ -16,8 +16,8 @@ namespace Infrastructure.Order.QueryRepositories
 
         public async Task<int> CreateOrder(OrderDto order)
         {
-            var result = await tradeMatchingEngineContext.Orders.AddAsync(order);
-            var added = tradeMatchingEngineContext.SaveChanges();
+            await tradeMatchingEngineContext.Orders.AddAsync(order);
+            var added = await tradeMatchingEngineContext.SaveChangesAsync();
             if (added > 0)
             {
                 return order.Id;

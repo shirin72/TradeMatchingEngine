@@ -264,7 +264,6 @@ namespace TradeMatchingEngine
                 var amount = otherSideOrder.Amount > order.Amount ? order.Amount : otherSideOrder.Amount;
 
                 var tradeItem = new Trade(
-                    tradeId: DateTime.Now.Ticks,
                     ownerId: order.Id,
                     buyOrderId: order.Side == Side.Buy ? order.Id : otherSideOrder.Id,
                     sellOrderId: order.Side == Side.Sell ? order.Id : otherSideOrder.Id,
@@ -280,7 +279,7 @@ namespace TradeMatchingEngine
 
                 var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
                 {
-                    EventObject = trade,
+                    EventObject = tradeItem,
                     EventType = EventType.TradeExecuted,
                     Description = $"Trade Has Been Executed For Order {tradeItem.OwnerId}" +
                     $" with Price of {tradeItem.Price} and Amount of {amount}"
