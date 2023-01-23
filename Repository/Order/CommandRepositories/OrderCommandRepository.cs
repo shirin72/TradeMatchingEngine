@@ -14,16 +14,25 @@ namespace Infrastructure.Order.QueryRepositories
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
 
-        public async Task<int> CreateOrder(OrderDto order)
+        public async Task<int> CreateOrder(TradeMatchingEngine.Order order)
         {
-            await tradeMatchingEngineContext.Orders.AddAsync(order);
-            var added = await tradeMatchingEngineContext.SaveChangesAsync();
-            if (added > 0)
+            try
             {
-                return order.Id;
+                var s = await tradeMatchingEngineContext.Orders.AddAsync(order);
+                var added = await tradeMatchingEngineContext.SaveChangesAsync();
+                if (added > 0)
+                {
+                    return order.Id;
+                }
+
+                throw new Exception(message: "Order cannot be added");
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
             }
 
-            throw new Exception(message: "Order cannot be added");
         }
 
         public async Task<int> DeleteOrder(int id)
@@ -37,7 +46,7 @@ namespace Infrastructure.Order.QueryRepositories
             return findOrder.Id;
         }
 
-        public async Task<int> UpdateOrder(OrderDto order)
+        public async Task<int> UpdateOrder(TradeMatchingEngine.Order order)
         {
             var findOrder = await tradeMatchingEngineContext.Orders.Where(x => x.Id == order.Id).FirstOrDefaultAsync();
             //var createOrder = new TradeMatchingEngine.OrderDto(id: order.Id, side: findOrder.Side, price: order.Price, amount: order.Amount, expireTime: order.ExpireTime, order.IsFillAndKill, order.OrderParentId);

@@ -1,18 +1,22 @@
-﻿namespace TradeMatchingEngine
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TradeMatchingEngine
 {
+
     public class Order
     {
         private OrderState _state;
 
-        public Order(int id, Side side, int price, int amount, DateTime expireTime, bool? isFillAndKill = null, int? OrderParentId = null)
+        public Order(int Id, Side Side, int Price, int Amount, DateTime ExpireTime, bool? IsFillAndKill = null, int? OrderParentId = null)
         {
-            Id = id;
-            Side = side;
-            Price = price;
-            Amount = amount;
-            IsFillAndKill = isFillAndKill;
-            ExpireTime = expireTime;
-            _state = OrderState.Register;
+            this.Id = Id;
+            this.Side = Side;
+            this.Price = Price;
+            this.Amount = Amount;
+            this.IsFillAndKill = IsFillAndKill;
+            this.ExpireTime = ExpireTime;
+            this._state = OrderState.Register;
+            this.OrderParentId = OrderParentId;
         }
 
         public int Id { get; }
@@ -59,12 +63,5 @@
 
         public int? OrderParentId { get; }
 
-    }
-
-    public enum OrderState
-    {
-        Cancell,
-        Modifie,
-        Register
     }
 }

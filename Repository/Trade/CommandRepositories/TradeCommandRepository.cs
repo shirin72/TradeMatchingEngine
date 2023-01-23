@@ -1,6 +1,4 @@
-﻿using Repository;
-using TradeMatchingEngine.Trades.Dto;
-using TradeMatchingEngine.Trades.Repositories.Command;
+﻿using TradeMatchingEngine.Trades.Repositories.Command;
 
 namespace Infrastructure.Trade.QueryRepositories
 {
@@ -13,9 +11,9 @@ namespace Infrastructure.Trade.QueryRepositories
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
 
-        public async Task<long> CreateTrade(TradeDto Trade)
+        public async Task<long> CreateTrade(TradeMatchingEngine.Trade Trade)
         {
-            await tradeMatchingEngineContext.AddAsync(Trade);
+            await tradeMatchingEngineContext.Trades.AddAsync(Trade);
             await tradeMatchingEngineContext.SaveChangesAsync();
 
             return Trade.Id;

@@ -8,6 +8,7 @@ using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
 using TradeMatchingEngine.Orders.Repositories.Query;
 using TradeMatchingEngine.Trades.Repositories.Command;
+using TradeMatchingEngine.Trades.Repositories.Query;
 using TradeMatchingEngine.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,7 @@ builder.Services.AddScoped<IOrderQuery, OrderQueryRepository>();
 builder.Services.AddScoped<IAddOrderCommandHandlers, AddOrderCommandHandlers>();
 builder.Services.AddScoped<ITradeCommand, TradeCommandRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+builder.Services.AddScoped<ITradeQuery, TradeQueryRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

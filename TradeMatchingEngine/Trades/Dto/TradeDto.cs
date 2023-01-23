@@ -1,6 +1,6 @@
 ﻿namespace TradeMatchingEngine.Trades.Dto
 {
-    public class TradeDto
+    public class Trade
     {
         public long Id { get; set; }
         public int OwnerId { get; set; }

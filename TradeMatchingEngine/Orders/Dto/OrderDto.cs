@@ -2,7 +2,6 @@
 
 namespace TradeMatchingEngine.Orders.Dto
 {
-    [Table("Order")]
     public class OrderDto
     {
         private OrderState _state;

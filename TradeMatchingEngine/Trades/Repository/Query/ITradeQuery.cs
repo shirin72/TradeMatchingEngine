@@ -4,5 +4,6 @@
     {
         Task<ITrade> GetTradeById(int id);
         Task<ITrade> GetAllTrades();
+        Task<long> GetLastTrade();
     }
 }

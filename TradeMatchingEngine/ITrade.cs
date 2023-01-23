@@ -7,6 +7,6 @@
         int OwnerId { get; }
         int Price { get; }
         int SellOrderId { get; }
-        long TradeId { get; }
+        long Id { get; }
     }
 }

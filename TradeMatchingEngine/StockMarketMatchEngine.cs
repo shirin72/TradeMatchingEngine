@@ -10,29 +10,33 @@ namespace TradeMatchingEngine
         private StockMarketState state;
         private readonly BlockingQueue queue;
         private Order _lastOrder;
+        private int _lastOrderId;
+        private long _lastTradeId;
         #endregion
 
         #region PublicProperties
         public MarcketState State => state.Code;
         public delegate void Notify(object sender, EventArgs e);
-        public  event Notify ProcessCompleted;
-        public event EventHandler <StockMarketMatchEngineEvents> OrderCreated;
+        public event Notify ProcessCompleted;
+        public event EventHandler<StockMarketMatchEngineEvents> OrderCreated;
         public event EventHandler<StockMarketMatchEngineEvents> OrderModified;
         public event EventHandler<StockMarketMatchEngineEvents> TradeCompleted;
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
-
+        
         #endregion
 
-        public StockMarketMatchEngine(List<Order> orders)
+        public StockMarketMatchEngine(List<Order> orders, int lastOrderId = 0, long lastTradeId = 0)
         {
             this.sellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.buyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
             this.allOrders = orders;
-            
+
             preOrderQueue = new Queue<Order>();
             state = new Closed(this);
             queue = new BlockingQueue();
+            _lastOrderId = lastOrderId;
+            _lastTradeId = lastTradeId;
         }
 
         #region Properties
@@ -44,7 +48,7 @@ namespace TradeMatchingEngine
         #region Public Method
         public IEnumerable<Order> AllOrders => allOrders;
         public int AllOrdersCount() => allOrders.Count;
-        public IEnumerable<ITrade> Trade => trade;
+        public IEnumerable<Trade> Trade => trade;
         public int AllTradeCount() => trade.Count;
         public PriorityQueue<Order, Order> GetSellOrderQueue()
         {
@@ -86,7 +90,7 @@ namespace TradeMatchingEngine
         {
             state.Close();
         }
-        public IEnumerable<ITrade> GetAllTradeByOrderId(int orderId)
+        public IEnumerable<Trade> GetAllTradeByOrderId(int orderId)
         {
             return trade.Where(x => x.OwnerId == orderId).ToList();
         }
@@ -94,7 +98,7 @@ namespace TradeMatchingEngine
         {
             return await queue.ExecuteAsync(async () => await state.CancellOrderAsync(orderId));
         }
-        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null,int ? orderParentId = null)
+        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, int? orderParentId = null)
         {
             return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId));
         }
@@ -107,7 +111,7 @@ namespace TradeMatchingEngine
         #region Private Method
         private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, int? OrderParentId = null)
         {
-            var order = new Order(id: SetId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, fillAndKill,OrderParentId);
+            var order = new Order(Id: SetId(), Side: side, Price: price,  Amount: amount, ExpireTime: expireTime ?? DateTime.MaxValue,IsFillAndKill: fillAndKill, OrderParentId);
 
             var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
             {
@@ -124,17 +128,17 @@ namespace TradeMatchingEngine
         private int SetId()
         {
             int id;
-            if (AllOrdersCount() == 0)
+
+            if (_lastOrderId == 0)
             {
                 id = 1;
 
                 return id;
             }
-            var findMaxId = allOrders.Max(x => x.Id);
 
-            return Interlocked.Increment(ref findMaxId);
+            return Interlocked.Increment(ref _lastOrderId);
         }
-        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null,int ? OrderParentId=null)
+        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, int? OrderParentId = null)
         {
 
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;

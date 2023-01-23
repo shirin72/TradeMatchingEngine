@@ -22,42 +22,45 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TradeMatchingEngine.Orders.Dto.OrderDto", b =>
+            modelBuilder.Entity("TradeMatchingEngine.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Amount")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Amount");
 
                     b.Property<DateTime>("ExpireTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsExpired")
-                        .HasColumnType("bit");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ExpireTime");
 
                     b.Property<bool?>("IsFillAndKill")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("IsFillAndKill");
 
                     b.Property<int?>("OrderParentId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("OrderParentId");
 
                     b.Property<int>("Price")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Price");
 
-                    b.Property<string>("Side")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Side")
+                        .HasColumnType("int")
+                        .HasColumnName("Side");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Order");
+                    b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("TradeMatchingEngine.Trades.Dto.TradeDto", b =>
+            modelBuilder.Entity("TradeMatchingEngine.Trade", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()

@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Repository;
-using TradeMatchingEngine.Orders.Dto;
 using TradeMatchingEngine.Orders.Repositories.Query;
-using TradeMatchingEngine.Trades.Repositories.Query;
 
 namespace Infrastructure.Order.CommandRepositories
 {
@@ -14,15 +11,19 @@ namespace Infrastructure.Order.CommandRepositories
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
 
-        public async Task<IEnumerable<OrderDto>> GetAllOrders()
+        public IEnumerable<TradeMatchingEngine.Order> GetAllOrders()
         {
-            return await tradeMatchingEngineContext.Orders.AsNoTracking().ToListAsync();
+            return tradeMatchingEngineContext.Orders.AsNoTracking().ToList();
         }
 
-        public async Task<OrderDto> GetOrderById(int id)
+        public async Task<TradeMatchingEngine.Order> GetOrderById(int id)
         {
             return await tradeMatchingEngineContext.Orders.FindAsync(id);
         }
 
+        public async Task<int> GetLastOrder()
+        {
+            return await tradeMatchingEngineContext.Orders.MaxAsync(x => x.Id);
+        }
     }
 }

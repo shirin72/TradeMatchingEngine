@@ -11,11 +11,11 @@
             Amount = amount;
             Price = price;
         }
-        public long TradeId { get; }
-        public int OwnerId { get; }
-        public int BuyOrderId { get; }
-        public int SellOrderId { get; }
-        public int Amount { get; }
-        public int Price { get; }
+        public long Id { get;  }
+        public int OwnerId { get;  }
+        public int BuyOrderId { get;  }
+        public int SellOrderId { get;  }
+        public int Amount { get;  }
+        public int Price { get;  }
     }
 }

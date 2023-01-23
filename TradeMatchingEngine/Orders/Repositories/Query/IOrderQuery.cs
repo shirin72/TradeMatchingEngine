@@ -4,7 +4,8 @@ namespace TradeMatchingEngine.Orders.Repositories.Query
 {
     public interface IOrderQuery
     {
-        Task<OrderDto> GetOrderById(int id);
-        Task<IEnumerable<OrderDto>> GetAllOrders();
+        Task<Order> GetOrderById(int id);
+        IEnumerable<Order> GetAllOrders();
+        Task<int> GetLastOrder();
     }
 }
