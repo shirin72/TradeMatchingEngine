@@ -7,5 +7,8 @@ namespace TradeMatchingEngine.Orders.Repositories.Command
         Task<int> CreateOrder(Order order);
         Task<int> DeleteOrder(int id);
         Task<int> UpdateOrder(Order order);
+        Task<Order> GetOrderById(int id);
+        IEnumerable<Order> GetAllOrders();
+        Task<int> GetLastOrder();
     }
 }

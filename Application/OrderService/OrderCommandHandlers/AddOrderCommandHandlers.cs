@@ -29,66 +29,101 @@ namespace Application.OrderService.OrderCommandHandlers
 
         public async Task<int> Handle(int price, int amount, Side side, DateTime expDate, bool isFillAndKill)
         {
-            var resultOfGetStockMarket = await getStockMarket();
+            //var resultOfGetStockMarket = await getStockMarket();
 
-            await SubscribeToEvent(resultOfGetStockMarket);
-            resultOfGetStockMarket.PreOpen();
-            resultOfGetStockMarket.Open();
 
-            return await resultOfGetStockMarket.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill);
-        }
 
-        private async Task SubscribeToEvent(StockMarketMatchEngine stockMarketMatchEngine)
-        {
-            stockMarketMatchEngine.OrderCreated += async (sender, args) => await this.OnOrderCreated(sender, args);
-            stockMarketMatchEngine.TradeCompleted += async (sender, args) => await this.OnTradeCompleted(sender, args);
-        }
-
-        public async Task OnOrderCreated(object sender, EventArgs eventArgs)
-        {
-            try
-            {
-                var result = eventArgs as StockMarketMatchEngineEvents;
-
-                var castEventObject = result.EventObject as Order;
-
-                await _orderCommand.CreateOrder(castEventObject);
-            }
-            catch (Exception ex)
-            {
-
-                throw ex;
-            }
-           
-        }
-
-        public async Task OnTradeCompleted(object sender, EventArgs eventArgs)
-        {
-            var result = eventArgs as StockMarketMatchEngineEvents;
-
-            var castEventObject = result.EventObject as Trade;
-
-            await _tradeCommand.CreateTrade(castEventObject);
-        }
-
-        private async Task<StockMarketMatchEngine> getStockMarket()
-        {
+            //return 
             if (_stockMarketMatchEngine != null)
             {
-                return _stockMarketMatchEngine;
+                //return _stockMarketMatchEngine;
+                var getOrders = _orderQuery.GetAllOrders();
+                var getLastTrade = _tradeQuery.GetLastTrade();
+                //_stockMarketMatchEngine = new StockMarketMatchEngine(getOrders.Result.Count() != 0 ? getOrders.Result.ToList() : new List<Order>(), getOrders.Result.Max(x => x.Id), getLastTrade.Result);
+                SubscribeToEvent(_stockMarketMatchEngine);
+                return await _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill);
             }
 
             lock (_locker)
             {
                 if (_stockMarketMatchEngine != null)
                 {
-                    return _stockMarketMatchEngine;
+                    // return _stockMarketMatchEngine;
+                    //var getOrders1 = _orderQuery.GetAllOrders();
+                    //var getLastTrade1 = _tradeQuery.GetLastTrade();
+                    //_stockMarketMatchEngine = new StockMarketMatchEngine(getOrders.Result.Count() != 0 ? getOrders.Result.ToList() : new List<Order>(), getOrders.Result.Max(x => x.Id), getLastTrade.Result);
+                    SubscribeToEvent(_stockMarketMatchEngine);
+                    //return await _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill);
                 }
 
                 var getOrders = _orderQuery.GetAllOrders();
                 var getLastTrade = _tradeQuery.GetLastTrade();
-                return _stockMarketMatchEngine = new StockMarketMatchEngine(getOrders != null ? getOrders.ToList() : new List<Order>(), getOrders.Max(x => x.Id), getLastTrade.Result);
+                _stockMarketMatchEngine = new StockMarketMatchEngine(getOrders.Result.Count() != 0 ? getOrders.Result.ToList() : new List<Order>(), getOrders.Result.Max(x => x.Id), getLastTrade.Result);
+                SubscribeToEvent(_stockMarketMatchEngine);
+                _stockMarketMatchEngine.PreOpen();
+                _stockMarketMatchEngine.Open();
+                   var result= _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill);
+                return result.Result;
+               // return 
+
+            }
+
+        }
+
+        private void SubscribeToEvent(StockMarketMatchEngine stockMarketMatchEngine)
+        {
+            stockMarketMatchEngine.OrderCreated += OnOrderCreated;
+            //stockMarketMatchEngine.TradeCompleted += async (sender, args) => await OnTradeCompleted(this, args);
+        }
+
+        public void OnOrderCreated(object sender, EventArgs eventArgs)
+        {
+            try
+            {
+                var result = eventArgs as StockMarketMatchEngineEvents;
+
+                Task.Run(() =>
+              {
+                  _orderCommand.CreateOrder(result.EventObject as Order);
+              });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
+
+        public async Task OnTradeCompleted(object sender, EventArgs eventArgs)
+        {
+            var result = eventArgs as StockMarketMatchEngineEvents;
+
+            await _tradeCommand.CreateTrade(result.EventObject as Trade);
+        }
+
+        //private async Task<StockMarketMatchEngine> getStockMarket()
+        //{
+            //if (_stockMarketMatchEngine != null)
+            //{
+            //    return _stockMarketMatchEngine;
+            //}
+
+            //lock (_locker)
+            //{
+            //    if (_stockMarketMatchEngine != null)
+            //    {
+            //        return _stockMarketMatchEngine;
+            //    }
+
+            //    var getOrders = _orderQuery.GetAllOrders();
+            //    var getLastTrade = _tradeQuery.GetLastTrade();
+            //    _stockMarketMatchEngine = new StockMarketMatchEngine(getOrders.Result.Count() != 0 ? getOrders.Result.ToList() : new List<Order>(), getOrders.Result.Max(x => x.Id), getLastTrade.Result);
+            //    SubscribeToEvent(_stockMarketMatchEngine);
+            //    _stockMarketMatchEngine.PreOpen();
+            //    _stockMarketMatchEngine.Open();
+            //   var result= await _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill);
+            //    return _stockMarketMatchEngine;
+
+            //}
+        //}
     }
 }

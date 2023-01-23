@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Repository;
-using TradeMatchingEngine.Orders.Dto;
+using Microsoft.Extensions.DependencyInjection;
 using TradeMatchingEngine.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
@@ -8,16 +7,30 @@ namespace Infrastructure.Order.QueryRepositories
     public class OrderCommandRepository : IOrderCommand
     {
         private readonly TradeMatchingEngineContext tradeMatchingEngineContext;
-
-        public OrderCommandRepository(TradeMatchingEngineContext tradeMatchingEngineContext)
+        private readonly IServiceScopeFactory serviceScopeFactory;
+        public OrderCommandRepository(TradeMatchingEngineContext tradeMatchingEngineContext, IServiceScopeFactory serviceScopeFactory)
         {
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<int> CreateOrder(TradeMatchingEngine.Order order)
         {
             try
             {
+                //using (var scope = serviceScopeFactory.CreateScope())
+                //{
+                //    // You can ask for any service here and DI will resolve it and give you back service instance
+                //    var contextService = scope.ServiceProvider.GetRequiredService <TradeMatchingEngineContext>();
+                //    var s = await contextService.Orders.AddAsync(order);
+                //    var state = contextService.ContextId;
+                //    var added = await contextService.SaveChangesAsync();
+                //    if (added > 0)
+                //    {
+                //        return order.Id;
+                //    }
+                //}
+
                 var s = await tradeMatchingEngineContext.Orders.AddAsync(order);
                 var added = await tradeMatchingEngineContext.SaveChangesAsync();
                 if (added > 0)
@@ -54,6 +67,29 @@ namespace Infrastructure.Order.QueryRepositories
             tradeMatchingEngineContext.Orders.Update(order);
 
             return findOrder.Id;
+        }
+        public IEnumerable<TradeMatchingEngine.Order> GetAllOrders()
+        {
+            try
+            {
+                var res = tradeMatchingEngineContext.Orders.AsNoTracking().ToList();
+                return res;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<TradeMatchingEngine.Order> GetOrderById(int id)
+        {
+            return await tradeMatchingEngineContext.Orders.FindAsync(id);
+        }
+
+        public async Task<int> GetLastOrder()
+        {
+            return await tradeMatchingEngineContext.Orders.MaxAsync(x => x.Id);
         }
     }
 }

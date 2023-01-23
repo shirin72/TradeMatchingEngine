@@ -1,14 +1,10 @@
-﻿using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Dto;
-using TradeMatchingEngine.Trades.Dto;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
     public class TradeMatchingEngineContext : DbContext
     {
-        public TradeMatchingEngineContext(DbContextOptions<TradeMatchingEngineContext> options) : base(options)
+        public TradeMatchingEngineContext(DbContextOptions<TradeMatchingEngineContext> options) 
         { }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

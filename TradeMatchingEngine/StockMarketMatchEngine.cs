@@ -23,7 +23,7 @@ namespace TradeMatchingEngine
         public event EventHandler<StockMarketMatchEngineEvents> TradeCompleted;
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
-        
+
         #endregion
 
         public StockMarketMatchEngine(List<Order> orders, int lastOrderId = 0, long lastTradeId = 0)
@@ -111,7 +111,7 @@ namespace TradeMatchingEngine
         #region Private Method
         private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, int? OrderParentId = null)
         {
-            var order = new Order(Id: SetId(), Side: side, Price: price,  Amount: amount, ExpireTime: expireTime ?? DateTime.MaxValue,IsFillAndKill: fillAndKill, OrderParentId);
+            var order = new Order(Id: SetId(), Side: side, Price: price, Amount: amount, ExpireTime: expireTime ?? DateTime.MaxValue, IsFillAndKill: fillAndKill, OrderParentId);
 
             var stockMarketMatchEngineEvents = new StockMarketMatchEngineEvents()
             {
