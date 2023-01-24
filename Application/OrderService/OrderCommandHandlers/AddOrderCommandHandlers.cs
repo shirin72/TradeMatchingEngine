@@ -42,7 +42,7 @@ namespace Application.OrderService.OrderCommandHandlers
 
             await SubscribeToEvent();
 
-            var result= await _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill));
+            var result= await _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill);
         
             return result;
         }
