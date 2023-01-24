@@ -11,9 +11,9 @@ namespace Infrastructure.Order.CommandRepositories
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
 
-        public IEnumerable<TradeMatchingEngine.Order> GetAllOrders()
+        public async Task<IEnumerable<TradeMatchingEngine.Order>> GetAllOrders()
         {
-            return tradeMatchingEngineContext.Orders.AsNoTracking().ToList();
+            return await tradeMatchingEngineContext.Orders.AsNoTracking().ToListAsync();
         }
 
         public async Task<TradeMatchingEngine.Order> GetOrderById(int id)

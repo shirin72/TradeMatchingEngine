@@ -1,8 +1,4 @@
-﻿using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Dto;
-using TradeMatchingEngine.Trades.Dto;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {

@@ -24,13 +24,20 @@ namespace EndPoints.Controller
         /// <param name="isFillAndKill"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<int> ProcessOrder(int price, int amount, Side side, bool isFillAndKill, DateTime expDate)
+        public async Task<int> ProcessOrder( int price, int amount, Side side, bool isFillAndKill, DateTime expDate)
         {
-            expDate = DateTime.Now.AddDays(1);
+            try
+            {
+                expDate = DateTime.Now.AddDays(1);
 
-            var result = await addOrderCommandHandlers.Handle(price, amount, side, expDate, isFillAndKill);
+                var result = await addOrderCommandHandlers.Handle(price, amount, side, expDate, isFillAndKill);
 
-            return result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

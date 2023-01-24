@@ -18,9 +18,9 @@ namespace Infrastructure.Order.QueryRepositories
         {
             try
             {
-                var s = await tradeMatchingEngineContext.Orders.AddAsync(order);
-                var added = await tradeMatchingEngineContext.SaveChangesAsync();
-                if (added > 0)
+                var addAsync = await tradeMatchingEngineContext.Orders.AddAsync(order).ConfigureAwait(false);
+                var saveChangesAsync = await tradeMatchingEngineContext.SaveChangesAsync().ConfigureAwait(false);
+                if (saveChangesAsync > 0)
                 {
                     return order.Id;
                 }
@@ -29,10 +29,8 @@ namespace Infrastructure.Order.QueryRepositories
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
-
         }
 
         public async Task<int> DeleteOrder(int id)
