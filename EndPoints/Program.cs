@@ -16,11 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddDbContext<TradeMatchingEngineContext>(options =>
-    {
-        options.UseSqlServer("Server=.;Initial Catalog=TradeMatchingEngine;Integrated Security=true;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;");
-    },ServiceLifetime.Scoped
-);
+builder.Services.AddDbContext<TradeMatchingEngineContext>();
 
 builder.Services.AddScoped<IOrderCommand, OrderCommandRepository>();
 builder.Services.AddScoped<IOrderQuery, OrderQueryRepository>();

@@ -21,21 +21,12 @@ namespace Infrastructure.Order.CommandRepositories
 
         public async Task<long> GetLastTrade()
         {
-            try
+            if (tradeMatchingEngineContext.Trades.Any())
             {
-                if (tradeMatchingEngineContext.Trades.Count()!=0)
-                {
-                    var result = await tradeMatchingEngineContext.Trades.MaxAsync(x => x.Id);
+                return await tradeMatchingEngineContext.Trades.MaxAsync(x => x.Id);
+            }
 
-                    return result;
-                }
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-           
+            return 0;
         }
 
         public Task<ITrade> GetTradeById(int id)

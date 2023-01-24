@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace TradeMatchingEngine
 {
@@ -18,12 +19,16 @@ namespace TradeMatchingEngine
         public MarcketState State => state.Code;
         public delegate void Notify(object sender, EventArgs e);
         public event Notify ProcessCompleted;
-        public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e);
-        public event AsyncEventHandler<StockMarketMatchEngineEvents>? OrderCreated;
 
-        //public event EventHandler<StockMarketMatchEngineEvents> OrderCreated;
-        public event EventHandler<StockMarketMatchEngineEvents> OrderModified;
-        public event EventHandler<StockMarketMatchEngineEvents> TradeCompleted;
+        public delegate Task DelOrderCreate(object sender, EventArgs args);
+        public event DelOrderCreate EventOrderCreated;
+
+        public delegate Task DelOrderModified(object sender, EventArgs args);
+        public event DelOrderModified EventOrderModified;
+
+        public delegate Task DelTradeCerate(object sender, EventArgs args);
+        public event DelTradeCerate EventTradeCompleted;
+
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
 
@@ -101,10 +106,31 @@ namespace TradeMatchingEngine
         {
             return await queue.ExecuteAsync(async () => await state.CancellOrderAsync(orderId));
         }
-        public async Task<int> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, int? orderParentId = null)
+
+        public async Task<int> ProcessOrderAsync(int price, 
+            int amount,
+            Side side,
+            DateTime? expireTime = null,
+            bool? fillAndKill = null,
+            int? orderParentId = null, 
+            Func<object, EventArgs, Task> orderCreate = null,
+            Func<object, EventArgs, Task> orderModifie = null,
+             Func<object, EventArgs, Task> tradeCreat = null
+            )
         {
-            return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId));
+            return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, 
+                amount,
+                side,
+                expireTime, 
+                fillAndKill, 
+                orderParentId, 
+                orderCreate,
+                orderModifie,
+                tradeCreat
+                ));
         }
+
+
         public async Task<int> ModifieOrder(int orderId, int price, int amount, DateTime expirationDate)
         {
             return await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate));
@@ -112,7 +138,7 @@ namespace TradeMatchingEngine
         #endregion
 
         #region Private Method
-        private async Task<Order> CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, int? OrderParentId = null)
+        private Order CreateOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, int? OrderParentId = null)
         {
             var order = new Order(Id: SetId(), Side: side, Price: price, Amount: amount, ExpireTime: expireTime ?? DateTime.MaxValue, IsFillAndKill: fillAndKill, OrderParentId);
 
@@ -123,26 +149,33 @@ namespace TradeMatchingEngine
                 Description = $"Order with Id: {order.Id} Is Created"
             };
 
-            await OnOrderAdded(stockMarketMatchEngineEvents).ConfigureAwait(false);
+            OnOrderCreate(stockMarketMatchEngineEvents);
 
             return order;
         }
 
         private int SetId()
         {
-            int id;
-
             if (_lastOrderId == 0)
             {
-                id = 1;
+                _lastOrderId = 1;
 
-                return id;
+                return _lastOrderId;
             }
 
             return Interlocked.Increment(ref _lastOrderId);
         }
-        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, int? OrderParentId = null)
+
+        private async Task<int> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null,
+            int? OrderParentId = null, 
+             Func<object, EventArgs, Task> orderCreate = null,
+             Func<object, EventArgs, Task> orderModifie = null,
+             Func<object, EventArgs, Task> tradeCreat = null
+            )
+
         {
+            EventOrderCreated += orderCreate.Invoke;
+            EventTradeCompleted += tradeCreat.Invoke;
 
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;
 
@@ -152,7 +185,7 @@ namespace TradeMatchingEngine
             {
                 case MarcketState.Open:
 
-                    var order = await CreateOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
+                    var order =  CreateOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
                     initializeQueue();
                     allOrders.Add(order);
                     initiateTheQueueSideAndPriceCheck();
@@ -216,7 +249,7 @@ namespace TradeMatchingEngine
 
                 case MarcketState.PreOpen:
 
-                    var preOrder = await CreateOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
+                    var preOrder =  CreateOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
 
                     allOrders.Add(preOrder);
 
@@ -269,14 +302,14 @@ namespace TradeMatchingEngine
             void makeTrade(Order order, Order otherSideOrder)
             {
                 var amount = otherSideOrder.Amount > order.Amount ? order.Amount : otherSideOrder.Amount;
-
                 var tradeItem = new Trade(
+                    id: Interlocked.Increment(ref _lastTradeId),
                     ownerId: order.Id,
                     buyOrderId: order.Side == Side.Buy ? order.Id : otherSideOrder.Id,
                     sellOrderId: order.Side == Side.Sell ? order.Id : otherSideOrder.Id,
                     amount: amount,
                     price: order.Side == Side.Sell ? order.Price : otherSideOrder.Price
-                    );
+                    ); ;
 
                 int currentOrderAmount = order.Amount;
                 order.DecreaseAmount(otherSideOrder.Amount);
@@ -345,25 +378,24 @@ namespace TradeMatchingEngine
             var result = eventArgs as StockMarketMatchEngineEvents;
             ProcessCompleted?.Invoke(this, result);
         }
-        protected virtual async Task OnOrderAdded(EventArgs eventArgs)
+
+        protected virtual void OnOrderCreate(EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
-            if (result != null)
-            {
-                await OrderCreated.Invoke(this, result);
-            }
+
+            EventOrderCreated?.Invoke(this, result);
         }
 
         protected virtual void OnOrderModified(EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
-            OrderModified?.Invoke(this, result);
+            EventOrderModified?.Invoke(this, result);
         }
 
         protected virtual void OnTradeCompleted(EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
-            TradeCompleted?.Invoke(this, result);
+            EventTradeCompleted?.Invoke(this, result);
         }
         #endregion
     }

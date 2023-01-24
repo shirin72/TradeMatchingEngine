@@ -23,7 +23,14 @@ namespace Infrastructure.Order.CommandRepositories
 
         public async Task<int> GetLastOrder()
         {
-            return await tradeMatchingEngineContext.Orders.MaxAsync(x => x.Id);
+            int id = 0;
+
+            if (tradeMatchingEngineContext.Orders.Any())
+            {
+                return await tradeMatchingEngineContext.Orders.MaxAsync(x => x.Id);
+            }
+
+            return id;
         }
     }
 }

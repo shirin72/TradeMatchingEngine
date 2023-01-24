@@ -26,34 +26,27 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Amount")
-                        .HasColumnType("int")
-                        .HasColumnName("Amount");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ExpireTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ExpireTime");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsFillAndKill")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsFillAndKill");
+                        .HasColumnType("bit");
 
                     b.Property<int?>("OrderParentId")
-                        .HasColumnType("int")
-                        .HasColumnName("OrderParentId");
+                        .HasColumnType("int");
 
                     b.Property<int>("Price")
-                        .HasColumnType("int")
-                        .HasColumnName("Price");
+                        .HasColumnType("int");
 
                     b.Property<int>("Side")
-                        .HasColumnType("int")
-                        .HasColumnName("Side");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

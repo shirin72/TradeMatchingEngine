@@ -2,9 +2,9 @@
 {
     public class Trade : ITrade
     {
-        public Trade( int ownerId, int buyOrderId, int sellOrderId, int amount, int price)
+        public Trade(long id, int ownerId, int buyOrderId, int sellOrderId, int amount, int price)
         {
-            //TradeId = tradeId;
+            Id = id;
             OwnerId = ownerId;
             BuyOrderId = buyOrderId;
             SellOrderId = sellOrderId;
