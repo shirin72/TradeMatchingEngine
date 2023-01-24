@@ -1,40 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TradeMatchingEngine;
+﻿using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
-using TradeMatchingEngine.Orders.Repositories.Query;
-using TradeMatchingEngine.Trades.Repositories.Command;
-using TradeMatchingEngine.Trades.Repositories.Query;
 
 namespace Application.OrderService.OrderEventHandler
 {
     public class OrderEventHandler
     {
-        private readonly IOrderCommand _orderCommand;
-        public OrderEventHandler(
-            IOrderCommand orderCommand
-            )
-        {
-            _orderCommand = orderCommand;
-        }
+    //    private readonly IOrderCommand _orderCommand;
+    //    private StockMarketMatchEngine _stockMarketMatchEngine;
+    //    public OrderEventHandler(
+    //        IOrderCommand orderCommand,
+    //        StockMarketMatchEngine stockMarketMatchEngine
+    //        )
+    //    {
+    //        _orderCommand = orderCommand;
+    //        _stockMarketMatchEngine= stockMarketMatchEngine;
+    //        _stockMarketMatchEngine.OrderCreated += OnOrderCreated;
+    //    }
 
-        public async Task OnOrderCreated(object sender, EventArgs eventArgs)
-        {
-            try
-            {
-                var result = eventArgs as StockMarketMatchEngineEvents;
+    //    public async Task OnOrderCreated(object sender, StockMarketMatchEngineEvents eventArgs)
+    //    {
+    //        try
+    //        {
+    //            var castEventObject = eventArgs.EventObject as Order;
 
-                var castEventObject = result.EventObject as Order;
-
-                //await _orderCommand.CreateOrder(castEventObject);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
+    //            await _orderCommand.CreateOrder(castEventObject);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            throw ex;
+    //        }
+    //    }
     }
 }

@@ -19,7 +19,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<TradeMatchingEngineContext>(options =>
     {
         options.UseSqlServer("Server=.;Initial Catalog=TradeMatchingEngine;Integrated Security=true;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;");
-    },ServiceLifetime.Scoped
+    }
 );
 
 builder.Services.AddScoped<IOrderCommand, OrderCommandRepository>();
@@ -28,7 +28,7 @@ builder.Services.AddScoped<IAddOrderCommandHandlers, AddOrderCommandHandlers>();
 builder.Services.AddScoped<ITradeCommand, TradeCommandRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITradeQuery, TradeQueryRepository>();
-builder.Services.AddScoped<OrderEventHandler>();
+//builder.Services.AddScoped<OrderEventHandler>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

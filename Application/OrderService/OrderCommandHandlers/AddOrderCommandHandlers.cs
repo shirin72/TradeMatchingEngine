@@ -9,61 +9,56 @@ namespace Application.OrderService.OrderCommandHandlers
     public class AddOrderCommandHandlers : IAddOrderCommandHandlers
     {
         private readonly IOrderCommand _orderCommand;
-        private readonly ITradeCommand _tradeCommand;
         private readonly IOrderQuery _orderQuery;
         private readonly ITradeQuery _tradeQuery;
         private static SemaphoreSlim _locker = new SemaphoreSlim(int.MaxValue);
         private static StockMarketMatchEngine _stockMarketMatchEngine;
-        private readonly OrderEventHandler.OrderEventHandler _orderEventHandler;
-
 
         public AddOrderCommandHandlers(
             IOrderCommand orderCommand,
-            ITradeCommand tradeCommand,
             IOrderQuery orderQuery,
-            ITradeQuery tradeQuery,
-            OrderEventHandler.OrderEventHandler orderEventHandler
-
+            ITradeQuery tradeQuery
             )
         {
             _orderCommand = orderCommand;
-            _tradeCommand = tradeCommand;
             _orderQuery = orderQuery;
             _tradeQuery = tradeQuery;
-            _orderEventHandler = orderEventHandler;
         }
 
         public async Task<int> Handle(int price, int amount, Side side, DateTime expDate, bool isFillAndKill)
         {
             await getStockMarket();
-
+            await SubscribeToEvent();
             _stockMarketMatchEngine.PreOpen();
             _stockMarketMatchEngine.Open();
 
-            await SubscribeToEvent();
+            var result = await _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill);
 
-            var result= await _stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expDate, isFillAndKill));
-        
             return result;
+        }
+
+        public async Task OnOrderCreated(object sender, StockMarketMatchEngineEvents eventArgs)
+        {
+            try
+            {
+                var castEventObject = eventArgs.EventObject as Order;
+
+                await _orderCommand.CreateOrder(castEventObject);
+
+                _stockMarketMatchEngine.OrderCreated -= OnOrderCreated;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private async Task SubscribeToEvent()
         {
-           _stockMarketMatchEngine.OrderCreated += async (sender, args) => await _orderEventHandler.OnOrderCreated(this, args);
-
-            //_stockMarketMatchEngine.TradeCompleted += async (sender, args) => await OnTradeCompleted(this, args);
+            await _locker.WaitAsync();
+            _stockMarketMatchEngine.OrderCreated += async (sender, args) => await OnOrderCreated(this, args).ConfigureAwait(false);
+            _locker.Release();
         }
-
-      
-
-        //public async Task OnTradeCompleted(object sender, EventArgs eventArgs)
-        //{
-        //    var result = eventArgs as StockMarketMatchEngineEvents;
-
-        //    var castEventObject = result.EventObject as Trade;
-
-        //    await _tradeCommand.CreateTrade(castEventObject);
-        //}
 
         private async Task<StockMarketMatchEngine> getStockMarket()
         {

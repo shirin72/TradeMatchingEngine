@@ -1,6 +1,4 @@
-﻿
-
-namespace TradeMatchingEngine.Orders.Repositories.Command
+﻿namespace TradeMatchingEngine.Orders.Repositories.Command
 {
     public interface IOrderCommand
     {

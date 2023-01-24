@@ -26,7 +26,7 @@ namespace TradeMatchingEngine
         public event EventHandler<StockMarketMatchEngineEvents> TradeCompleted;
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
-
+        public int a;
         #endregion
 
         public StockMarketMatchEngine(List<Order> orders, int lastOrderId = 0, long lastTradeId = 0)
@@ -123,7 +123,7 @@ namespace TradeMatchingEngine
                 Description = $"Order with Id: {order.Id} Is Created"
             };
 
-            await OnOrderAdded(stockMarketMatchEngineEvents).ConfigureAwait(false);
+            OnOrderAdded(stockMarketMatchEngineEvents);
 
             return order;
         }
@@ -345,13 +345,12 @@ namespace TradeMatchingEngine
             var result = eventArgs as StockMarketMatchEngineEvents;
             ProcessCompleted?.Invoke(this, result);
         }
-        protected virtual async Task OnOrderAdded(EventArgs eventArgs)
+
+        protected virtual void OnOrderAdded(EventArgs eventArgs)
         {
             var result = eventArgs as StockMarketMatchEngineEvents;
-            if (result != null)
-            {
-                await OrderCreated.Invoke(this, result);
-            }
+
+            OrderCreated?.Invoke(this, result);
         }
 
         protected virtual void OnOrderModified(EventArgs eventArgs)

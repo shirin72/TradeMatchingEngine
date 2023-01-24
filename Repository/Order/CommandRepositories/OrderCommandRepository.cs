@@ -1,15 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Repository;
-using TradeMatchingEngine.Orders.Dto;
 using TradeMatchingEngine.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
 {
     public class OrderCommandRepository : IOrderCommand
     {
-        private readonly TradeMatchingEngineContext tradeMatchingEngineContext;
-
-        public OrderCommandRepository(TradeMatchingEngineContext tradeMatchingEngineContext)
+        private  TradeMatchingEngineContext tradeMatchingEngineContext;
+        public OrderCommandRepository()
         {
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
@@ -47,7 +44,6 @@ namespace Infrastructure.Order.QueryRepositories
         public async Task<int> UpdateOrder(TradeMatchingEngine.Order order)
         {
             var findOrder = await tradeMatchingEngineContext.Orders.Where(x => x.Id == order.Id).FirstOrDefaultAsync();
-            //var createOrder = new TradeMatchingEngine.OrderDto(id: order.Id, side: findOrder.Side, price: order.Price, amount: order.Amount, expireTime: order.ExpireTime, order.IsFillAndKill, order.OrderParentId);
 
             tradeMatchingEngineContext.Orders.Update(order);
 
