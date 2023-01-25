@@ -2,64 +2,47 @@
 
 namespace Infrastructure
 {
+
     public class TradeMatchingEngineContext : DbContext
     {
         public TradeMatchingEngineContext(DbContextOptions<TradeMatchingEngineContext> options) : base(options)
         {
+            Database.EnsureCreated();
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("Server=.;Initial Catalog=TradeMatchingEngineDb;Integrated Security=true;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;");
-        }
-      
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //OrderEntity
-            modelBuilder.Entity<TradeMatchingEngine.Order>().Property(o => o.Side).HasConversion<int>();
 
-            modelBuilder.Entity<TradeMatchingEngine.Order>()
-            .Property("Id");
+            modelBuilder.Entity<TradeMatchingEngine.Order>(b =>
+            {
+                b.HasKey(o => o.Id);
+                b.Property(o => o.Id).ValueGeneratedNever();
+                b.Property(o => o.Price);
+                b.Property(o => o.Amount);
+                b.Property(o => o.IsFillAndKill);
+                b.Property(o => o.ExpireTime);
+                b.Property(o => o.OrderParentId);
+                b.Property(o => o.Side).HasConversion<int>();
+            });
 
-            modelBuilder.Entity<TradeMatchingEngine.Order>()
-            .Property("Side");
-
-            modelBuilder.Entity<TradeMatchingEngine.Order>()
-            .Property("Price");
-
-            modelBuilder.Entity<TradeMatchingEngine.Order>()
-            .Property("Amount");
-
-            modelBuilder.Entity<TradeMatchingEngine.Order>()
-            .Property("IsFillAndKill");
-
-            modelBuilder.Entity<TradeMatchingEngine.Order>()
-            .Property("ExpireTime");
-
-
-            modelBuilder.Entity<TradeMatchingEngine.Order>()
-            .Property("OrderParentId");
 
 
             //TradeEntity
 
-            modelBuilder.Entity<TradeMatchingEngine.Trade>()
-            .Property("Id");
-
-            modelBuilder.Entity<TradeMatchingEngine.Trade>()
-            .Property("OwnerId");
-
-            modelBuilder.Entity<TradeMatchingEngine.Trade>()
-            .Property("BuyOrderId");
-
-            modelBuilder.Entity<TradeMatchingEngine.Trade>()
-            .Property("SellOrderId");
-
-            modelBuilder.Entity<TradeMatchingEngine.Trade>()
-            .Property("Amount");
-
-            modelBuilder.Entity<TradeMatchingEngine.Trade>()
-            .Property("Price");
+            modelBuilder.Entity<TradeMatchingEngine.Trade>(b =>
+            {
+                b.HasKey(o => o.Id);
+                b.Property(o => o.Id).ValueGeneratedNever();
+                b.Property(o => o.Price);
+                b.Property(o => o.Amount);
+                b.HasOne<TradeMatchingEngine.Order>().WithMany().HasForeignKey(t => t.BuyOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                b.HasOne<TradeMatchingEngine.Order>().WithMany().HasForeignKey(t => t.SellOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                b.Property(o => o.SellOrderId)   ;
+                b.Property(o => o.BuyOrderId);
+                // b.Property(o => o.OwnerId);
+            });
 
         }
 

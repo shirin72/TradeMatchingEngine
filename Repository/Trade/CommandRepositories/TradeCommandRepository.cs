@@ -11,12 +11,9 @@ namespace Infrastructure.Trade.QueryRepositories
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
 
-        public async Task<long> CreateTrade(TradeMatchingEngine.Trade Trade)
+        public async Task AddTrade(TradeMatchingEngine.Trade Trade)
         {
-            await tradeMatchingEngineContext.Trades.AddAsync(Trade);
-            await tradeMatchingEngineContext.SaveChangesAsync();
-
-            return Trade.Id;
+             await tradeMatchingEngineContext.Trades.AddAsync(Trade);
         }
     }
 }

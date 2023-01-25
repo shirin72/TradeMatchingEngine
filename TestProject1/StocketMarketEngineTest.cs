@@ -31,7 +31,7 @@ namespace Test
             sut.PreOpen();
 
             //Action
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -50,7 +50,7 @@ namespace Test
             sut.PreOpen();
 
             //Action
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -78,10 +78,10 @@ namespace Test
             //Arrange
             sut.PreOpen();
             sut.Open();
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
 
             //Action
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //Assert
             Assert.Equal(1, sut.TradeCount);
@@ -123,7 +123,7 @@ namespace Test
             sut.PreOpen();
 
             //Action
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -154,13 +154,13 @@ namespace Test
         {
             //Arrange
             sut.PreOpen();
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(120, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
+            await sut.ProcessOrderAsync(120, 10, Side.Sell, events);
 
             //Action
-            await sut.ProcessOrderAsync(110, 10, Side.Sell);
+            await sut.ProcessOrderAsync(110, 10, Side.Sell, events);
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -179,10 +179,10 @@ namespace Test
             //arrenge
             sut.PreOpen();
             sut.Open();
-            await sut.ProcessOrderAsync(100, 10, Side.Buy, DateTime.Now.AddDays(-1));
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, DateTime.Now.AddDays(-1), events);
 
             //action
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
 
             //assert
             Assert.Equal(0, sut.TradeCount);
@@ -196,10 +196,10 @@ namespace Test
             //arrenge
             sut.PreOpen();
             sut.Open();
-            await sut.ProcessOrderAsync(100, 10, Side.Sell, DateTime.Now.AddDays(-1));
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, DateTime.Now.AddDays(-1), events);
 
             //action
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //assert
             Assert.Equal(0, sut.TradeCount);
@@ -213,10 +213,10 @@ namespace Test
             //arrenge
             sut.PreOpen();
             sut.Open();
-            await sut.ProcessOrderAsync(10, 1, Side.Buy);
+            await sut.ProcessOrderAsync(10, 1, Side.Buy, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 2, Side.Sell);
+            await sut.ProcessOrderAsync(10, 2, Side.Sell, events);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -236,10 +236,10 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 1, Side.Sell);
+            await sut.ProcessOrderAsync(10, 1, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+            await sut.ProcessOrderAsync(10, 2, Side.Buy, events);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -259,10 +259,10 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+            await sut.ProcessOrderAsync(10, 2, Side.Buy, events);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -283,11 +283,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 100, Side.Sell);
-            await sut.ProcessOrderAsync(10, 50, Side.Buy);
+            await sut.ProcessOrderAsync(10, 100, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 50, Side.Buy, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 50, Side.Buy);
+            await sut.ProcessOrderAsync(10, 50, Side.Buy, events);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -304,11 +304,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 2, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 2, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+            await sut.ProcessOrderAsync(10, 6, Side.Buy, events);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -324,11 +324,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
-            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+            await sut.ProcessOrderAsync(10, 5, Side.Buy, events);
+            await sut.ProcessOrderAsync(10, 2, Side.Buy, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 6, Side.Sell);
+            await sut.ProcessOrderAsync(10, 6, Side.Sell, events);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -349,13 +349,13 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
-            await sut.ProcessOrderAsync(10, 2, Side.Buy);
-            await sut.ProcessOrderAsync(10, 1, Side.Buy);
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            await sut.ProcessOrderAsync(10, 5, Side.Buy, events);
+            await sut.ProcessOrderAsync(10, 2, Side.Buy, events);
+            await sut.ProcessOrderAsync(10, 1, Side.Buy, events);
+            await sut.ProcessOrderAsync(10, 5, Side.Buy, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 6, Side.Sell);
+            await sut.ProcessOrderAsync(10, 6, Side.Sell, events);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -370,13 +370,13 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 2, Side.Sell);
-            await sut.ProcessOrderAsync(10, 1, Side.Sell);
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 2, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 1, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+            await sut.ProcessOrderAsync(10, 6, Side.Buy, events);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -394,7 +394,7 @@ namespace Test
             sut.PreOpen();
 
             //Action
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            await sut.ProcessOrderAsync(10, 5, Side.Buy, events);
 
             //Assert
             Assert.Equal(MarcketState.PreOpen, sut.State);
@@ -412,7 +412,7 @@ namespace Test
             sut.PreOpen();
 
             //Action
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
 
             //Assert
             Assert.Equal(MarcketState.PreOpen, sut.State);
@@ -431,13 +431,13 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 2, Side.Sell);
-            await sut.ProcessOrderAsync(10, 1, Side.Sell);
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 2, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 1, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+            await sut.ProcessOrderAsync(10, 6, Side.Buy, events);
 
             //assert
             Assert.Equal(8, receivedEvents.Count);
@@ -457,11 +457,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 1, Side.Sell);
+            await sut.ProcessOrderAsync(10, 5, Side.Sell, events);
+            await sut.ProcessOrderAsync(10, 1, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+            await sut.ProcessOrderAsync(10, 6, Side.Buy, events);
 
             //assert
             Assert.Equal(6, receivedEvents.Count);
@@ -482,11 +482,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
+            await sut.ProcessOrderAsync(100, 5, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //assert
             Assert.Equal(5, receivedEvents.Count);
@@ -506,11 +506,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
+            await sut.ProcessOrderAsync(100, 5, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //assert
             Assert.Equal(5, receivedEvents.Count);
@@ -530,10 +530,10 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //action
-            await sut.ProcessOrderAsync(90, 10, Side.Sell);
+            await sut.ProcessOrderAsync(90, 10, Side.Sell, events);
 
             //assert
             Assert.Equal(4, receivedEvents.Count);
@@ -553,10 +553,10 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(90, 10, Side.Buy);
+            await sut.ProcessOrderAsync(90, 10, Side.Buy, events);
 
             //assert
             Assert.Equal(4, receivedEvents.Count);
@@ -575,10 +575,10 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(110, 10, Side.Buy);
+            await sut.ProcessOrderAsync(110, 10, Side.Buy, events);
 
             //assert
             Assert.Equal(4, receivedEvents.Count);
@@ -597,13 +597,13 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 15, Side.Sell);
-            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events);
+            await sut.ProcessOrderAsync(100, 15, Side.Sell, events);
+            await sut.ProcessOrderAsync(100, 5, Side.Sell, events);
 
             //action
-            await sut.ProcessOrderAsync(110, 10, Side.Buy);
-            await sut.ProcessOrderAsync(110, 5, Side.Buy);
+            await sut.ProcessOrderAsync(110, 10, Side.Buy, events);
+            await sut.ProcessOrderAsync(110, 5, Side.Buy, events);
 
             //assert
             Assert.Equal(7, receivedEvents.Count);
@@ -622,14 +622,14 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
-            await sut.ProcessOrderAsync(100, 15, Side.Buy);
-            await sut.ProcessOrderAsync(100, 5, Side.Buy);
-            await sut.ProcessOrderAsync(100, 20, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
+            await sut.ProcessOrderAsync(100, 15, Side.Buy, events);
+            await sut.ProcessOrderAsync(100, 5, Side.Buy, events);
+            await sut.ProcessOrderAsync(100, 20, Side.Buy, events);
 
             //action
-            await sut.ProcessOrderAsync(90, 10, Side.Sell);
-            await sut.ProcessOrderAsync(90, 10, Side.Sell);
+            await sut.ProcessOrderAsync(90, 10, Side.Sell, events);
+            await sut.ProcessOrderAsync(90, 10, Side.Sell, events);
 
             //assert
             Assert.Equal(8, receivedEvents.Count);
@@ -649,10 +649,10 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //action
-            await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true);
+            await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true, events: events);
 
             //assert
             Assert.Equal(4, receivedEvents.Count);
@@ -672,10 +672,10 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true);
+            await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true, events: events);
 
             //action
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            await sut.ProcessOrderAsync(100, 10, Side.Buy, events);
 
             //assert
             Assert.Equal(0, sut.TradeCount);
@@ -686,99 +686,100 @@ namespace Test
             Assert.Equal(0, sut.GetSellOrderCount());
         }
 
-        [Fact]
-        public async void ProcessOrderAsync_ShouldNotTrade2()
-        {
-            var bCollection = new BlockingCollection<int>();
-            var tasks = new List<Task>();
-            for (int i = 0; i < 100; i++)
-            {
-                tasks.Add(Task.Run(async () =>
-                {
+        //[Fact]
+        //public async void ProcessOrderAsync_ShouldNotTrade2()
+        //{
+        //    var bCollection = new BlockingCollection<int>();
+        //    var tasks = new List<Task>();
+        //    for (int i = 0; i < 100; i++)
+        //    {
+        //        tasks.Add(Task.Run(async () =>
+        //        {
 
-                    bCollection.Add(i);
+        //            bCollection.Add(i);
 
-                }));
-            }
-            var completeTask = Task.WhenAll(tasks).ContinueWith(t => bCollection.CompleteAdding());
+        //        }));
+        //    }
+        //    var completeTask = Task.WhenAll(tasks).ContinueWith(t => bCollection.CompleteAdding());
 
-            int k = 0;
-            Task consumer = Task.Run(() =>
-            {
+        //    int k = 0;
+        //    Task consumer = Task.Run(() =>
+        //    {
 
-                while (!bCollection.IsCompleted)
-                {
-                    if (bCollection.TryTake(out int i))
-                    {
+        //        while (!bCollection.IsCompleted)
+        //        {
+        //            if (bCollection.TryTake(out int i))
+        //            {
 
-                        k++;
-                    }
+        //                k++;
+        //            }
 
-                }
-            });
+        //        }
+        //    });
 
-            var allTasks = new List<Task>(tasks);
-            allTasks.Add(consumer);
-            allTasks.Add(completeTask);
-            await Task.WhenAll(allTasks);
-            Assert.Equal(100, k);
+        //    var allTasks = new List<Task>(tasks);
+        //    allTasks.Add(consumer);
+        //    allTasks.Add(completeTask);
+        //    await Task.WhenAll(allTasks);
+        //    Assert.Equal(100, k);
 
-            //var queue = new ConcurrentQueue<int>();
-            //var i = 0;
-            //var t1=Task.Run(() => queue.Enqueue(Interlocked.Increment(3)));
-            //var t2 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
-            //var t3 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
-            //var t4 = Task.Run(async () => {
-            //    var j = 0;
-            //    while(j<3)
-            //    {
-            //        int x=0;
-            //        queue.TryDequeue(out x);
-            //        if (x == 0)
-            //        {
-            //            await Task.Delay(100);
-            //            continue;
-            //        }
-            //        j++;
-            //    }
-            //});
+        //    var queue = new ConcurrentQueue<int>();
+        //    var i = 0;
+        //    var t1 = Task.Run(() => queue.Enqueue(Interlocked.Increment(3)));
+        //    var t2 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
+        //    var t3 = Task.Run(() => queue.Enqueue(Interlocked.Increment(ref i)));
+        //    var t4 = Task.Run(async () =>
+        //    {
+        //        var j = 0;
+        //        while (j < 3)
+        //        {
+        //            int x = 0;
+        //            queue.TryDequeue(out x);
+        //            if (x == 0)
+        //            {
+        //                await Task.Delay(100);
+        //                continue;
+        //            }
+        //            j++;
+        //        }
+        //    });
 
-            //await Task.WhenAll(t1, t2, t3,t4);
-        }
+        //    await Task.WhenAll(t1, t2, t3, t4);
+        //}
 
-        [Fact]
-        public async void ProcessOrderAsync_ShouldNotTrade4()
-        {
-            var bCollection = new BlockingCollection<int>();
-            var tasks = new List<Task>();
-            for (int i = 0; i < 5; i++)
-            {
-                tasks.Add(Task.Run(async () =>
-                {
+        //[Fact]
+        //public async void ProcessOrderAsync_ShouldNotTrade4()
+        //{
+        //    var bCollection = new BlockingCollection<int>();
+        //    var tasks = new List<Task>();
+        //    for (int i = 0; i < 5; i++)
+        //    {
+        //        tasks.Add(Task.Run(async () =>
+        //        {
 
-                    bCollection.Add(i);
+        //            bCollection.Add(i);
 
-                }));
-            }
-            Task.WhenAll(tasks);
+        //        }));
+        //    }
+        //    Task.WhenAll(tasks);
 
-            int k = 0;
-            Task consumer = Task.Run(() =>
-            {
+        //    int k = 0;
+        //    Task consumer = Task.Run(() =>
+        //    {
 
-                while (!bCollection.IsCompleted)
-                {
-                    if (bCollection.TryTake(out int i)) { k++; }
-                    bCollection.Add(i + 2);
-                }
-            });
+        //        while (!bCollection.IsCompleted)
+        //        {
+        //            if (bCollection.TryTake(out int i)) { k++; }
+        //            bCollection.Add(i + 2);
+        //        }
+        //    });
 
-            var allTasks = new List<Task>(tasks);
-            allTasks.Add(consumer);
-            //allTasks.Add(completeTask);
-            Task.WhenAll(allTasks.ToArray());
-            System.Threading.Thread.Sleep(10000);
-        }
+        //    var allTasks = new List<Task>(tasks);
+        //    allTasks.Add(consumer);
+        //    //allTasks.Add(completeTask);
+        //    Task.WhenAll(allTasks.ToArray());
+        //    System.Threading.Thread.Sleep(10000);
+        //}
 
         [Fact]
         public async void ProcessOrderAsync_1SellOrderEntersOrderSetToCancel1BuyOrderEnter_NoTradeShouldBeExecute()
@@ -787,11 +788,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
-            await sut.CancelOrder(orderId);
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell, events);
+            await sut.CancelOrderAsync(orderId, events);
 
             //action
-            await sut.ProcessOrderAsync(90, 15, Side.Buy);
+            await sut.ProcessOrderAsync(90, 15, Side.Buy, events);
 
             //assert
             Assert.Equal(0, sut.TradeCount);
@@ -810,7 +811,7 @@ namespace Test
             sut.Open();
 
             //assert
-            Assert.ThrowsAsync<NotImplementedException>(async () =>await  sut.CancelOrder(0));
+            Assert.ThrowsAsync<NotImplementedException>(async () =>await  sut.CancelOrderAsync(0, events));
         }
 
         [Fact]
@@ -820,11 +821,11 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
-            await sut.ModifieOrder(orderId,100,5,DateTime.MaxValue);
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell, events);
+            await sut.ModifieOrder(orderId, 100, 5, DateTime.MaxValue, events);
 
             //action
-            await sut.ProcessOrderAsync(100, 15, Side.Buy);
+            await sut.ProcessOrderAsync(100, 15, Side.Buy, events);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -834,6 +835,9 @@ namespace Test
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
         }
+
+
+      
 
     }
 }

@@ -2,19 +2,19 @@
 {
     public class Trade : ITrade
     {
-        public Trade( int ownerId, int buyOrderId, int sellOrderId, int amount, int price)
+        public Trade(long id,  long buyOrderId, long sellOrderId, int amount, int price)
         {
-            //TradeId = tradeId;
-            OwnerId = ownerId;
+            Id = id;
+           // OwnerId = ownerId;
             BuyOrderId = buyOrderId;
             SellOrderId = sellOrderId;
             Amount = amount;
             Price = price;
         }
         public long Id { get;  }
-        public int OwnerId { get;  }
-        public int BuyOrderId { get;  }
-        public int SellOrderId { get;  }
+        //public int OwnerId { get;  }
+        public long BuyOrderId { get;  }
+        public long SellOrderId { get;  }
         public int Amount { get;  }
         public int Price { get;  }
     }

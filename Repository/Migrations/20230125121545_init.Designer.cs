@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(TradeMatchingEngineContext))]
-    [Migration("20230123082534_init_46")]
-    partial class init46
+    [Migration("20230125121545_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,36 +27,29 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("TradeMatchingEngine.Order", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Amount")
-                        .HasColumnType("int")
-                        .HasColumnName("Amount");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ExpireTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ExpireTime");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsFillAndKill")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsFillAndKill");
+                        .HasColumnType("bit");
 
-                    b.Property<int?>("OrderParentId")
-                        .HasColumnType("int")
-                        .HasColumnName("OrderParentId");
+                    b.Property<long?>("OrderParentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("OriginalAmount")
+                        .HasColumnType("int");
 
                     b.Property<int>("Price")
-                        .HasColumnType("int")
-                        .HasColumnName("Price");
+                        .HasColumnType("int");
 
                     b.Property<int>("Side")
-                        .HasColumnType("int")
-                        .HasColumnName("Side");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -66,29 +59,42 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("TradeMatchingEngine.Trade", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<int>("BuyOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OwnerId")
-                        .HasColumnType("int");
+                    b.Property<long>("BuyOrderId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
-                    b.Property<int>("SellOrderId")
-                        .HasColumnType("int");
+                    b.Property<long>("SellOrderId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BuyOrderId");
+
+                    b.HasIndex("SellOrderId");
+
                     b.ToTable("Trades");
+                });
+
+            modelBuilder.Entity("TradeMatchingEngine.Trade", b =>
+                {
+                    b.HasOne("TradeMatchingEngine.Order", null)
+                        .WithMany()
+                        .HasForeignKey("BuyOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TradeMatchingEngine.Order", null)
+                        .WithMany()
+                        .HasForeignKey("SellOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

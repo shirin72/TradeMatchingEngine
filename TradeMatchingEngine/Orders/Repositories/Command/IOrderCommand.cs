@@ -1,9 +1,9 @@
 ﻿namespace TradeMatchingEngine.Orders.Repositories.Command
 {
-    public interface IOrderCommand
+    public interface IOrderCommandRepository
     {
-        Task<int> CreateOrder(Order order);
-        Task<int> DeleteOrder(int id);
-        Task<int> UpdateOrder(Order order);
+        Task<Order> Find(long id);
+        Task AddOrder(Order order);
+        Task DeleteOrder(long id);
     }
 }

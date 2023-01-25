@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init46 : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,14 +15,14 @@ namespace Infrastructure.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     Side = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
+                    OriginalAmount = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<int>(type: "int", nullable: false),
                     IsFillAndKill = table.Column<bool>(type: "bit", nullable: true),
                     ExpireTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    OrderParentId = table.Column<int>(type: "int", nullable: true)
+                    OrderParentId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -33,28 +33,48 @@ namespace Infrastructure.Migrations
                 name: "Trades",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OwnerId = table.Column<int>(type: "int", nullable: false),
-                    BuyOrderId = table.Column<int>(type: "int", nullable: false),
-                    SellOrderId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
+                    BuyOrderId = table.Column<long>(type: "bigint", nullable: false),
+                    SellOrderId = table.Column<long>(type: "bigint", nullable: false),
                     Amount = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Trades", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Trades_Orders_BuyOrderId",
+                        column: x => x.BuyOrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Trades_Orders_SellOrderId",
+                        column: x => x.SellOrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Trades_BuyOrderId",
+                table: "Trades",
+                column: "BuyOrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Trades_SellOrderId",
+                table: "Trades",
+                column: "SellOrderId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "Trades");
 
             migrationBuilder.DropTable(
-                name: "Trades");
+                name: "Orders");
         }
     }
 }

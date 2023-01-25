@@ -7,23 +7,25 @@ namespace TradeMatchingEngine
     {
         private OrderState _state;
 
-        public Order(int Id, Side Side, int Price, int Amount, DateTime ExpireTime, bool? IsFillAndKill = null, int? OrderParentId = null)
+        public Order(long id, Side side, int price, int amount, DateTime expireTime, bool? isFillAndKill = null, long? orderParentId = null)
         {
-            this.Id = Id;
-            this.Side = Side;
-            this.Price = Price;
-            this.Amount = Amount;
-            this.IsFillAndKill = IsFillAndKill;
-            this.ExpireTime = ExpireTime;
+            this.Id = id;
+            this.Side = side;
+            this.Price = price;
+            this.Amount = amount;
+            this.OriginalAmount = amount;
+            this.IsFillAndKill = isFillAndKill;
+            this.ExpireTime = expireTime;
             this._state = OrderState.Register;
-            this.OrderParentId = OrderParentId;
+            this.OrderParentId = orderParentId;
         }
 
-        public int Id { get; }
+        public long Id { get; }
 
-        public Side Side { get; }
+        public Side Side { get; private set; }
 
-        public int Price { get; }
+        public int Price { get; private set; }
+        public int OriginalAmount { get; private set; }
 
         public int Amount { get; private set; }
 
@@ -39,7 +41,7 @@ namespace TradeMatchingEngine
             return Amount;
         }
 
-        public bool? IsFillAndKill { get; } = false;
+        public bool? IsFillAndKill { get; private set; } = false;
 
         public bool HasCompleted
         {
@@ -51,7 +53,7 @@ namespace TradeMatchingEngine
             }
         }
 
-        public DateTime ExpireTime { get; }
+        public DateTime ExpireTime { get; private set; }
 
         public bool IsExpired => ExpireTime < DateTime.Now;
         public OrderState GetOrderState() => _state;
@@ -61,7 +63,17 @@ namespace TradeMatchingEngine
             _state = OrderState.Cancell;
         }
 
-        public int? OrderParentId { get; }
+        public long? OrderParentId { get; private set; }
+
+        public void UpdateBy(Order order)
+        {
+            Price = order.Price;
+            OriginalAmount = order.OriginalAmount;
+            Amount = order.Amount;
+            ExpireTime = order.ExpireTime;
+            IsFillAndKill = order.IsFillAndKill;
+            Side = order.Side;
+        }
 
     }
 }

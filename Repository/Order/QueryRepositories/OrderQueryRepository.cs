@@ -16,14 +16,19 @@ namespace Infrastructure.Order.CommandRepositories
             return await tradeMatchingEngineContext.Orders.AsNoTracking().ToListAsync();
         }
 
-        public async Task<TradeMatchingEngine.Order> GetOrderById(int id)
+        public async Task<TradeMatchingEngine.Order> GetOrderById(long id)
         {
-            return await tradeMatchingEngineContext.Orders.FindAsync(id);
+            return await tradeMatchingEngineContext.Orders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<int> GetLastOrder()
+        public async Task<long> GetLastOrder()
         {
-            return await tradeMatchingEngineContext.Orders.MaxAsync(x => x.Id);
+            if (tradeMatchingEngineContext.Orders.Any())
+            {
+                return await tradeMatchingEngineContext.Orders.MaxAsync(x => x.Id);
+            }
+
+            return 0;
         }
     }
 }

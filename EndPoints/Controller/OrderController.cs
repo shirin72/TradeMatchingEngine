@@ -24,7 +24,7 @@ namespace EndPoints.Controller
         /// <param name="isFillAndKill"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<int> ProcessOrder( int price, int amount, Side side, bool isFillAndKill, DateTime expDate)
+        public async Task<long> ProcessOrder( int price, int amount, Side side, bool isFillAndKill, DateTime expDate)
         {
             try
             {

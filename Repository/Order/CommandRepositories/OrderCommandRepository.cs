@@ -1,53 +1,31 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using TradeMatchingEngine.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
 {
-    public class OrderCommandRepository : IOrderCommand
+    public class OrderCommandRepository : IOrderCommandRepository
     {
-        private  TradeMatchingEngineContext tradeMatchingEngineContext;
-        public OrderCommandRepository()
+        private readonly TradeMatchingEngineContext _tradeMatchingEngineContext;
+        public OrderCommandRepository(TradeMatchingEngineContext tradeMatchingEngineContext)
         {
-            this.tradeMatchingEngineContext = tradeMatchingEngineContext;
+            _tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
 
-        public async Task<int> CreateOrder(TradeMatchingEngine.Order order)
+        public async Task AddOrder(TradeMatchingEngine.Order order)
         {
-            try
-            {
-                var addAsync = await tradeMatchingEngineContext.Orders.AddAsync(order).ConfigureAwait(false);
-                var saveChangesAsync = await tradeMatchingEngineContext.SaveChangesAsync().ConfigureAwait(false);
-                if (saveChangesAsync > 0)
-                {
-                    return order.Id;
-                }
-
-                throw new Exception(message: "Order cannot be added");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            await _tradeMatchingEngineContext.Orders.AddAsync(order).ConfigureAwait(false);
         }
 
-        public async Task<int> DeleteOrder(int id)
+        public async Task DeleteOrder(long id)
         {
-            var findOrder = await tradeMatchingEngineContext.Orders.Where(x => x.Id == id).FirstOrDefaultAsync();
-
-            findOrder?.SetStateCancelled();
-
-            tradeMatchingEngineContext.Update(findOrder);
-
-            return findOrder.Id;
+            var findOrder = await _tradeMatchingEngineContext.Orders.FindAsync(id);
+            _tradeMatchingEngineContext.Orders.Remove(findOrder);
         }
 
-        public async Task<int> UpdateOrder(TradeMatchingEngine.Order order)
+        public async Task<TradeMatchingEngine.Order> Find(long id)
         {
-            var findOrder = await tradeMatchingEngineContext.Orders.Where(x => x.Id == order.Id).FirstOrDefaultAsync();
-
-            tradeMatchingEngineContext.Orders.Update(order);
-
-            return findOrder.Id;
+            return await _tradeMatchingEngineContext.Orders.FindAsync(id);
         }
     }
 }
