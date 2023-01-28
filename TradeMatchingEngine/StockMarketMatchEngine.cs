@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-namespace TradeMatchingEngine
+﻿namespace TradeMatchingEngine
 {
     public partial class StockMarketMatchEngine : IStockMarketMatchEngine
     {
@@ -16,18 +14,15 @@ namespace TradeMatchingEngine
 
         #region PublicProperties
         public MarcketState State => state.Code;
-        public delegate void Notify(object sender, EventArgs e);
-        public event Notify ProcessCompleted;
-        public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e);
         private Func<StockMarketMatchEngine, Order, Task> onOrderModified;
         private Func<StockMarketMatchEngine, Trade, Task> onTradeCreated;
         private Func<StockMarketMatchEngine, Order, Task> onOrderCreated;
-
+        private bool isInitialized = false;
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
         #endregion
 
-        public StockMarketMatchEngine(List<Order> orders, long lastOrderId = 0, long lastTradeId = 0)
+        public StockMarketMatchEngine(List<Order>? orders = null, long lastOrderId = 0, long lastTradeId = 0)
         {
             this.sellOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMin());
             this.buyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
@@ -39,7 +34,7 @@ namespace TradeMatchingEngine
             _lastTradeId = lastTradeId;
             allOrders = new List<Order>();
 
-            foreach (var order in orders)
+            foreach (var order in orders ?? new List<Order>())
             {
                 processOrder(order).GetAwaiter().GetResult();
             }
@@ -160,10 +155,8 @@ namespace TradeMatchingEngine
             {
                 clearEvents();
             }
-
-
-
         }
+
         private async Task<long> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
         {
             setupEvents(events);
@@ -216,21 +209,20 @@ namespace TradeMatchingEngine
                     continue;
                 }
             }
+            var isFillAndKill = order.IsFillAndKill ?? false;
 
-            if (order.Amount > 0 && (!order.IsFillAndKill.HasValue && order.IsFillAndKill.Value))
+            if (order.Amount > 0 && !isFillAndKill)
             {
                 ordersQueue.Enqueue(order, order);
 
                 return order.Id;
             }
 
-            if (order.Amount <= 0 || (order.IsFillAndKill.HasValue && order.IsFillAndKill.Value))
+            if (order.Amount <= 0 || isFillAndKill)
                 allOrders.Remove(order);
 
 
             return order.Id;
-
-
 
 
             void initiateTheQueueSideAndPriceCheck()
@@ -250,24 +242,34 @@ namespace TradeMatchingEngine
 
             void initializeQueue()
             {
-                foreach (var item in allOrders)
+                if (!isInitialized)
                 {
-                    if (item.Side == Side.Sell)
+                    foreach (var item in allOrders)
                     {
-                        sellOrderQueue.Enqueue(item, item);
-                        continue;
-                    }
+                        if (item.GetOrderState() == OrderState.Cancell)
+                        {
+                            continue;
+                        }
 
-                    buyOrderQueue.Enqueue(item, item);
+                        if (item.Side == Side.Sell)
+                        {
+                            sellOrderQueue.Enqueue(item, item);
+                            continue;
+                        }
+
+                        buyOrderQueue.Enqueue(item, item);
+                    }
                 }
+
+                isInitialized = true;
             }
+
             async Task makeTrade(Order order, Order otherSideOrder)
             {
                 var amount = otherSideOrder.Amount > order.Amount ? order.Amount : otherSideOrder.Amount;
 
                 var tradeItem = new Trade(
                     id: Interlocked.Increment(ref _lastTradeId),
-                    // ownerId: order.Id,
                     buyOrderId: order.Side == Side.Buy ? order.Id : otherSideOrder.Id,
                     sellOrderId: order.Side == Side.Sell ? order.Id : otherSideOrder.Id,
                     amount: amount,
@@ -281,16 +283,9 @@ namespace TradeMatchingEngine
                     await onOrderModified(this, order);
 
                 otherSideOrder.DecreaseAmount(currentOrderAmount);
-                try
-                {
-                    if (onOrderModified != null)
-                        await onOrderModified(this, otherSideOrder);
-                }
-                catch (Exception x)
-                {
 
-                }
-
+                if (onOrderModified != null)
+                    await onOrderModified(this, otherSideOrder);
 
                 trades.Add(tradeItem);
 
@@ -332,10 +327,7 @@ namespace TradeMatchingEngine
             {
                 clearEvents();
             }
-
-
         }
-
         private void setupEvents(StockMarketEvents? events)
         {
             if (events != null)
@@ -369,34 +361,6 @@ namespace TradeMatchingEngine
 
             return id;
         }
-
-        #endregion
-
-        #region ProtectedMethod
-        //protected virtual void OnProcessCompleted(EventArgs eventArgs)
-        //{
-        //    var result = eventArgs as StockMarketMatchEngineEvents;
-        //    ProcessCompleted?.Invoke(this, result);
-        //}
-
-        //protected virtual void OnOrderAdded(EventArgs eventArgs)
-        //{
-        //    var result = eventArgs as StockMarketMatchEngineEvents;
-
-        //    OrderCreated?.Invoke(this, result);
-        //}
-
-        ////protected virtual void OnOrderModified(EventArgs eventArgs)
-        //{
-        //    var result = eventArgs as StockMarketMatchEngineEvents;
-        //    OrderModified?.Invoke(this, result);
-        //}
-
-        //protected virtual void OnTradeCompleted(EventArgs eventArgs)
-        //{
-        //    var result = eventArgs as StockMarketMatchEngineEvents;
-        //    TradeCompleted?.Invoke(this, result);
-        //}
         #endregion
     }
 }

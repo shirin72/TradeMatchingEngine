@@ -13,7 +13,10 @@ namespace Infrastructure.Order.CommandRepositories
 
         public async Task<IEnumerable<TradeMatchingEngine.Order>> GetAllOrders()
         {
-            return await tradeMatchingEngineContext.Orders.AsNoTracking().ToListAsync();
+            return await tradeMatchingEngineContext.Orders
+                .AsNoTracking()
+                .Where(x => x.OrderState != TradeMatchingEngine.OrderState.Cancell)
+                .ToListAsync();
         }
 
         public async Task<TradeMatchingEngine.Order> GetOrderById(long id)

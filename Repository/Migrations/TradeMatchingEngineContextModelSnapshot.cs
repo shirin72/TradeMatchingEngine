@@ -39,6 +39,9 @@ namespace Infrastructure.Migrations
                     b.Property<long?>("OrderParentId")
                         .HasColumnType("bigint");
 
+                    b.Property<int>("OrderState")
+                        .HasColumnType("int");
+
                     b.Property<int>("OriginalAmount")
                         .HasColumnType("int");
 

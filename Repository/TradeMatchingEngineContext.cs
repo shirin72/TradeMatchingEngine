@@ -25,6 +25,7 @@ namespace Infrastructure
                 b.Property(o => o.ExpireTime);
                 b.Property(o => o.OrderParentId);
                 b.Property(o => o.Side).HasConversion<int>();
+                b.Property(o => o.OrderState).HasConversion<int>();
             });
 
 

@@ -20,6 +20,7 @@ namespace TradeMatchingEngine
             this.OrderParentId = orderParentId;
         }
 
+        public OrderState OrderState { get { return _state; } private set { value = _state; } }
         public long Id { get; }
 
         public Side Side { get; private set; }
