@@ -51,6 +51,8 @@ namespace Application.OrderService.OrderCommandHandlers
             return result;
         }
 
+
+        #region Private
         private async Task onOrderModified(StockMarketMatchEngine stockMarketMatchEngine, Order order)
         {
             var founndOrder = await _orderCommandRepository.Find(order.Id);
@@ -58,7 +60,6 @@ namespace Application.OrderService.OrderCommandHandlers
             founndOrder.UpdateBy(order);
         }
 
-        #region Private
         private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
         {
             await _orderCommandRepository.AddOrder(order);
