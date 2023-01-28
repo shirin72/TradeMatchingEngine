@@ -1,8 +1,10 @@
 using FluentAssertions;
+using Moq;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
+using TradeMatchingEngine.Orders.Repositories.Command;
 using Xunit;
 
 
@@ -23,8 +25,6 @@ namespace Test
             //Arrange
             sut.PreOpen();
 
-            var expected = new { Id = 1, Price = 100, Amount = 10, Side = Side.Sell };
-
             //Act
             var sellOrderId = await sut.ProcessOrderAsync(100, 10, Side.Sell);
 
@@ -37,8 +37,17 @@ namespace Test
             Assert.Equal(MarcketState.PreOpen, sut.State);
             Assert.Equal(0, sut.AllTradeCount());
 
-            var getSellOrder = sut.AllOrders.Where(o => o.Id == sellOrderId).FirstOrDefault();
-            getSellOrder.Should().BeEquivalentTo(expected);
+            sut.AllOrders
+                .Where(o => o.Id == sellOrderId).
+                FirstOrDefault().
+                Should().
+                BeEquivalentTo(new
+                {
+                    Id = 1,
+                    Price = 100,
+                    Amount = 10,
+                    Side = Side.Sell
+                });
         }
 
         [Fact]
@@ -46,7 +55,6 @@ namespace Test
         {
             //Arrange
             sut.PreOpen();
-            var expected = new { Id = 1, Price = 100, Amount = 10, Side = Side.Buy };
 
             //Act
             var buyOrderId = await sut.ProcessOrderAsync(100, 10, Side.Buy);
@@ -59,8 +67,17 @@ namespace Test
             Assert.Equal(MarcketState.PreOpen, sut.State);
             Assert.Equal(0, sut.AllTradeCount());
 
-            var getBuyOrder = sut.AllOrders.Where(o => o.Id == buyOrderId).FirstOrDefault();
-            getBuyOrder.Should().BeEquivalentTo(expected);
+            sut.AllOrders
+                .Where(o => o.Id == buyOrderId)
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(new
+                {
+                    Id = 1,
+                    Price = 100,
+                    Amount = 10,
+                    Side = Side.Buy
+                });
         }
 
 
@@ -84,11 +101,20 @@ namespace Test
             Assert.Equal(MarcketState.Open, sut.State);
             Assert.Equal(1, sut.AllTradeCount());
 
-            var expected = new { Id = 1, BuyOrderId = buyOrderId, SellOrderId = sellOrderId, Amount = 10, Price = 100 };
-
-            var getTrade = sut.Trade.Where(o => o.Id == 1).FirstOrDefault();
-
-            getTrade.Should().BeEquivalentTo(expected);
+            sut.Trade.
+                Where(o => o.Id == 1)
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(
+                new
+                {
+                    Id = 1,
+                    BuyOrderId = buyOrderId
+                    ,
+                    SellOrderId = sellOrderId,
+                    Amount = 10,
+                    Price = 100
+                });
         }
 
 
@@ -99,8 +125,6 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            var expected = new { Price = 100, Amount = 10, Side = Side.Sell };
-
             await sut.ProcessOrderAsync(100, 10, Side.Buy, DateTime.Now.AddDays(-1));
 
             //Act
@@ -110,8 +134,16 @@ namespace Test
             Assert.Equal(0, sut.TradeCount);
             Assert.Equal(0, sut.AllTradeCount());
 
-            var getSellOrder = sut.AllOrders.Where(o => o.Id == sellOrderId).FirstOrDefault();
-            getSellOrder.Should().BeEquivalentTo(expected);
+            sut.AllOrders
+                .Where(o => o.Id == sellOrderId)
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(new
+                {
+                    Price = 100,
+                    Amount = 10,
+                    Side = Side.Sell
+                });
         }
 
         [Fact]
@@ -120,8 +152,6 @@ namespace Test
             //arrenge
             sut.PreOpen();
             sut.Open();
-
-            var expected = new { Price = 100, Amount = 10, Side = Side.Buy };
 
             await sut.ProcessOrderAsync(100, 10, Side.Sell, DateTime.Now.AddDays(-1));
 
@@ -132,8 +162,16 @@ namespace Test
             Assert.Equal(0, sut.TradeCount);
             Assert.Equal(0, sut.AllTradeCount());
 
-            var getbuyOrder = sut.AllOrders.Where(o => o.Id == buyOrderId).FirstOrDefault();
-            getbuyOrder.Should().BeEquivalentTo(expected);
+            sut.AllOrders
+                .Where(o => o.Id == buyOrderId)
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(new
+                {
+                    Price = 100,
+                    Amount = 10,
+                    Side = Side.Buy
+                });
         }
 
         [Fact]
@@ -143,7 +181,6 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            var expected = new { Price = 10, Amount = 1, Side = Side.Sell };
             await sut.ProcessOrderAsync(10, 1, Side.Buy);
 
             //Act
@@ -158,8 +195,16 @@ namespace Test
             Assert.Equal(10, sut.Trade.First().Price);
             Assert.Equal(1, sut.Trade.First().Amount);
 
-            var getbuyOrder = sut.AllOrders.Where(o => o.Id == sellOrderId).FirstOrDefault();
-            getbuyOrder.Should().BeEquivalentTo(expected);
+            sut.AllOrders
+                 .Where(o => o.Id == sellOrderId)
+                 .FirstOrDefault()
+                 .Should()
+                 .BeEquivalentTo(new
+                 {
+                     Price = 10,
+                     Amount = 1,
+                     Side = Side.Sell
+                 });
         }
 
         [Fact]
@@ -168,7 +213,6 @@ namespace Test
             //arrenge
             sut.PreOpen();
             sut.Open();
-            var expected = new { Price = 10, Amount = 1, Side = Side.Buy };
 
             await sut.ProcessOrderAsync(10, 1, Side.Sell);
 
@@ -184,22 +228,29 @@ namespace Test
             Assert.Equal(10, sut.Trade.First().Price);
             Assert.Equal(1, sut.Trade.First().Amount);
 
-
-            var getbuyOrder = sut.AllOrders.Where(o => o.Id == buyOrderId).FirstOrDefault();
-            getbuyOrder.Should().BeEquivalentTo(expected);
+            sut.AllOrders
+               .Where(o => o.Id == buyOrderId)
+               .FirstOrDefault()
+               .Should()
+               .BeEquivalentTo(new
+               {
+                   Price = 10,
+                   Amount = 1,
+                   Side = Side.Buy
+               });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldOnTradeCommitedAndOneSellOrderEnqueuWithNewAmount()
+        public async void ProcessOrderAsync_Should_One_Trade_Commited_With_2_Amount_And_One_SellOrder_Enqueu_With_Amount3()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            var sellOrderId = await sut.ProcessOrderAsync(10, 5, Side.Sell);
 
             //Act
-            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+            var buyOrderId = await sut.ProcessOrderAsync(10, 2, Side.Buy);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -210,20 +261,42 @@ namespace Test
             Assert.Equal(3, sut.AllOrders.Sum(x => x.Amount));
             Assert.Equal(10, sut.Trade.First().Price);
             Assert.Equal(2, sut.Trade.First().Amount);
+
+            var buyOrder = sut.AllOrders
+                .Where(o => o.Id == sellOrderId)
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(new
+                {
+                    Price = 10,
+                    Amount = 3,
+                    Side = Side.Sell
+                });
+
+            sut.Trade
+                .Where(o => o.BuyOrderId == buyOrderId && o.SellOrderId == sellOrderId)
+                .FirstOrDefault().Should().BeEquivalentTo(
+                new
+                {
+                    Price = 10,
+                    Amount = 2,
+                    SellOrderId = sellOrderId,
+                    BuyOrderId = buyOrderId
+                });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldTwoTradeCommited()
+        public async void ProcessOrderAsync_Should_Commit_Two_Trades_And_Left_No_Order_In_Queues()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 100, Side.Sell);
-            await sut.ProcessOrderAsync(10, 50, Side.Buy);
+            var sellOrder = await sut.ProcessOrderAsync(10, 100, Side.Sell);
+            var buyOrder1 = await sut.ProcessOrderAsync(10, 50, Side.Buy);
 
             //Act
-            await sut.ProcessOrderAsync(10, 50, Side.Buy);
+            var buyOrder2 = await sut.ProcessOrderAsync(10, 50, Side.Buy);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -231,40 +304,80 @@ namespace Test
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
 
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder)
+                .FirstOrDefault().Should().BeEquivalentTo(
+                new
+                {
+                    Price = 10,
+                    Amount = 50,
+                    SellOrderId = sellOrder,
+                    BuyOrderId = buyOrder1
+                });
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder)
+            .FirstOrDefault().Should().BeEquivalentTo(
+            new
+            {
+                Price = 10,
+                Amount = 50,
+                SellOrderId = sellOrder,
+                BuyOrderId = buyOrder2
+            });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndOneSellOrderShouldBeEnteredWithNewAmount()
+        public async void ProcessOrderAsync_Two_Trade_Should_Commit_And_One_SellOrder_Should_Be_Enqueued_With_New_Amount()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 2, Side.Sell);
+            var sellOrder1 = await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            var sellOrder2 = await sut.ProcessOrderAsync(10, 2, Side.Sell);
 
             //Act
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+            var buyOrder = await sut.ProcessOrderAsync(10, 6, Side.Buy);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder1)
+           .FirstOrDefault().Should().BeEquivalentTo(
+           new
+           {
+               Price = 10,
+               Amount = 5,
+               SellOrderId = sellOrder1,
+               BuyOrderId = buyOrder
+           });
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder2)
+         .FirstOrDefault().Should().BeEquivalentTo(
+         new
+         {
+             Price = 10,
+             Amount = 1,
+             SellOrderId = sellOrder2,
+             BuyOrderId = buyOrder
+         });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndOneBuyOrderShouldBeEnteredWithNewAmount()
+        public async void ProcessOrderAsync_One_Trade_Should_Commite_And_One_BuyOrder_Should_Be_Enqueued_With_New_Amount()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
-            await sut.ProcessOrderAsync(10, 2, Side.Buy);
+            var buyOrder1 = await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            var buyOrder2 = await sut.ProcessOrderAsync(10, 2, Side.Buy);
 
             //Act
-            await sut.ProcessOrderAsync(10, 6, Side.Sell);
+            var sellOrder = await sut.ProcessOrderAsync(10, 6, Side.Sell);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -276,104 +389,127 @@ namespace Test
             Assert.Equal(6, sut.Trade.Sum(x => x.Amount));
             Assert.Equal(10, sut.Trade.First().Price);
             Assert.Equal(1, sut.AllOrders.Where(x => x.Side == Side.Buy).Select(x => x.Amount).First());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder)
+         .FirstOrDefault().Should().BeEquivalentTo(
+         new
+         {
+             Price = 10,
+             Amount = 5,
+             SellOrderId = sellOrder,
+             BuyOrderId = buyOrder1
+         });
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder)
+         .FirstOrDefault().Should().BeEquivalentTo(
+         new
+         {
+             Price = 10,
+             Amount = 1,
+             SellOrderId = sellOrder,
+             BuyOrderId = buyOrder2
+         });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldTwoTradeCommitedAndThreeBuyOrderShouldBeRemained()
+        public async void ProcessOrderAsync_TwoTrade_Should_Commit_And_Three_BuyOrder_Should_Be_Enqueued()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
-            await sut.ProcessOrderAsync(10, 2, Side.Buy);
-            await sut.ProcessOrderAsync(10, 1, Side.Buy);
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            var buyOrder1 = await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            var buyOrder2 = await sut.ProcessOrderAsync(10, 2, Side.Buy);
+            var buyOrder3 = await sut.ProcessOrderAsync(10, 1, Side.Buy);
+            var buyOrder4 = await sut.ProcessOrderAsync(10, 5, Side.Buy);
 
             //Act
-            await sut.ProcessOrderAsync(10, 6, Side.Sell);
+            var sellOrder = await sut.ProcessOrderAsync(10, 6, Side.Sell);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
             Assert.Equal(3, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder)
+          .FirstOrDefault().Should().BeEquivalentTo(
+          new
+          {
+              Price = 10,
+              Amount = 5,
+              SellOrderId = sellOrder,
+              BuyOrderId = buyOrder1
+          });
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder)
+         .FirstOrDefault().Should().BeEquivalentTo(
+         new
+         {
+             Price = 10,
+             Amount = 1,
+             SellOrderId = sellOrder,
+             BuyOrderId = buyOrder2
+         });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldTwoTradeCommitedAndThreeSellOrderShouldBeRemained()
+        public async void ProcessOrderAsync_Two_Trades_Should_Commit_And_Two_SellOrder_Should_Be_Enqueued()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 2, Side.Sell);
-            await sut.ProcessOrderAsync(10, 1, Side.Sell);
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            var sellOrder1 = await sut.ProcessOrderAsync(10, 1, Side.Sell);
+            var sellOrder2 = await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            var sellOrder3 = await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            var sellOrder4 = await sut.ProcessOrderAsync(10, 2, Side.Sell);
 
             //Act
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+            var buyOrder = await sut.ProcessOrderAsync(10, 6, Side.Buy);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
             Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(3, sut.GetSellOrderCount());
+            Assert.Equal(2, sut.GetSellOrderCount());
             Assert.Equal(6, sut.Trade.Sum(t => t.Amount));
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder1)
+         .FirstOrDefault().Should().BeEquivalentTo(
+         new
+         {
+             Price = 10,
+             Amount = 1,
+             SellOrderId = sellOrder1,
+             BuyOrderId = buyOrder
+         });
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder2)
+         .FirstOrDefault().Should().BeEquivalentTo(
+         new
+         {
+             Price = 10,
+             Amount = 5,
+             SellOrderId = sellOrder2,
+             BuyOrderId = buyOrder
+         });
         }
 
-        [Fact]
-        public async void ProcessOrderAsync_ShouldBuyOrderEnqueInPreQueue()
-        {
-            //Arrange
-            sut.PreOpen();
-            sut.Open();
-            sut.PreOpen();
 
-            //Act
-            await sut.ProcessOrderAsync(10, 5, Side.Buy);
 
-            //Assert
-            Assert.Equal(MarcketState.PreOpen, sut.State);
-            Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(0, sut.GetSellOrderCount());
-            Assert.Equal(1, sut.GetPreOrderQueue().Count);
-        }
+
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldSellOrderEnqueInPreQueue()
-        {
-            //Arrange
-            sut.PreOpen();
-            sut.Open();
-            sut.PreOpen();
-
-            //Act
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-
-            //Assert
-            Assert.Equal(MarcketState.PreOpen, sut.State);
-            Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(1, sut.GetSellOrderCount());
-            Assert.Equal(0, sut.GetPreOrderQueue().Count);
-            Assert.Equal(0, sut.TradeCount);
-            Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(1, sut.GetSellOrderCount());
-        }
-
-        [Fact]
-        public async void ProcessOrderAsync_FourSellOrderExsistAndOneBuyOrderEnters_TwoSellOrderMustExecutedAndBuyOrderMustBeDone()
+        public async void ProcessOrderAsync_Four_SellOrder_Exsist_And_One_BuyOrder_Enters_Two_Trades_Should_Commmit_And_Three_SellOrder_Should_Be_Enqueued()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 2, Side.Sell);
-            await sut.ProcessOrderAsync(10, 1, Side.Sell);
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            var sellOrder1 = await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            var sellOrder2 = await sut.ProcessOrderAsync(10, 2, Side.Sell);
+            var sellOrder3 = await sut.ProcessOrderAsync(10, 1, Side.Sell);
+            var sellOrder4 = await sut.ProcessOrderAsync(10, 5, Side.Sell);
 
             //Act
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
+            var buyOrder = await sut.ProcessOrderAsync(10, 6, Side.Buy);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -383,6 +519,26 @@ namespace Test
             Assert.Equal(10, sut.Trade.First().Price);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(3, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder1)
+            .FirstOrDefault().Should().BeEquivalentTo(
+            new
+            {
+                Price = 10,
+                Amount = 5,
+                SellOrderId = sellOrder1,
+                BuyOrderId = buyOrder
+            });
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder2)
+            .FirstOrDefault().Should().BeEquivalentTo(
+            new
+            {
+                Price = 10,
+                Amount = 1,
+                SellOrderId = sellOrder2,
+                BuyOrderId = buyOrder
+            });
         }
 
         [Fact]
@@ -406,63 +562,58 @@ namespace Test
             Assert.Equal(10, sut.Trade.First().Price);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+
         }
 
+        //[Fact]
+        //public async void ProcessOrderAsync_ShouldOneTradeCommitedAndFiveEventBeRaised()
+        //{
+        //    //arrenge
+        //    sut.PreOpen();
+        //    sut.Open();
+
+        //    var events = new StockMarketEvents()
+        //    {
+        //        OnOrderCreated = onOrderCreated
+        //    };
+
+        //    await sut.ProcessOrderAsync(100, 10, Side.Sell, events: events);
+        //    await sut.ProcessOrderAsync(100, 5, Side.Sell);
+
+        //    //Act
+        //    await sut.ProcessOrderAsync(100, 10, Side.Buy);
+
+        //    //assert
+        //    Assert.Equal(1, sut.TradeCount);
+        //    Assert.Equal(10, sut.Trade.First().Amount);
+        //    Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
+        //    Assert.Equal(100, sut.Trade.First().Price);
+        //    Assert.Equal(0, sut.GetBuyOrderCount());
+        //    Assert.Equal(1, sut.GetSellOrderCount());
+        //    Assert.NotNull(sut.FuncOrderCreated);
+        //}
+        //private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
+        //{
+
+        //    var _orderCommandRepository = new Mock<IOrderCommandRepository>();
+
+        //    _orderCommandRepository.Setup(x => x.AddOrder(It.IsAny<Order>()));
+
+        //    await _orderCommandRepository.Object.AddOrder(order);
+        //}
+
+
         [Fact]
-        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndFiveEventBeRaised()
+        public async void ProcessOrderAsync_One_Trade_Should_Be_Executed_With_Seller_Price()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+            var buyOrder = await sut.ProcessOrderAsync(100, 10, Side.Buy);
 
             //Act
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
-
-            //assert
-            Assert.Equal(1, sut.TradeCount);
-            Assert.Equal(10, sut.Trade.First().Amount);
-            Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
-            Assert.Equal(100, sut.Trade.First().Price);
-            Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(1, sut.GetSellOrderCount());
-        }
-
-        [Fact]
-        public async void ProcessOrderAsync_OneTradeShouldBeExecutedWithTenAmount()
-        {
-            //arrenge
-            sut.PreOpen();
-            sut.Open();
-
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 5, Side.Sell);
-
-            //Act
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
-
-            //assert
-            Assert.Equal(1, sut.TradeCount);
-            Assert.Equal(10, sut.Trade.First().Amount);
-            Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
-            Assert.Equal(100, sut.Trade.First().Price);
-            Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(1, sut.GetSellOrderCount());
-        }
-
-        [Fact]
-        public async void ProcessOrderAsync_OneTradeShouldBeExecutedWithSalePrice()
-        {
-            //arrenge
-            sut.PreOpen();
-            sut.Open();
-
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
-
-            //Act
-            await sut.ProcessOrderAsync(90, 10, Side.Sell);
+            var sellOrder = await sut.ProcessOrderAsync(90, 10, Side.Sell);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -471,10 +622,20 @@ namespace Test
             Assert.Equal(90, sut.Trade.Sum(x => x.Price));
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder)
+            .FirstOrDefault().Should().BeEquivalentTo(
+            new
+            {
+                Price = 90,
+                Amount = 10,
+                SellOrderId = sellOrder,
+                BuyOrderId = buyOrder
+            });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_TradeShouldNotBeExecuted()
+        public async void ProcessOrderAsync_Trade_Should_Not_Be_Executed()
         {
             //arrenge
             sut.PreOpen();
@@ -494,16 +655,16 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_OneTradeShouldBeExecutedWIthSellPrice()
+        public async void ProcessOrderAsync_One_Trade_Should_Be_Executed_With_SellPrice()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            var sellOrder = await sut.ProcessOrderAsync(100, 10, Side.Sell);
 
             //Act
-            await sut.ProcessOrderAsync(110, 10, Side.Buy);
+            var buyOrder = await sut.ProcessOrderAsync(110, 10, Side.Buy);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -511,22 +672,35 @@ namespace Test
             Assert.Equal(100, sut.Trade.Sum(x => x.Price));
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder)
+           .FirstOrDefault().Should().BeEquivalentTo(
+           new
+           {
+               Price = 100,
+               Amount = 10,
+               SellOrderId = sellOrder,
+               BuyOrderId = buyOrder
+           });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_TwoTradeShouldBeExecutedAndRmainAmountShouldBeFifteen()
+        public async void ProcessOrderAsync_Two_Trades_Should_Be_Commited_And_Rmain_Amount_Should_Be_Fifteen()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell);
-            await sut.ProcessOrderAsync(100, 15, Side.Sell);
-            await sut.ProcessOrderAsync(100, 5, Side.Sell);
+            var sellOrder1 = await sut.ProcessOrderAsync(100, 10, Side.Sell);
+
+            var sellOrder2 = await sut.ProcessOrderAsync(100, 15, Side.Sell);
+
+            var sellOrder3 = await sut.ProcessOrderAsync(100, 5, Side.Sell);
+
 
             //Act
-            await sut.ProcessOrderAsync(110, 10, Side.Buy);
-            await sut.ProcessOrderAsync(110, 5, Side.Buy);
+            var buyOrder1 = await sut.ProcessOrderAsync(110, 10, Side.Buy);
+            var buyOrder2 = await sut.ProcessOrderAsync(110, 5, Side.Buy);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -534,23 +708,43 @@ namespace Test
             Assert.Equal(200, sut.Trade.Sum(x => x.Price));
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(2, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder1)
+            .FirstOrDefault().Should().BeEquivalentTo(
+            new
+            {
+                Price = 100,
+                Amount = 10,
+                SellOrderId = sellOrder1,
+                BuyOrderId = buyOrder1
+            });
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder2)
+            .FirstOrDefault().Should().BeEquivalentTo(
+            new
+            {
+                Price = 100,
+                Amount = 5,
+                SellOrderId = sellOrder2,
+                BuyOrderId = buyOrder2
+            });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_TwoTradeShouldBeExecutedAndToalAmountOfTradeShouldBeTwenty()
+        public async void ProcessOrderAsync_Two_Trades_Should_Be_Executed_And_Toal_Amount_Of_Trade_Should_Be_Twenty()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
-            await sut.ProcessOrderAsync(100, 15, Side.Buy);
-            await sut.ProcessOrderAsync(100, 5, Side.Buy);
-            await sut.ProcessOrderAsync(100, 20, Side.Buy);
+            var buyOrder1 = await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            var buyOrder2 = await sut.ProcessOrderAsync(100, 15, Side.Buy);
+            var buyOrder3 = await sut.ProcessOrderAsync(100, 5, Side.Buy);
+            var buyOrder4 = await sut.ProcessOrderAsync(100, 20, Side.Buy);
 
             //Act
-            await sut.ProcessOrderAsync(90, 10, Side.Sell);
-            await sut.ProcessOrderAsync(90, 10, Side.Sell);
+            var sellOrder1 = await sut.ProcessOrderAsync(90, 10, Side.Sell);
+            var sellOrder2 = await sut.ProcessOrderAsync(90, 10, Side.Sell);
 
             //assert
             Assert.Equal(2, sut.TradeCount);
@@ -559,19 +753,40 @@ namespace Test
             Assert.Equal(30, sut.AllOrders.Sum(x => x.Amount));
             Assert.Equal(3, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder1)
+           .FirstOrDefault().Should().BeEquivalentTo(
+           new
+           {
+               Price = 90,
+               Amount = 10,
+               SellOrderId = sellOrder1,
+               BuyOrderId = buyOrder1
+           });
+
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder2)
+           .FirstOrDefault().Should().BeEquivalentTo(
+           new
+           {
+               Price = 90,
+               Amount = 10,
+               SellOrderId = sellOrder2,
+               BuyOrderId = buyOrder2
+           });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldOneTradeBeCommitedAndRemainOrderShouldBeRemoved()
+        public async void ProcessOrderAsync_Should_One_Trade_Be_Commited_And_Remain_Order_Should_Be_Removed_FillAndKill()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
-            await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            var buyOrder = await sut.ProcessOrderAsync(100, 10, Side.Buy);
 
             //Act
-            await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true);
+            var sellOrder = await sut.ProcessOrderAsync(90, 15, Side.Sell, fillAndKill: true);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -580,10 +795,20 @@ namespace Test
             Assert.Equal(0, sut.AllOrdersCount());
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder)
+            .FirstOrDefault().Should().BeEquivalentTo(
+            new
+            {
+                Price = 90,
+                Amount = 10,
+                SellOrderId = sellOrder,
+                BuyOrderId = buyOrder
+            });
         }
 
         [Fact]
-        public async void ProcessOrderAsync_ShouldNotTrade()
+        public async void ProcessOrderAsync_No_Trade_Should_Be_Commited()
         {
             //arrenge
             sut.PreOpen();
@@ -699,7 +924,7 @@ namespace Test
         //}
 
         [Fact]
-        public async void ProcessOrderAsync_1SellOrderEntersOrderSetToCancel1BuyOrderEnter_NoTradeShouldBeExecute()
+        public async void ProcessOrderAsync_OrderEnters_Then_Is_Cancelled_Then_BuyOrder_Enters_And_No_Trade_Should_Be_Commited()
         {
             //arrenge
             sut.PreOpen();
@@ -721,7 +946,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_CancellNoneValidOrder_ThrowException()
+        public async void ProcessOrderAsync_Cancell_None_Exist_Order_Should_Throw_Execption()
         {
             //arrenge
             sut.PreOpen();
@@ -732,26 +957,36 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_1SellOrderEntersOrderGetModified1BuyOrderEnters_OneTradeWithNewAmountShoudExecute()
+        public async void ProcessOrderAsync_Order_Enters_Then_Modified_Trade_Should_Be_Commited_With_New_Price_And_Amount()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
             var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
-            await sut.ProcessOrderAsync(110, 15, Side.Sell);
-            await sut.ModifieOrder(orderId, 100, 5, DateTime.MaxValue);
+            var sellOrderId = await sut.ProcessOrderAsync(110, 15, Side.Sell);
+            var modifiedOrderId = await sut.ModifieOrder(orderId, 100, 5, DateTime.MaxValue);
 
             //Act
-            await sut.ProcessOrderAsync(100, 15, Side.Buy);
+            var buyOrderId = await sut.ProcessOrderAsync(100, 15, Side.Buy);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
             Assert.Equal(5, sut.Trade.Sum(x => x.Amount));
             Assert.Equal(100, sut.Trade.Sum(x => x.Price));
-            Assert.Equal(1, sut.AllOrdersCount());
+            Assert.Equal(2, sut.AllOrdersCount());
             Assert.Equal(1, sut.GetBuyOrderCount());
-            Assert.Equal(0, sut.GetSellOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+
+            sut.Trade.Where(o => o.BuyOrderId == buyOrderId && o.SellOrderId == modifiedOrderId)
+        .FirstOrDefault().Should().BeEquivalentTo(
+        new
+        {
+            Price = 100,
+            Amount = 5,
+            SellOrderId = modifiedOrderId,
+            BuyOrderId = buyOrderId
+        });
         }
 
     }

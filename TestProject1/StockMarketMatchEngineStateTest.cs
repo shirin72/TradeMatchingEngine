@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
@@ -92,6 +93,66 @@ namespace Test
             var sumSellOrderWithPrice100 = sut.AllOrders.Where(x => x.Side == Side.Sell && x.Price == 100).Sum(x => x.Amount);
             Assert.Equal(30, sumSellOrderWithPrice100);
 
+        }
+        [Fact]
+        public async void ProcessOrderAsync_BuyOrder_Should_Enque_In_PreQueue()
+        {
+            //Arrange
+            sut.PreOpen();
+            sut.Open();
+            sut.PreOpen();
+
+            //Act
+            var buyOrder=await sut.ProcessOrderAsync(10, 5, Side.Buy);
+
+            //Assert
+            Assert.Equal(MarcketState.PreOpen, sut.State);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+            Assert.Equal(1, sut.GetPreOrderQueue().Count);
+
+            sut.AllOrders.Where(o => o.Id == buyOrder )
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(
+                new
+                {
+                    Id=buyOrder,
+                    Price = 10,
+                    Amount = 5,
+                    Side= Side.Buy,
+                  
+                });
+        }
+        [Fact]
+        public async void ProcessOrderAsync_SellOrder_Should_Enque_In_SellOrderQueue()
+        {
+            //Arrange
+            sut.PreOpen();
+            sut.Open();
+            sut.PreOpen();
+
+            //Act
+            var sellOrder = await sut.ProcessOrderAsync(10, 5, Side.Sell);
+
+            //Assert
+            Assert.Equal(MarcketState.PreOpen, sut.State);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+            Assert.Empty(sut.GetPreOrderQueue());
+
+            sut.AllOrders.Where(o => o.Id == sellOrder)
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(
+                new
+                {
+                    Id = sellOrder,
+                    Price = 10,
+                    Amount = 5,
+                    Side = Side.Sell,
+
+                });
         }
     }
 }
