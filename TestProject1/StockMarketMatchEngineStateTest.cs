@@ -9,11 +9,11 @@ namespace Test
 {
     public class StockMarketMatchEngineStateTest
     {
-        private StockMarketMatchEngine sut;
+        private StockMarketMatchEngineStateProxy sut;
 
         public StockMarketMatchEngineStateTest()
         {
-            sut = new StockMarketMatchEngine();
+            sut = new StockMarketMatchEngineStateProxy( new StockMarketMatchEngine());
         }
 
         [Fact]
