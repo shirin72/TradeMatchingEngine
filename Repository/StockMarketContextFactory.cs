@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Infrastructure
 {
-    public class BloggingContextFactory : IDesignTimeDbContextFactory<TradeMatchingEngineContext>
+    public class StockMarketContextFactory : IDesignTimeDbContextFactory<TradeMatchingEngineContext>
     {
         public TradeMatchingEngineContext CreateDbContext(string[] args)
         {

@@ -10,6 +10,12 @@ namespace Infrastructure
         {
             this.tradeMatchingEngineContext = tradeMatchingEngineContext;
         }
+
+        public async ValueTask DisposeAsync()
+        {
+            await tradeMatchingEngineContext.DisposeAsync();
+        }
+
         public Task<int> SaveChange()
         {
             var result = tradeMatchingEngineContext.SaveChangesAsync();

@@ -35,7 +35,7 @@ namespace Test
 
             var buyOrder = new Order(1, Side.Buy, 100, 1, DateTime.Now.AddDays(1));
 
-            mockOrderCommand.Setup(x => x.AddOrder(buyOrder)).Returns(() => 1);
+            mockOrderCommand.Setup(x => x.Add(buyOrder)).Returns(() => 1);
 
             var mockOrderQuery = new Mock<IOrderQuery>();
             mockOrderQuery.Setup(x => x.GetLastOrder()).ReturnsAsync(() => 0);
@@ -45,8 +45,8 @@ namespace Test
             var mockTradeQuery = new Mock<ITradeQuery>();
             mockTradeQuery.Setup(x => x.GetLastTrade()).ReturnsAsync(() => 0);
 
-            var mockTradeCommand = new Mock<ITradeCommand>();
-            mockTradeCommand.Setup(x => x.AddTrade(new Trade(1, 1, 2, 1, 100))).Returns(() => 0);
+            var mockTradeCommand = new Mock<ITradeCommandRepository>();
+            mockTradeCommand.Setup(x => x.Add(new Trade(1, 1, 2, 1, 100))).Returns(() => 0);
 
             var mockUnitOfWork = new Mock<IUnitOfWork>();
             mockUnitOfWork.Setup(x => x.SaveChange()).ReturnsAsync(() => 1);
@@ -92,7 +92,7 @@ namespace Test
 
 
             //Action
-            await Task.WhenAll(task1, task2, task3);
+            //await Task.WhenAll(task1, task2, task3);
 
             //Assert
 

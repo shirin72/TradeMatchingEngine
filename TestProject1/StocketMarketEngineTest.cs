@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Test
 {
-    public class StocketMarketEngineTest
+    public class StocketMarketEngineTest:IAsyncDisposable
     {
         private StockMarketMatchEngine sut;
 
@@ -20,7 +20,7 @@ namespace Test
         }
 
         [Fact]
-        public async Task ProcessOrderAsync_Should_Enqueue_One_SellOrder_In_PreOerderQueues_NoTradeShouldCommit()
+        public async Task ProcessOrderAsync_Should_Enqueue_One_SellOrder_And_NoTrades_Should_be_Created_When_Is_In_Preopen_State()
         {
             //Arrange
             sut.PreOpen();
@@ -565,42 +565,43 @@ namespace Test
 
         }
 
-        //[Fact]
-        //public async void ProcessOrderAsync_ShouldOneTradeCommitedAndFiveEventBeRaised()
-        //{
-        //    //arrenge
-        //    sut.PreOpen();
-        //    sut.Open();
+        [Fact]
+        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndFiveEventBeRaised()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
 
-        //    var events = new StockMarketEvents()
-        //    {
-        //        OnOrderCreated = onOrderCreated
-        //    };
+            var events = new StockMarketEvents()
+            {
+                OnOrderCreated = onOrderCreated
+            };
 
-        //    await sut.ProcessOrderAsync(100, 10, Side.Sell, events: events);
-        //    await sut.ProcessOrderAsync(100, 5, Side.Sell);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell, events: events);
+            await sut.ProcessOrderAsync(100, 5, Side.Sell);
 
-        //    //Act
-        //    await sut.ProcessOrderAsync(100, 10, Side.Buy);
+            //Act
+            await sut.ProcessOrderAsync(100, 10, Side.Buy);
 
-        //    //assert
-        //    Assert.Equal(1, sut.TradeCount);
-        //    Assert.Equal(10, sut.Trade.First().Amount);
-        //    Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
-        //    Assert.Equal(100, sut.Trade.First().Price);
-        //    Assert.Equal(0, sut.GetBuyOrderCount());
-        //    Assert.Equal(1, sut.GetSellOrderCount());
-        //    Assert.NotNull(sut.FuncOrderCreated);
-        //}
-        //private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
-        //{
+            //assert
+            Assert.Equal(1, sut.TradeCount);
+            Assert.Equal(10, sut.Trade.First().Amount);
+            Assert.Equal(10, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(100, sut.Trade.First().Price);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+            Assert.NotNull(sut.FuncOrderCreated);
+        }
 
-        //    var _orderCommandRepository = new Mock<IOrderCommandRepository>();
+        private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
+        {
 
-        //    _orderCommandRepository.Setup(x => x.AddOrder(It.IsAny<Order>()));
+            var _orderCommandRepository = new Mock<IOrderCommandRepository>();
 
-        //    await _orderCommandRepository.Object.AddOrder(order);
-        //}
+            _orderCommandRepository.Setup(x => x.Add(It.IsAny<Order>()));
+
+            await _orderCommandRepository.Object.Add(order);
+        }
 
 
         [Fact]
@@ -989,5 +990,9 @@ namespace Test
         });
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            await sut.DisposeAsync();
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace TradeMatchingEngine.UnitOfWork
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork:IAsyncDisposable
     {
         Task<int> SaveChange();
     }

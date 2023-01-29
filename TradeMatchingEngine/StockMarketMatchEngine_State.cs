@@ -44,6 +44,11 @@
             {
                 throw new NotImplementedException();
             }
+
+            ValueTask IAsyncDisposable.DisposeAsync()
+            {
+                throw new NotImplementedException();
+            }
         }
         class Closed : StockMarketState
         {

@@ -21,9 +21,9 @@
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
 
-        //public Func<StockMarketMatchEngine, Order, Task> FuncOrderModified { get { return this.onOrderModified; } }
-        //public Func<StockMarketMatchEngine, Trade, Task> FuncTradeCreated { get { return this.onTradeCreated; } }
-        //public Func<StockMarketMatchEngine, Order, Task> FuncOrderCreated { get { return this.onOrderCreated; } }
+        public Func<StockMarketMatchEngine, Order, Task> FuncOrderModified { get { return this.onOrderModified; } }
+        public Func<StockMarketMatchEngine, Trade, Task> FuncTradeCreated { get { return this.onTradeCreated; } }
+        public Func<StockMarketMatchEngine, Order, Task> FuncOrderCreated { get { return this.onOrderCreated; } }
         #endregion
 
         public StockMarketMatchEngine(List<Order>? orders = null, long lastOrderId = 0, long lastTradeId = 0)
@@ -364,6 +364,11 @@
             }
 
             return id;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await queue.DisposeAsync();
         }
         #endregion
     }

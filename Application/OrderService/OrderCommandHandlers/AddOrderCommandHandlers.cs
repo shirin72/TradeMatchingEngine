@@ -12,7 +12,7 @@ namespace Application.OrderService.OrderCommandHandlers
         private readonly IOrderCommandRepository _orderCommandRepository;
         private readonly IOrderQuery _orderQuery;
         private readonly ITradeQuery _tradeQuery;
-        private readonly ITradeCommand _tradeCommand;
+        private readonly ITradeCommandRepository _tradeCommand;
         private readonly IUnitOfWork _unitOfWork;
         private static SemaphoreSlim _locker = new SemaphoreSlim(int.MaxValue);
         private static StockMarketMatchEngine _stockMarketMatchEngine;
@@ -21,7 +21,7 @@ namespace Application.OrderService.OrderCommandHandlers
             IOrderCommandRepository orderCommandRepository,
             IOrderQuery orderQuery,
             ITradeQuery tradeQuery,
-            ITradeCommand tradeCommand,
+            ITradeCommandRepository tradeCommand,
             IUnitOfWork unitOfWork
             )
         {
@@ -62,12 +62,12 @@ namespace Application.OrderService.OrderCommandHandlers
 
         private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
         {
-            await _orderCommandRepository.AddOrder(order);
+            await _orderCommandRepository.Add(order);
         }
 
         private async Task onTradeCreated(StockMarketMatchEngine stockMarketMatchEngine, Trade trade)
         {
-            await _tradeCommand.AddTrade(trade);
+            await _tradeCommand.Add(trade);
         }
 
         private async Task<StockMarketMatchEngine> getStockMarket()

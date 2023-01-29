@@ -1,19 +1,15 @@
-﻿using TradeMatchingEngine.Trades.Repositories.Command;
+﻿using Infrastructure.Order.QueryRepositories;
+using Microsoft.EntityFrameworkCore;
+using TradeMatchingEngine.Trades.Repositories.Command;
 
 namespace Infrastructure.Trade.QueryRepositories
 {
-    public class TradeCommandRepository : ITradeCommand
+    public class TradeCommandRepository : CommandRepository<TradeMatchingEngine.Trade>,ITradeCommandRepository
     {
         private readonly TradeMatchingEngineContext tradeMatchingEngineContext;
 
-        public TradeCommandRepository(TradeMatchingEngineContext tradeMatchingEngineContext)
+        public TradeCommandRepository(TradeMatchingEngineContext dbcontext) : base(dbcontext)
         {
-            this.tradeMatchingEngineContext = tradeMatchingEngineContext;
-        }
-
-        public async Task AddTrade(TradeMatchingEngine.Trade Trade)
-        {
-             await tradeMatchingEngineContext.Trades.AddAsync(Trade);
         }
     }
 }

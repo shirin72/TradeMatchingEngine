@@ -1,6 +1,6 @@
 ﻿namespace TradeMatchingEngine
 {
-    public interface IStockMarketMatchEngine
+    public interface IStockMarketMatchEngine:IAsyncDisposable
     {
         Task<long?> CancelOrderAsync(long orderId, StockMarketEvents? events = null);
         void Close();
