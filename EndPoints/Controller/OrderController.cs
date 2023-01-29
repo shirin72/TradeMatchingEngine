@@ -8,10 +8,10 @@ namespace EndPoints.Controller
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IAddOrderCommandHandlers addOrderCommandHandlers;
-        public OrderController(IAddOrderCommandHandlers addOrderCommandHandlers)
+
+        public OrderController()
         {
-            this.addOrderCommandHandlers = addOrderCommandHandlers;
+
         }
 
         /// <summary>
@@ -23,16 +23,65 @@ namespace EndPoints.Controller
         /// <param name="expDate"></param>
         /// <param name="isFillAndKill"></param>
         /// <returns></returns>
-        [HttpPost]
-        public async Task<long> ProcessOrder( int price, int amount, Side side, bool isFillAndKill, DateTime expDate)
+        [HttpPatch]
+        public async Task<long> ProcessOrder([FromServices] IAddOrderCommandHandlers handler, int price, int amount, Side side, bool isFillAndKill, DateTime? expDate)
         {
             try
             {
-                expDate = DateTime.Now.AddDays(1);
+                return await handler.Handle(price, amount, side, expDate, isFillAndKill);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
-                var result = await addOrderCommandHandlers.Handle(price, amount, side, expDate, isFillAndKill);
+        /// <summary>
+        /// ModifieOrder
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="orderId"></param>
+        /// <param name="price"></param>
+        /// <param name="amount"></param>
+        /// <param name="expDate"></param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<long> ModifieOrder([FromServices] IModifieOrderCommandHandler handler, long orderId, int price, int amount, DateTime? expDate)
+        {
+            try
+            {
+                var result = await handler.Handle(orderId, price, amount, expDate);
 
-                return result;
+                if (result != null)
+                {
+                    return (long)result;
+                }
+                throw new Exception("Order Not Found");
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// CancellOrder
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        [HttpPut]
+        public async Task<long> CancellOrder([FromServices] ICancellOrderCommandHandler handler, long orderId)
+        {
+            try
+            {
+                var result = await handler.Handle(orderId);
+
+                if (result != null)
+                {
+                    return (long)result;
+                }
+                throw new Exception("Order Not Found");
             }
             catch (Exception ex)
             {

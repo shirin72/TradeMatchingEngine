@@ -36,11 +36,7 @@
             {
                 throw new NotImplementedException();
             }
-            public virtual async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime expirationDate, StockMarketEvents? events = null)
-            {
-                throw new NotImplementedException();
-            }
-            public virtual void ClearQueue()
+            public virtual async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events = null)
             {
                 throw new NotImplementedException();
             }
@@ -63,11 +59,6 @@
 
                
             }
-
-            //public override void ClearQueue()
-            //{
-            //    StockMarketMatchEngine.clearQueue();
-            //}
         }
         class Opened : StockMarketState
         {
@@ -90,7 +81,7 @@
             {
                 return await StockMarketMatchEngine.cancelOrderAsync(orderId, events);
             }
-            public override async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime expirationDate, StockMarketEvents? events = null)
+            public override async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events = null)
             {
                 return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate, events);
             }
@@ -126,7 +117,7 @@
                 return await StockMarketMatchEngine.cancelOrderAsync(orderId, events);
             }
 
-            public override async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime expirationDate, StockMarketEvents? events = null)
+            public override async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events = null)
             {
                 return await StockMarketMatchEngine.modifieOrder(orderId, price, amount, expirationDate, events);
             }

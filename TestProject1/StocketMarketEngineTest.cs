@@ -1,16 +1,18 @@
 using FluentAssertions;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
+using TradeMatchingEngine.Trades.Repositories.Command;
 using Xunit;
 
 
 namespace Test
 {
-    public class StocketMarketEngineTest:IAsyncDisposable
+    public class StocketMarketEngineTest : IAsyncDisposable
     {
         private StockMarketMatchEngine sut;
 
@@ -18,6 +20,8 @@ namespace Test
         {
             sut = new StockMarketMatchEngine();
         }
+
+       
 
         [Fact]
         public async Task ProcessOrderAsync_Should_Enqueue_One_SellOrder_And_NoTrades_Should_be_Created_When_Is_In_Preopen_State()
@@ -51,7 +55,7 @@ namespace Test
         }
 
         [Fact]
-        public async Task ProcessOrderAsync_Should_Enqueue_One_BuyOrder_In_PreOerderQueues_NoTradeShouldCommit()
+        public async Task ProcessOrderAsync_Should_Enqueue_One_BuyOrder_NoTrade_Should_Created_When_Is_In_Preopen_State()
         {
             //Arrange
             sut.PreOpen();
@@ -82,7 +86,7 @@ namespace Test
 
 
         [Fact]
-        public async Task ProcessOrderAsync_Should_One_Trade_Commit_With_Amount10_And_Price100()
+        public async Task ProcessOrderAsync_Should_One_Trade_Create_With_Amount10_And_Price100_When_Is_In_Open_State()
         {
             //Arrange
             sut.PreOpen();
@@ -119,7 +123,7 @@ namespace Test
 
 
         [Fact]
-        public async void ProcessOrderAsync_Should_Not_Execute_Trade_By_ExpiredBuyOrder()
+        public async void ProcessOrderAsync_Should_Not_Create_Trade_By_ExpiredBuyOrder_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -147,7 +151,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Should_Not_Execute_Trade_By_ExpiredSellOrder()
+        public async void ProcessOrderAsync_Should_Not_Create_Trade_By_ExpiredSellOrder_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -175,7 +179,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Should_One_Trade_Commited_And_One_SellOrder_Enqueu_With_Amount_1()
+        public async void ProcessOrderAsync_Should_One_Trade_Created_And_One_SellOrder_Enqueu_With_Amount_1_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -208,7 +212,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Should_One_Trade_Commited_And_One_BuyOrder_Enqueu_With_Amount_1()
+        public async void ProcessOrderAsync_Should_One_Trade_Created_And_One_BuyOrder_Enqueu_With_Amount_1_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -241,7 +245,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Should_One_Trade_Commited_With_2_Amount_And_One_SellOrder_Enqueu_With_Amount3()
+        public async void ProcessOrderAsync_Should_One_Trade_Created_With_2_Amount_And_One_SellOrder_Enqueu_With_Amount3_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -286,7 +290,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Should_Commit_Two_Trades_And_Left_No_Order_In_Queues()
+        public async void ProcessOrderAsync_Should_Create_Two_Trades_And_Left_No_Order_In_Queues_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -327,7 +331,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Two_Trade_Should_Commit_And_One_SellOrder_Should_Be_Enqueued_With_New_Amount()
+        public async void ProcessOrderAsync_Two_Trade_Should_Create_And_One_SellOrder_Should_Be_Enqueued_With_New_Amount_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -367,7 +371,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_One_Trade_Should_Commite_And_One_BuyOrder_Should_Be_Enqueued_With_New_Amount()
+        public async void ProcessOrderAsync_One_Trade_Should_Create_And_One_BuyOrder_Should_Be_Enqueued_With_New_Amount_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -412,7 +416,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_TwoTrade_Should_Commit_And_Three_BuyOrder_Should_Be_Enqueued()
+        public async void ProcessOrderAsync_TwoTrade_Should_Create_And_Three_BuyOrder_Should_Be_Enqueued_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -452,7 +456,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Two_Trades_Should_Commit_And_Two_SellOrder_Should_Be_Enqueued()
+        public async void ProcessOrderAsync_Two_Trades_Should_Create_And_Two_SellOrder_Should_Be_Enqueued_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -497,7 +501,7 @@ namespace Test
 
 
         [Fact]
-        public async void ProcessOrderAsync_Four_SellOrder_Exsist_And_One_BuyOrder_Enters_Two_Trades_Should_Commmit_And_Three_SellOrder_Should_Be_Enqueued()
+        public async void ProcessOrderAsync_Four_SellOrder_Exsist_And_One_BuyOrder_Enters_Two_Trades_Should_Create_And_Three_SellOrder_Should_Be_Enqueued_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -541,32 +545,32 @@ namespace Test
             });
         }
 
+        //[Fact]
+        //public async void ProcessOrderAsync_SixEventShouldBeRaised()
+        //{
+        //    //arrenge
+        //    sut.PreOpen();
+        //    sut.Open();
+
+        //    await sut.ProcessOrderAsync(10, 5, Side.Sell);
+        //    await sut.ProcessOrderAsync(10, 1, Side.Sell);
+
+        //    //Act
+        //    await sut.ProcessOrderAsync(10, 6, Side.Buy);
+
+        //    //assert
+        //    Assert.Equal(2, sut.TradeCount);
+        //    Assert.Equal(5, sut.Trade.First().Amount);
+        //    Assert.Equal(1, sut.Trade.Last().Amount);
+        //    Assert.Equal(6, sut.Trade.Sum(x => x.Amount));
+        //    Assert.Equal(10, sut.Trade.First().Price);
+        //    Assert.Equal(0, sut.GetBuyOrderCount());
+        //    Assert.Equal(0, sut.GetSellOrderCount());
+
+        //}
+
         [Fact]
-        public async void ProcessOrderAsync_SixEventShouldBeRaised()
-        {
-            //arrenge
-            sut.PreOpen();
-            sut.Open();
-
-            await sut.ProcessOrderAsync(10, 5, Side.Sell);
-            await sut.ProcessOrderAsync(10, 1, Side.Sell);
-
-            //Act
-            await sut.ProcessOrderAsync(10, 6, Side.Buy);
-
-            //assert
-            Assert.Equal(2, sut.TradeCount);
-            Assert.Equal(5, sut.Trade.First().Amount);
-            Assert.Equal(1, sut.Trade.Last().Amount);
-            Assert.Equal(6, sut.Trade.Sum(x => x.Amount));
-            Assert.Equal(10, sut.Trade.First().Price);
-            Assert.Equal(0, sut.GetBuyOrderCount());
-            Assert.Equal(0, sut.GetSellOrderCount());
-
-        }
-
-        [Fact]
-        public async void ProcessOrderAsync_ShouldOneTradeCommitedAndFiveEventBeRaised()
+        public async void ProcessOrderAsync_ShouldOneTradeCreatedAndFiveEventBeRaised()
         {
             //arrenge
             sut.PreOpen();
@@ -574,7 +578,8 @@ namespace Test
 
             var events = new StockMarketEvents()
             {
-                OnOrderCreated = onOrderCreated
+                OnOrderCreated = onOrderCreated,
+                OnTradeCreated = onTradeCreated
             };
 
             await sut.ProcessOrderAsync(100, 10, Side.Sell, events: events);
@@ -590,7 +595,6 @@ namespace Test
             Assert.Equal(100, sut.Trade.First().Price);
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
-            Assert.NotNull(sut.FuncOrderCreated);
         }
 
         private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
@@ -603,9 +607,39 @@ namespace Test
             await _orderCommandRepository.Object.Add(order);
         }
 
+        private async Task onTradeCreated(StockMarketMatchEngine stockMarketMatchEngine, Trade trade)
+        {
+
+            var _tradeCommandRepository = new Mock<ITradeCommandRepository>();
+
+            _tradeCommandRepository.Setup(x => x.Add(It.IsAny<Trade>()));
+
+            await _tradeCommandRepository.Object.Add(trade);
+        }
+
+        private async Task onOrderModified(StockMarketMatchEngine stockMarketMatchEngine, Order order)
+        {
+            try
+            {
+                var _orderCommandRepository = new Mock<IOrderCommandRepository>();
+
+                _orderCommandRepository.Setup(x => x.Find(order.Id)).ReturnsAsync(() => order);
+
+                var founndOrder = await _orderCommandRepository.Object.Find(order.Id);
+
+                founndOrder.UpdateBy(order);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+        }
+
 
         [Fact]
-        public async void ProcessOrderAsync_One_Trade_Should_Be_Executed_With_Seller_Price()
+        public async void ProcessOrderAsync_One_Trade_Should_Be_Created_With_Seller_Price_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -636,7 +670,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Trade_Should_Not_Be_Executed()
+        public async void ProcessOrderAsync_Trade_Should_Not_Be_Created_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -656,7 +690,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_One_Trade_Should_Be_Executed_With_SellPrice()
+        public async void ProcessOrderAsync_One_Trade_Should_Be_Created_With_SellPrice_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -686,7 +720,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Two_Trades_Should_Be_Commited_And_Rmain_Amount_Should_Be_Fifteen()
+        public async void ProcessOrderAsync_Two_Trades_Should_Be_Created_And_Rmain_Amount_Should_Be_Fifteen_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -732,7 +766,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Two_Trades_Should_Be_Executed_And_Toal_Amount_Of_Trade_Should_Be_Twenty()
+        public async void ProcessOrderAsync_Two_Trades_Should_Be_Created_And_Toal_Amount_Of_Trade_Should_Be_Twenty_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -778,7 +812,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Should_One_Trade_Be_Commited_And_Remain_Order_Should_Be_Removed_FillAndKill()
+        public async void ProcessOrderAsync_Should_One_Trade_Be_Created_And_Remain_Order_Should_Be_Removed_FillAndKill_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -809,7 +843,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_No_Trade_Should_Be_Commited()
+        public async void ProcessOrderAsync_No_Trade_Should_Be_Created_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -925,7 +959,7 @@ namespace Test
         //}
 
         [Fact]
-        public async void ProcessOrderAsync_OrderEnters_Then_Is_Cancelled_Then_BuyOrder_Enters_And_No_Trade_Should_Be_Commited()
+        public async void ProcessOrderAsync_OrderEnters_Then_Is_Cancelled_Then_BuyOrder_Enters_And_No_Trade_Should_Be_Created_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -947,7 +981,7 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Cancell_None_Exist_Order_Should_Throw_Execption()
+        public async void ProcessOrderAsync_Cancell_Not_Exist_Order_Should_Throw_Execption_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
@@ -958,18 +992,25 @@ namespace Test
         }
 
         [Fact]
-        public async void ProcessOrderAsync_Order_Enters_Then_Modified_Trade_Should_Be_Commited_With_New_Price_And_Amount()
+        public async void ProcessOrderAsync_Order_Enters_Then_Modified_Trade_Should_Be_Created_With_New_Price_And_Amount_When_Is_In_Open_State()
         {
             //arrenge
             sut.PreOpen();
             sut.Open();
 
+            var events = new StockMarketEvents()
+            {
+                OnOrderCreated = onOrderCreated,
+                OnOrderModified = onOrderModified,
+                OnTradeCreated = onTradeCreated
+            };
+
             var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
             var sellOrderId = await sut.ProcessOrderAsync(110, 15, Side.Sell);
-            var modifiedOrderId = await sut.ModifieOrder(orderId, 100, 5, DateTime.MaxValue);
+            var modifiedOrderId = await sut.ModifieOrder(orderId, 100, 5, DateTime.MaxValue, events);
 
             //Act
-            var buyOrderId = await sut.ProcessOrderAsync(100, 15, Side.Buy);
+            var buyOrderId = await sut.ProcessOrderAsync(100, 15, Side.Buy, events: events);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -989,6 +1030,55 @@ namespace Test
             BuyOrderId = buyOrderId
         });
         }
+
+        [Fact]
+        public async void ProcessOrderAsync_Cancell_Order()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            var events = new StockMarketEvents()
+            {
+                OnOrderCreated = onOrderCreated,
+                OnOrderModified = onOrderModified,
+                OnTradeCreated = onTradeCreated
+            };
+
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
+
+            //Act
+            var modifiedOrderId = await sut.CancelOrderAsync(orderId, events);
+
+            //assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(1, sut.AllOrdersCount());
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_Initialize_Orders_And_Enqueue_SellOrder_When_State_Is_Open()
+        {
+            //arrenge
+            var orders = new List<Order>()
+            {
+                new Order(1,Side.Sell,price: 100,amount:2,expireTime: DateTime.Now.AddDays(1))
+            };
+            var sut1 = new StockMarketMatchEngine(orders);
+            sut1.PreOpen();
+            sut1.Open();
+
+            //Act
+          await sut1.ProcessOrderAsync(90, 15, Side.Sell);
+
+            //assert
+            Assert.Equal(0, sut1.TradeCount);
+            Assert.Equal(2, sut1.AllOrdersCount());
+            Assert.Equal(0, sut1.GetBuyOrderCount());
+            Assert.Equal(2, sut1.GetSellOrderCount());
+        }
+
 
         public async ValueTask DisposeAsync()
         {

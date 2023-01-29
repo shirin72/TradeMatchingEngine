@@ -1,4 +1,5 @@
-﻿using TradeMatchingEngine;
+﻿using Application.Utilities;
+using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
 using TradeMatchingEngine.Orders.Repositories.Query;
 using TradeMatchingEngine.Trades.Repositories.Command;
@@ -10,19 +11,21 @@ namespace Application.OrderService.OrderCommandHandlers
     public class AddOrderCommandHandlers : IAddOrderCommandHandlers
     {
         private readonly IOrderCommandRepository _orderCommandRepository;
-        private readonly IOrderQuery _orderQuery;
-        private readonly ITradeQuery _tradeQuery;
+        private readonly IOrderQueryRepository _orderQuery;
+        private readonly ITradeQueryRespository _tradeQuery;
         private readonly ITradeCommandRepository _tradeCommand;
         private readonly IUnitOfWork _unitOfWork;
         private static SemaphoreSlim _locker = new SemaphoreSlim(int.MaxValue);
-        private static StockMarketMatchEngine _stockMarketMatchEngine;
+        //private static StockMarketMatchEngine _stockMarketMatchEngine;
+        private readonly StockMarketUtilities _stockMarketUtilities;
 
         public AddOrderCommandHandlers(
             IOrderCommandRepository orderCommandRepository,
-            IOrderQuery orderQuery,
-            ITradeQuery tradeQuery,
+            IOrderQueryRepository orderQuery,
+            ITradeQueryRespository tradeQuery,
             ITradeCommandRepository tradeCommand,
-            IUnitOfWork unitOfWork
+            IUnitOfWork unitOfWork,
+            StockMarketUtilities stockMarketUtilities
             )
         {
             _orderCommandRepository = orderCommandRepository;
@@ -30,17 +33,18 @@ namespace Application.OrderService.OrderCommandHandlers
             _tradeQuery = tradeQuery;
             _tradeCommand = tradeCommand;
             _unitOfWork = unitOfWork;
+            _stockMarketUtilities = stockMarketUtilities;
         }
 
-        public async Task<long> Handle(int price, int amount, Side side, DateTime expDate, bool isFillAndKill)
+        public async Task<long> Handle(int price, int amount, Side side, DateTime? expDate, bool isFillAndKill)
         {
-            var sm = await getStockMarket();
+            var sm = await _stockMarketUtilities.GetStockMarket();
 
             var events = new StockMarketEvents()
             {
-                OnOrderCreated = onOrderCreated,
-                OnTradeCreated = onTradeCreated,
-                OnOrderModified = onOrderModified,
+                OnOrderCreated =_stockMarketUtilities.onOrderCreated,
+                OnTradeCreated = _stockMarketUtilities.onTradeCreated,
+                OnOrderModified = _stockMarketUtilities.onOrderModified,
             };
 
 
@@ -51,55 +55,54 @@ namespace Application.OrderService.OrderCommandHandlers
             return result;
         }
 
-
         #region Private
-        private async Task onOrderModified(StockMarketMatchEngine stockMarketMatchEngine, Order order)
-        {
-            var founndOrder = await _orderCommandRepository.Find(order.Id);
+        //public async Task onOrderModified(StockMarketMatchEngine stockMarketMatchEngine, Order order)
+        //{
+        //    var founndOrder = await _orderCommandRepository.Find(order.Id);
 
-            founndOrder.UpdateBy(order);
-        }
+        //    founndOrder.UpdateBy(order);
+        //}
 
-        private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
-        {
-            await _orderCommandRepository.Add(order);
-        }
+        //public async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
+        //{
+        //    await _orderCommandRepository.Add(order);
+        //}
 
-        private async Task onTradeCreated(StockMarketMatchEngine stockMarketMatchEngine, Trade trade)
-        {
-            await _tradeCommand.Add(trade);
-        }
+        //public async Task onTradeCreated(StockMarketMatchEngine stockMarketMatchEngine, Trade trade)
+        //{
+        //    await _tradeCommand.Add(trade);
+        //}
 
-        private async Task<StockMarketMatchEngine> getStockMarket()
-        {
-            if (_stockMarketMatchEngine != null)
-            {
-                return _stockMarketMatchEngine;
-            }
+        //public async Task<StockMarketMatchEngine> getStockMarket()
+        //{
+        //    if (_stockMarketMatchEngine != null)
+        //    {
+        //        return _stockMarketMatchEngine;
+        //    }
 
-            await _locker.WaitAsync();
-            try
-            {
-                if (_stockMarketMatchEngine != null)
-                {
-                    return _stockMarketMatchEngine;
-                }
+        //    await _locker.WaitAsync();
+        //    try
+        //    {
+        //        if (_stockMarketMatchEngine != null)
+        //        {
+        //            return _stockMarketMatchEngine;
+        //        }
 
-                var getOrders = await _orderQuery.GetAllOrders();
-                var lastOrderId = await _orderQuery.GetLastOrder();
-                var getLastTrade = await _tradeQuery.GetLastTrade();
-                _stockMarketMatchEngine = new StockMarketMatchEngine(getOrders.ToList(), lastOrderId, getLastTrade);
-                _stockMarketMatchEngine.PreOpen();
-                _stockMarketMatchEngine.Open();
-            }
-            finally
-            {
-                _locker.Release();
-            }
+        //        var getOrders = await _orderQuery.GetAll();
+        //        var lastOrderId = await _orderQuery.GetLastId();
+        //        var getLastTrade = await _tradeQuery.GetLastId();
+        //        _stockMarketMatchEngine = new StockMarketMatchEngine(getOrders.ToList(), lastOrderId, getLastTrade);
+        //        _stockMarketMatchEngine.PreOpen();
+        //        _stockMarketMatchEngine.Open();
+        //    }
+        //    finally
+        //    {
+        //        _locker.Release();
+        //    }
 
 
-            return _stockMarketMatchEngine;
-        }
+        //    return _stockMarketMatchEngine;
+        //}
         #endregion
     }
 }

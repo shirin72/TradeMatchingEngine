@@ -27,6 +27,7 @@ namespace Infrastructure.Order.QueryRepositories
 
         public async Task<T> Find(long id)
         {
+
             return await _dbSet.FindAsync(id);
         }
     }

@@ -26,7 +26,17 @@ namespace Test
             //Assert
             Assert.Throws<NotImplementedException>(() => sut.Open());
         }
+        [Fact]
+        public void StockMarketMatchEngine_Try_To_Close_Market_In_OpenState_Must_Throw_NotImplemented_Exception()
+        {
+            //Arrange
+            sut.PreOpen();
+            sut.Open();
+            //Act
 
+            //Assert
+            Assert.Throws<NotImplementedException>(() => sut.Close());
+        }
         [Fact]
         public void OpenMethod_Should_Change_State_From_PreOpen_To_OpenState()
         {
@@ -70,7 +80,7 @@ namespace Test
         }
 
         [Fact]
-        public async Task ProcessOrderAsync_Several_SellOrder_Should_Enqueue_In_PreOrderQueue_With_No_Trade()
+        public async Task ProcessOrderAsync_Several_SellOrder_Should_Enqueue_When_State_Is_PreOpen()
         {
             //Arrange
             sut.PreOpen();
@@ -95,7 +105,7 @@ namespace Test
 
         }
         [Fact]
-        public async void ProcessOrderAsync_BuyOrder_Should_Enque_In_PreQueue()
+        public async void ProcessOrderAsync_BuyOrder_Should_Enqueue_When_State_Is_PreOpen()
         {
             //Arrange
             sut.PreOpen();
@@ -103,7 +113,7 @@ namespace Test
             sut.PreOpen();
 
             //Act
-            var buyOrder=await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            var buyOrder = await sut.ProcessOrderAsync(10, 5, Side.Buy);
 
             //Assert
             Assert.Equal(MarcketState.PreOpen, sut.State);
@@ -111,21 +121,21 @@ namespace Test
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(1, sut.GetPreOrderQueue().Count);
 
-            sut.AllOrders.Where(o => o.Id == buyOrder )
+            sut.AllOrders.Where(o => o.Id == buyOrder)
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(
                 new
                 {
-                    Id=buyOrder,
+                    Id = buyOrder,
                     Price = 10,
                     Amount = 5,
-                    Side= Side.Buy,
-                  
+                    Side = Side.Buy,
+
                 });
         }
         [Fact]
-        public async void ProcessOrderAsync_SellOrder_Should_Enque_In_SellOrderQueue()
+        public async void ProcessOrderAsync_SellOrder_Should_Enqueue_When_State_Is_PreOpen()
         {
             //Arrange
             sut.PreOpen();
@@ -150,6 +160,39 @@ namespace Test
                     Id = sellOrder,
                     Price = 10,
                     Amount = 5,
+                    Side = Side.Sell,
+
+                });
+        }
+
+        [Fact]
+        public async Task ProcessOrderAsync_Call_ModifieOrder_When_State_Is_PreOpen()
+        {
+            //Arrange
+            sut.PreOpen();
+            var sellOrderId = await sut.ProcessOrderAsync(100, 10, Side.Sell);
+
+            //Act
+           var modifieOrderId=  await sut.ModifieOrder(sellOrderId,110, 10,DateTime.Now.AddDays(1));
+
+            //Assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Empty(sut.Trade);
+            Assert.Equal(2, sut.AllOrdersCount());
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(2, sut.GetSellOrderCount());
+            Assert.Equal(0, sut.GetPreOrderQueueCount());
+            Assert.Equal(0, sut.AllTradeCount());
+
+             sut.AllOrders.Where(x => x.Id== modifieOrderId)
+                .FirstOrDefault()
+                .Should()
+                .BeEquivalentTo(
+                new
+                {
+                    Id = modifieOrderId,
+                    Price = 110,
+                    Amount = 10,
                     Side = Side.Sell,
 
                 });

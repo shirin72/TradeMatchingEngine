@@ -23,12 +23,14 @@ builder.Services.AddDbContext<TradeMatchingEngineContext>(options =>
 );
 
 builder.Services.AddScoped<IOrderCommandRepository, OrderCommandRepository>();
-builder.Services.AddScoped<IOrderQuery, OrderQueryRepository>();
+builder.Services.AddScoped<IOrderQueryRepository, OrderQueryRepository>();
 builder.Services.AddScoped<IAddOrderCommandHandlers, AddOrderCommandHandlers>();
 builder.Services.AddScoped<ITradeCommandRepository, TradeCommandRepository>();
 //builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ITradeQuery, TradeQueryRepository>();
+builder.Services.AddScoped<ITradeQueryRespository, TradeQueryRepository>();
+builder.Services.AddScoped<IModifieOrderCommandHandler, ModifieOrderCommandHandler>();
+builder.Services.AddScoped<ICancellOrderCommandHandler, CancellOrderCommandHandler>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

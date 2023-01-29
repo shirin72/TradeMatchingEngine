@@ -79,10 +79,7 @@
         {
             return sellOrderQueue.Count;
         }
-        public void ClearQueue()
-        {
-            state.ClearQueue();
-        }
+
         public void PreOpen()
         {
             state.PreOpen();
@@ -107,9 +104,9 @@
         {
             return await queue.ExecuteAsync(async () => await state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId, events));
         }
-        public async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime expirationDate, StockMarketEvents events = null)
+        public async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents events = null)
         {
-            return await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate, events));
+            return await queue.ExecuteAsync(async () => await state.ModifieOrder(orderId, price, amount, expirationDate ?? DateTime.MaxValue, events));
         }
         #endregion
 
@@ -347,7 +344,7 @@
             onOrderModified = null;
             onTradeCreated = null;
         }
-        private async Task<long> modifieOrder(long orderId, int price, int amount, DateTime expirationDate, StockMarketEvents? events)
+        private async Task<long> modifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events)
         {
             setupEvents(events);
             long id;
