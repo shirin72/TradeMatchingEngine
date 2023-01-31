@@ -1,11 +1,10 @@
 ﻿namespace TradeMatchingEngine
 {
-    public class StockMarketMatchEngine 
+    public class StockMarketMatchEngine
     {
         #region PrivateField
         private readonly PriorityQueue<Order, Order> sellOrderQueue, buyOrderQueue;
         private readonly Queue<Order> preOrderQueue;
-        private Order _lastOrder;
         private long _lastOrderId;
         private long _lastTradeId;
         #endregion
@@ -32,7 +31,7 @@
 
             foreach (var order in orders ?? new List<Order>())
             {
-                processOrder(order).GetAwaiter().GetResult();
+                processOrder(new StockMarketMatchingEngineProcessContext(), order);
             }
         }
 
@@ -70,12 +69,11 @@
         #endregion
 
         #region Private Method
-        private async Task<Order> createOrderRequest(int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, long? OrderParentId = null)
+        private Order createOrderRequest(StockMarketMatchingEngineProcessContext processContext, int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, long? OrderParentId = null)
         {
-            var order = new Order(id: setId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, isFillAndKill: fillAndKill, OrderParentId);
+            var order = new Order(id: setId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, isFillAndKill: fillAndKill, orderParentId: OrderParentId);
 
-            if (onOrderCreated != null)
-                await onOrderCreated(this, order);
+            processContext.OrderCreated(order);
 
             return order;
         }
@@ -92,30 +90,32 @@
             return Interlocked.Increment(ref _lastOrderId);
         }
 
-        protected async Task<long> preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
+        protected IStockMarketMatchingEngineProcessContext preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
         {
-            var preOrder = await createOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
+            var processContext = new StockMarketMatchingEngineProcessContext();
+            var preOrder = createOrderRequest(processContext, price, amount, side, expireTime, fillAndKill, OrderParentId);
 
             allOrders.Add(preOrder);
 
             if (preOrder.Side == Side.Sell)
             {
                 this.sellOrderQueue.Enqueue(preOrder, preOrder);
-                return preOrder.Id;
+                return processContext;
             }
 
             preOrderQueue.Enqueue(preOrder);
 
-            return preOrder.Id;
+            return processContext;
         }
 
-        protected async Task<long> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
+        protected IStockMarketMatchingEngineProcessContext processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketMatchingEngineProcessContext? processContext = null)
         {
-            var order = await createOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
-            return await processOrder(order);
+            processContext = processContext ?? new StockMarketMatchingEngineProcessContext();
+            var order = createOrderRequest(processContext, price, amount, side, expireTime, fillAndKill, OrderParentId);
+            return processOrder(processContext, order);
         }
 
-        private async Task<long> processOrder(Order order)
+        private IStockMarketMatchingEngineProcessContext processOrder(StockMarketMatchingEngineProcessContext processContext, Order order)
         {
             PriorityQueue<Order, Order> ordersQueue, otherSideOrdersQueue;
 
@@ -137,7 +137,7 @@
                 }
 
                 tradeCount++;
-                await makeTrade(order, peekedOrder);
+                makeTrade(order, peekedOrder);
 
                 if (peekedOrder.HasCompleted)
                 {
@@ -158,14 +158,14 @@
             {
                 ordersQueue.Enqueue(order, order);
 
-                return order.Id;
+                return processContext;
             }
 
             if (order.Amount <= 0 || isFillAndKill)
                 allOrders.Remove(order);
 
 
-            return order.Id;
+            return processContext;
 
 
             void initiateTheQueueSideAndPriceCheck()
@@ -207,7 +207,7 @@
                 isInitialized = true;
             }
 
-            async Task makeTrade(Order order, Order otherSideOrder)
+            void makeTrade(Order order, Order otherSideOrder)
             {
                 var amount = otherSideOrder.Amount > order.Amount ? order.Amount : otherSideOrder.Amount;
 
@@ -222,18 +222,23 @@
                 int currentOrderAmount = order.Amount;
                 order.DecreaseAmount(otherSideOrder.Amount);
 
-                if (onOrderModified != null)
-                    await onOrderModified(this, order);
+                processContext.OrderModified(order.Clone((int)order.OriginalAmount));
+
+                //if (onOrderModified != null)
+                //    await onOrderModified(this, order);
 
                 otherSideOrder.DecreaseAmount(currentOrderAmount);
 
-                if (onOrderModified != null)
-                    await onOrderModified(this, otherSideOrder);
+                //if (onOrderModified != null)
+                //    await onOrderModified(this, otherSideOrder);
+
+                processContext.OrderModified(otherSideOrder.Clone((int)otherSideOrder.OriginalAmount));
 
                 trades.Add(tradeItem);
+                processContext.TradeCreated(tradeItem);
 
-                if (onTradeCreated != null)
-                    await onTradeCreated(this, tradeItem);
+                //if (onTradeCreated != null)
+                //    await onTradeCreated(this, tradeItem);
             }
 
             bool CheckForNotCanceled(Order order)
@@ -251,26 +256,33 @@
             }
         }
 
-        protected async Task<long?> cancelOrderAsync(long orderId, StockMarketEvents? events)
+        protected IStockMarketMatchingEngineProcessContext cancelOrderAsync(long orderId, StockMarketMatchingEngineProcessContext? processContext = null)
         {
+            processContext = processContext ?? new StockMarketMatchingEngineProcessContext();
+
             var findOrder = allOrders.Where(a => a.Id == orderId).SingleOrDefault();
             findOrder?.SetStateCancelled();
 
-            if (onOrderModified != null)
-                await onOrderModified(this, findOrder);
+            processContext.OrderModified(findOrder);
 
-            return findOrder?.Id;
+            //if (onOrderModified != null)
+            //    await onOrderModified(this, findOrder);
+
+            return processContext;
 
         }
 
-        protected async Task<long> modifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events)
+        protected IStockMarketMatchingEngineProcessContext modifieOrder(long orderId, int price, int amount, DateTime? expirationDate)
         {
-            await cancelOrderAsync(orderId, events);
+            var processContext = new StockMarketMatchingEngineProcessContext();
+
+            cancelOrderAsync(orderId, processContext);
 
             var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
-            long id = await processOrderAsync(price, amount, orderSide, expirationDate);
 
-            return id;
+            processOrderAsync(price, amount, orderSide, expirationDate, processContext: processContext);
+
+            return processContext;
         }
 
         #endregion

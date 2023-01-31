@@ -7,13 +7,13 @@ namespace TradeMatchingEngine
     {
         private OrderState _state;
 
-        public Order(long id, Side side, int price, int amount, DateTime expireTime, bool? isFillAndKill = null, long? orderParentId = null)
+        public Order(long id, Side side, int price, int amount, DateTime expireTime, int? originalAmount=null, bool? isFillAndKill = null, long? orderParentId = null)
         {
             this.Id = id;
             this.Side = side;
             this.Price = price;
             this.Amount = amount;
-            this.OriginalAmount = amount;
+            this.OriginalAmount = originalAmount ?? amount;
             this.IsFillAndKill = isFillAndKill;
             this.ExpireTime = expireTime;
             this._state = OrderState.Register;
@@ -26,7 +26,7 @@ namespace TradeMatchingEngine
         public Side Side { get; private set; }
 
         public int Price { get; private set; }
-        public int OriginalAmount { get; private set; }
+        public int? OriginalAmount { get; private set; }
 
         public int Amount { get; private set; }
 
@@ -76,9 +76,9 @@ namespace TradeMatchingEngine
             Side = order.Side;
             _state = order.OrderState;
         }
-        internal Order Clone()
+        internal Order Clone(int originalAmount)
         {
-            return new Order(Id, Side, Price, Amount, ExpireTime, IsFillAndKill, OrderParentId);
+            return new Order(Id, Side, Price, Amount, ExpireTime, originalAmount, IsFillAndKill, OrderParentId);
         }
     }
 }

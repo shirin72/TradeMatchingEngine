@@ -121,13 +121,13 @@ namespace Test
             Assert.Equal(0, sut.GetSellOrderCount());
             Assert.Equal(1, sut.GetPreOrderQueue().Count);
 
-            sut.AllOrders.Where(o => o.Id == buyOrder)
+            sut.AllOrders.Where(o => o.Id == buyOrder.Order.Id)
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(
                 new
                 {
-                    Id = buyOrder,
+                    Id = buyOrder.Order.Id,
                     Price = 10,
                     Amount = 5,
                     Side = Side.Buy,
@@ -151,13 +151,13 @@ namespace Test
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Empty(sut.GetPreOrderQueue());
 
-            sut.AllOrders.Where(o => o.Id == sellOrder)
+            sut.AllOrders.Where(o => o.Id == sellOrder.Order.Id)
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(
                 new
                 {
-                    Id = sellOrder,
+                    Id = sellOrder.Order.Id,
                     Price = 10,
                     Amount = 5,
                     Side = Side.Sell,
@@ -173,7 +173,7 @@ namespace Test
             var sellOrderId = await sut.ProcessOrderAsync(100, 10, Side.Sell);
 
             //Act
-           var modifieOrderId=  await sut.ModifieOrder(sellOrderId,110, 10,DateTime.Now.AddDays(1));
+           var modifieOrderId=  await sut.ModifieOrder(sellOrderId.Order.Id,110, 10,DateTime.Now.AddDays(1));
 
             //Assert
             Assert.Equal(0, sut.TradeCount);
@@ -184,13 +184,13 @@ namespace Test
             Assert.Equal(0, sut.GetPreOrderQueueCount());
             Assert.Equal(0, sut.AllTradeCount());
 
-             sut.AllOrders.Where(x => x.Id== modifieOrderId)
+             sut.AllOrders.Where(x => x.Id== modifieOrderId.Order.Id)
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(
                 new
                 {
-                    Id = modifieOrderId,
+                    Id = modifieOrderId.Order.Id,
                     Price = 110,
                     Amount = 10,
                     Side = Side.Sell,

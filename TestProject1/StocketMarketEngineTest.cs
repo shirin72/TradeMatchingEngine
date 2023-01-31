@@ -1,15 +1,11 @@
-using Application.Factories;
 using FluentAssertions;
 using Moq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
-using TradeMatchingEngine.Orders.Repositories.Query;
 using TradeMatchingEngine.Trades.Repositories.Command;
-using TradeMatchingEngine.Trades.Repositories.Query;
 using Xunit;
 
 
@@ -58,7 +54,7 @@ namespace Test
             Assert.Equal(0, sut.AllTradeCount());
 
             sut.AllOrders
-                .Where(o => o.Id == sellOrderId).
+                .Where(o => o.Id == sellOrderId.Order.Id).
                 FirstOrDefault().
                 Should().
                 BeEquivalentTo(new
@@ -88,7 +84,8 @@ namespace Test
             Assert.Equal(0, sut.AllTradeCount());
 
             sut.AllOrders
-                .Where(o => o.Id == buyOrderId)
+                .Where(o => o.Id == buyOrderId.Order.Id)
+                
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(new
@@ -129,9 +126,9 @@ namespace Test
                 new
                 {
                     Id = 1,
-                    BuyOrderId = buyOrderId
+                    BuyOrderId = buyOrderId.Order.Id
                     ,
-                    SellOrderId = sellOrderId,
+                    SellOrderId = sellOrderId.Order.Id,
                     Amount = 10,
                     Price = 100
                 });
@@ -155,7 +152,7 @@ namespace Test
             Assert.Equal(0, sut.AllTradeCount());
 
             sut.AllOrders
-                .Where(o => o.Id == sellOrderId)
+                .Where(o => o.Id == sellOrderId.Order.Id)
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(new
@@ -183,7 +180,7 @@ namespace Test
             Assert.Equal(0, sut.AllTradeCount());
 
             sut.AllOrders
-                .Where(o => o.Id == buyOrderId)
+                .Where(o => o.Id == buyOrderId.Order.Id)
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(new
@@ -216,7 +213,7 @@ namespace Test
             Assert.Equal(1, sut.Trade.First().Amount);
 
             sut.AllOrders
-                 .Where(o => o.Id == sellOrderId)
+                 .Where(o => o.Id == sellOrderId.Order.Id)
                  .FirstOrDefault()
                  .Should()
                  .BeEquivalentTo(new
@@ -249,7 +246,7 @@ namespace Test
             Assert.Equal(1, sut.Trade.First().Amount);
 
             sut.AllOrders
-               .Where(o => o.Id == buyOrderId)
+               .Where(o => o.Id == buyOrderId.Order.Id)
                .FirstOrDefault()
                .Should()
                .BeEquivalentTo(new
@@ -283,7 +280,7 @@ namespace Test
             Assert.Equal(2, sut.Trade.First().Amount);
 
             var buyOrder = sut.AllOrders
-                .Where(o => o.Id == sellOrderId)
+                .Where(o => o.Id == sellOrderId.Order.Id)
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(new
@@ -294,14 +291,14 @@ namespace Test
                 });
 
             sut.Trade
-                .Where(o => o.BuyOrderId == buyOrderId && o.SellOrderId == sellOrderId)
+                .Where(o => o.BuyOrderId == buyOrderId.Order.Id && o.SellOrderId == sellOrderId.Order.Id)
                 .FirstOrDefault().Should().BeEquivalentTo(
                 new
                 {
                     Price = 10,
                     Amount = 2,
-                    SellOrderId = sellOrderId,
-                    BuyOrderId = buyOrderId
+                    SellOrderId = sellOrderId.Order.Id,
+                    BuyOrderId = buyOrderId.Order.Id
                 });
         }
 
@@ -325,24 +322,24 @@ namespace Test
             Assert.Equal(0, sut.GetPreOrderQueueCount());
 
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1.Order.Id && o.SellOrderId == sellOrder.Order.Id)
                 .FirstOrDefault().Should().BeEquivalentTo(
                 new
                 {
                     Price = 10,
                     Amount = 50,
-                    SellOrderId = sellOrder,
-                    BuyOrderId = buyOrder1
+                    SellOrderId = sellOrder.Order.Id,
+                    BuyOrderId = buyOrder1.Order.Id
                 });
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2.Order.Id && o.SellOrderId == sellOrder.Order.Id)
             .FirstOrDefault().Should().BeEquivalentTo(
             new
             {
                 Price = 10,
                 Amount = 50,
-                SellOrderId = sellOrder,
-                BuyOrderId = buyOrder2
+                SellOrderId = sellOrder.Order.Id,
+                BuyOrderId = buyOrder2.Order.Id
             });
         }
 
@@ -365,24 +362,24 @@ namespace Test
             Assert.Equal(1, sut.GetSellOrderCount());
             Assert.Equal(0, sut.GetPreOrderQueueCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder1)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder1.Order.Id)
            .FirstOrDefault().Should().BeEquivalentTo(
            new
            {
                Price = 10,
                Amount = 5,
-               SellOrderId = sellOrder1,
-               BuyOrderId = buyOrder
+               SellOrderId = sellOrder1.Order.Id,
+               BuyOrderId = buyOrder.Order.Id
            });
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder2)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder2.Order.Id)
          .FirstOrDefault().Should().BeEquivalentTo(
          new
          {
              Price = 10,
              Amount = 1,
-             SellOrderId = sellOrder2,
-             BuyOrderId = buyOrder
+             SellOrderId = sellOrder2.Order.Id,
+             BuyOrderId = buyOrder.Order.Id
          });
         }
 
@@ -410,24 +407,24 @@ namespace Test
             Assert.Equal(10, sut.Trade.First().Price);
             Assert.Equal(1, sut.AllOrders.Where(x => x.Side == Side.Buy).Select(x => x.Amount).First());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1.Order.Id && o.SellOrderId == sellOrder.Order.Id)
          .FirstOrDefault().Should().BeEquivalentTo(
          new
          {
              Price = 10,
              Amount = 5,
-             SellOrderId = sellOrder,
-             BuyOrderId = buyOrder1
+             SellOrderId = sellOrder.Order.Id,
+             BuyOrderId = buyOrder1.Order.Id
          });
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2.Order.Id && o.SellOrderId == sellOrder.Order.Id)
          .FirstOrDefault().Should().BeEquivalentTo(
          new
          {
              Price = 10,
              Amount = 1,
-             SellOrderId = sellOrder,
-             BuyOrderId = buyOrder2
+             SellOrderId = sellOrder.Order.Id,
+             BuyOrderId = buyOrder2.Order.Id
          });
         }
 
@@ -451,23 +448,23 @@ namespace Test
             Assert.Equal(3, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1.Order.Id && o.SellOrderId == sellOrder.Order.Id)
           .FirstOrDefault().Should().BeEquivalentTo(
           new
           {
               Price = 10,
               Amount = 5,
-              SellOrderId = sellOrder,
-              BuyOrderId = buyOrder1
+              SellOrderId = sellOrder.Order.Id,
+              BuyOrderId = buyOrder1.Order.Id
           });
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2.Order.Id && o.SellOrderId == sellOrder.Order.Id)
          .FirstOrDefault().Should().BeEquivalentTo(
          new
          {
              Price = 10,
              Amount = 1,
-             SellOrderId = sellOrder,
-             BuyOrderId = buyOrder2
+             SellOrderId = sellOrder.Order.Id,
+             BuyOrderId = buyOrder2.Order.Id
          });
         }
 
@@ -492,23 +489,23 @@ namespace Test
             Assert.Equal(2, sut.GetSellOrderCount());
             Assert.Equal(6, sut.Trade.Sum(t => t.Amount));
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder1)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder1.Order.Id)
          .FirstOrDefault().Should().BeEquivalentTo(
          new
          {
              Price = 10,
              Amount = 1,
-             SellOrderId = sellOrder1,
-             BuyOrderId = buyOrder
+             SellOrderId = sellOrder1.Order.Id,
+             BuyOrderId = buyOrder.Order.Id
          });
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder2)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder2.Order.Id)
          .FirstOrDefault().Should().BeEquivalentTo(
          new
          {
              Price = 10,
              Amount = 5,
-             SellOrderId = sellOrder2,
-             BuyOrderId = buyOrder
+             SellOrderId = sellOrder2.Order.Id,
+             BuyOrderId = buyOrder.Order.Id
          });
         }
 
@@ -540,24 +537,24 @@ namespace Test
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(3, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder1)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder1.Order.Id)
             .FirstOrDefault().Should().BeEquivalentTo(
             new
             {
                 Price = 10,
                 Amount = 5,
-                SellOrderId = sellOrder1,
-                BuyOrderId = buyOrder
+                SellOrderId = sellOrder1.Order.Id,
+                BuyOrderId = buyOrder.Order.Id
             });
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder2)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder2.Order.Id)
             .FirstOrDefault().Should().BeEquivalentTo(
             new
             {
                 Price = 10,
                 Amount = 1,
-                SellOrderId = sellOrder2,
-                BuyOrderId = buyOrder
+                SellOrderId = sellOrder2.Order.Id,
+                BuyOrderId = buyOrder.Order.Id
             });
         }
 
@@ -598,7 +595,7 @@ namespace Test
                 OnTradeCreated = onTradeCreated
             };
 
-            await sut.ProcessOrderAsync(100, 10, Side.Sell, events: events);
+            await sut.ProcessOrderAsync(100, 10, Side.Sell);
             await sut.ProcessOrderAsync(100, 5, Side.Sell);
 
             //Act
@@ -666,14 +663,14 @@ namespace Test
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder.Order.Id)
             .FirstOrDefault().Should().BeEquivalentTo(
             new
             {
                 Price = 90,
                 Amount = 10,
-                SellOrderId = sellOrder,
-                BuyOrderId = buyOrder
+                SellOrderId = sellOrder.Order.Id,
+                BuyOrderId = buyOrder.Order.Id
             });
         }
 
@@ -716,14 +713,14 @@ namespace Test
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder.Order.Id)
            .FirstOrDefault().Should().BeEquivalentTo(
            new
            {
                Price = 100,
                Amount = 10,
-               SellOrderId = sellOrder,
-               BuyOrderId = buyOrder
+               SellOrderId = sellOrder.Order.Id,
+               BuyOrderId = buyOrder.Order.Id
            });
         }
 
@@ -752,24 +749,24 @@ namespace Test
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(2, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder1)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1.Order.Id && o.SellOrderId == sellOrder1.Order.Id)
             .FirstOrDefault().Should().BeEquivalentTo(
             new
             {
                 Price = 100,
                 Amount = 10,
-                SellOrderId = sellOrder1,
-                BuyOrderId = buyOrder1
+                SellOrderId = sellOrder1.Order.Id,
+                BuyOrderId = buyOrder1.Order.Id
             });
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder2)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2.Order.Id && o.SellOrderId == sellOrder2.Order.Id)
             .FirstOrDefault().Should().BeEquivalentTo(
             new
             {
                 Price = 100,
                 Amount = 5,
-                SellOrderId = sellOrder2,
-                BuyOrderId = buyOrder2
+                SellOrderId = sellOrder2.Order.Id,
+                BuyOrderId = buyOrder2.Order.Id
             });
         }
 
@@ -797,25 +794,25 @@ namespace Test
             Assert.Equal(3, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder1 && o.SellOrderId == sellOrder1)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder1.Order.Id && o.SellOrderId == sellOrder1.Order.Id)
            .FirstOrDefault().Should().BeEquivalentTo(
            new
            {
                Price = 90,
                Amount = 10,
-               SellOrderId = sellOrder1,
-               BuyOrderId = buyOrder1
+               SellOrderId = sellOrder1.Order.Id,
+               BuyOrderId = buyOrder1.Order.Id
            });
 
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder2 && o.SellOrderId == sellOrder2)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder2.Order.Id && o.SellOrderId == sellOrder2.Order.Id)
            .FirstOrDefault().Should().BeEquivalentTo(
            new
            {
                Price = 90,
                Amount = 10,
-               SellOrderId = sellOrder2,
-               BuyOrderId = buyOrder2
+               SellOrderId = sellOrder2.Order.Id,
+               BuyOrderId = buyOrder2.Order.Id
            });
         }
 
@@ -839,14 +836,14 @@ namespace Test
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(0, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrder && o.SellOrderId == sellOrder)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrder.Order.Id && o.SellOrderId == sellOrder.Order.Id)
             .FirstOrDefault().Should().BeEquivalentTo(
             new
             {
                 Price = 90,
                 Amount = 10,
-                SellOrderId = sellOrder,
-                BuyOrderId = buyOrder
+                SellOrderId = sellOrder.Order.Id,
+                BuyOrderId = buyOrder.Order.Id
             });
         }
 
@@ -974,7 +971,7 @@ namespace Test
             sut.Open();
 
             var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
-            await sut.CancelOrderAsync(orderId);
+            await sut.CancelOrderAsync(orderId.Order.Id);
 
             //Act
             await sut.ProcessOrderAsync(90, 15, Side.Buy);
@@ -999,7 +996,7 @@ namespace Test
 
 
             //Act
-            await sut.CancelOrderAsync(orderId);
+            await sut.CancelOrderAsync(orderId.Order.Id);
 
             //assert
             Assert.Equal(0, sut.TradeCount);
@@ -1028,19 +1025,14 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            var events = new StockMarketEvents()
-            {
-                OnOrderCreated = onOrderCreated,
-                OnOrderModified = onOrderModified,
-                OnTradeCreated = onTradeCreated
-            };
+           
 
             var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
             var sellOrderId = await sut.ProcessOrderAsync(110, 15, Side.Sell);
-            var modifiedOrderId = await sut.ModifieOrder(orderId, 100, 5, DateTime.MaxValue, events);
+            var modifiedOrderId = await sut.ModifieOrder(orderId.Order.Id, 100, 5, DateTime.MaxValue);
 
             //Act
-            var buyOrderId = await sut.ProcessOrderAsync(100, 15, Side.Buy, events: events);
+            var buyOrderId = await sut.ProcessOrderAsync(100, 15, Side.Buy);
 
             //assert
             Assert.Equal(1, sut.TradeCount);
@@ -1050,14 +1042,14 @@ namespace Test
             Assert.Equal(1, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
 
-            sut.Trade.Where(o => o.BuyOrderId == buyOrderId && o.SellOrderId == modifiedOrderId)
+            sut.Trade.Where(o => o.BuyOrderId == buyOrderId.Order.Id && o.SellOrderId == modifiedOrderId.Order.Id)
         .FirstOrDefault().Should().BeEquivalentTo(
         new
         {
             Price = 100,
             Amount = 5,
-            SellOrderId = modifiedOrderId,
-            BuyOrderId = buyOrderId
+            SellOrderId = modifiedOrderId.Order.Id,
+            BuyOrderId = buyOrderId.Order.Id
         });
         }
 
@@ -1068,17 +1060,12 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-            var events = new StockMarketEvents()
-            {
-                OnOrderCreated = onOrderCreated,
-                OnOrderModified = onOrderModified,
-                OnTradeCreated = onTradeCreated
-            };
 
-            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell, null, false, null, events);
+
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell, null, false, null);
 
             //Act
-            var modifiedOrderId = await sut.CancelOrderAsync(orderId, events);
+            var modifiedOrderId = await sut.CancelOrderAsync(orderId.Order.Id);
 
             //assert
             Assert.Equal(0, sut.TradeCount);

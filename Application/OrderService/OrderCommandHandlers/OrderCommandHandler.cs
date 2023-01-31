@@ -8,7 +8,7 @@ using TradeMatchingEngine.UnitOfWork;
 
 namespace Application.OrderService.OrderCommandHandlers
 {
-    public abstract class CommandHandler<T>:ICommandHandler<T>
+    public abstract class CommandHandler<T1> :ICommandHandler<T1>
     {
         protected readonly IStockMarketFactory _stockMarketFactory;
         protected readonly IOrderCommandRepository _orderCommandRepository;
@@ -26,34 +26,18 @@ namespace Application.OrderService.OrderCommandHandlers
             _tradeQuery = tradeQueryRespository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<long?> Handle(T command)
+        public async Task<long ?> Handle(T1 command)
         {
             _stockMarketMatchEngine = await _stockMarketFactory.GetStockMarket(_orderQuery, _tradeQuery);
 
-            var events = new StockMarketEvents()
-            {
-                OnOrderCreated = async (_stockMarketMatchEngine, order) =>
-                {
-                    await _orderCommandRepository.Add(order);
-                },
-                OnTradeCreated = async (_stockMarketMatchEngine, trade) =>
-                {
-                    await _tradeCommandRepository.Add(trade);
-                },
-                OnOrderModified = async (_stockMarketMatchEngine, order) =>
-                {
-                    (await _orderCommandRepository.Find(order.Id))?.UpdateBy(order);
-                }
-            };
-
-            var result = await SpecificHandle(command, events);
+            var result = await SpecificHandle(command);
 
             await _unitOfWork.SaveChange();
 
             return result;
         }
 
-        protected abstract Task<long> SpecificHandle(T? command, StockMarketEvents? events = null);
+        protected abstract Task<long> SpecificHandle(T1? command);
 
     }
 }

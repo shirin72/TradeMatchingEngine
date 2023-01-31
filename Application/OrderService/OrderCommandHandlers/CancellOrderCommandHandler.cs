@@ -14,9 +14,17 @@ namespace Application.OrderService.OrderCommandHandlers
         {
         }
 
-        protected async override Task<long> SpecificHandle(long orderId, StockMarketEvents? events = null)
+        protected async override Task<long> SpecificHandle(long orderId)
         {
-            return await this._stockMarketMatchEngine.CancelOrderAsync(orderId, events) ?? 0;
+            var result = await this._stockMarketMatchEngine.CancelOrderAsync(orderId);
+
+            foreach (var order in result.ModifiedOrders)
+            {
+                var findOrder = await this._orderCommandRepository.Find(order.Id);
+                findOrder.UpdateBy(order);
+            }
+
+            return result.ModifiedOrders == null ? 0 : result.ModifiedOrders.FirstOrDefault().Id;
         }
     }
 }

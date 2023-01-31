@@ -20,9 +20,24 @@ namespace Application.OrderService.OrderCommandHandlers
         {
         }
 
-        protected async override Task<long> SpecificHandle(ModifieOrderCommand? command, StockMarketEvents? events = null)
+        protected async override Task<long> SpecificHandle(ModifieOrderCommand? command)
         {
-            return await this._stockMarketMatchEngine.ModifieOrder(command.OrderId, command.Price, command.Amount, command.ExpDate, events) ?? 0;
+            var result = await this._stockMarketMatchEngine.ModifieOrder(command.OrderId, command.Price, command.Amount, command.ExpDate);
+
+            await _orderCommandRepository.Add(result.Order);
+
+            foreach (var order in result.ModifiedOrders)
+            {
+                var findOrder = await this._orderCommandRepository.Find(order.Id);
+                findOrder.UpdateBy(order);
+            }
+
+            foreach (var trade in result.CreatedTrades)
+            {
+                await _tradeCommandRepository.Add(trade);
+            }
+
+            return result.Order.Id;
         }
     }
 }
