@@ -74,6 +74,7 @@ namespace TradeMatchingEngine
             ExpireTime = order.ExpireTime;
             IsFillAndKill = order.IsFillAndKill;
             Side = order.Side;
+            _state = order.OrderState;
         }
 
     }

@@ -13,7 +13,7 @@ namespace Test
 
         public StockMarketMatchEngineStateTest()
         {
-            sut = new StockMarketMatchEngineStateProxy( new StockMarketMatchEngine());
+            sut = new StockMarketMatchEngineStateProxy();
         }
 
         [Fact]

@@ -16,10 +16,19 @@ namespace Infrastructure
             await tradeMatchingEngineContext.DisposeAsync();
         }
 
-        public Task<int> SaveChange()
+        public async Task<int> SaveChange()
         {
-            var result = tradeMatchingEngineContext.SaveChangesAsync();
-            return result;
+            try
+            {
+                var result = await tradeMatchingEngineContext.SaveChangesAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+           
         }
     }
 }

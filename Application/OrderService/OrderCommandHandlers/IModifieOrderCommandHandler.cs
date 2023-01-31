@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TradeMatchingEngine.Orders.Commands;
 
 namespace Application.OrderService.OrderCommandHandlers
 {
-    public interface IModifieOrderCommandHandler
+    public interface ICommandHandler<T>
     {
-        Task<long?> Handle(long orderId, int price, int amount, DateTime? expDate);
-
+        Task<long?> Handle(T modifieOrcommandderCommand);
+    }
+    public interface IModifieOrderCommandHandler:ICommandHandler<ModifieOrderCommand>
+    {
     }
 }

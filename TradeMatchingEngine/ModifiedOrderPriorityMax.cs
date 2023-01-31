@@ -10,12 +10,10 @@
                 {
                     return 1;
                 }
-                else if (x.Id < y.Id)
+                else 
                 {
                     return -1;
                 }
-
-                return 0;
             }
             else if (x.Price < y.Price)
             {

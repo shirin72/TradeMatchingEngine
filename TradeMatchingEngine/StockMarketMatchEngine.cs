@@ -1,28 +1,23 @@
 ﻿namespace TradeMatchingEngine
 {
-    public class StockMarketMatchEngine : IStockMarketMatchEngine
+    public class StockMarketMatchEngine 
     {
         #region PrivateField
         private readonly PriorityQueue<Order, Order> sellOrderQueue, buyOrderQueue;
         private readonly Queue<Order> preOrderQueue;
-        private readonly BlockingQueue queue;
         private Order _lastOrder;
         private long _lastOrderId;
         private long _lastTradeId;
         #endregion
 
         #region PublicProperties
-        //public MarcketState State => state.Code;
-        private Func<StockMarketMatchEngine, Order, Task> onOrderModified;
-        private Func<StockMarketMatchEngine, Trade, Task> onTradeCreated;
-        private Func<StockMarketMatchEngine, Order, Task> onOrderCreated;
+        protected Func<StockMarketMatchEngine, Order, Task> onOrderModified;
+        protected Func<StockMarketMatchEngine, Trade, Task> onTradeCreated;
+        protected Func<StockMarketMatchEngine, Order, Task> onOrderCreated;
         private bool isInitialized = false;
         public int TradeCount => tradeCount;
         public Order LastOrder => _lastOrder;
 
-        public Func<StockMarketMatchEngine, Order, Task> FuncOrderModified { get { return this.onOrderModified; } }
-        public Func<StockMarketMatchEngine, Trade, Task> FuncTradeCreated { get { return this.onTradeCreated; } }
-        public Func<StockMarketMatchEngine, Order, Task> FuncOrderCreated { get { return this.onOrderCreated; } }
         #endregion
 
         public StockMarketMatchEngine(List<Order>? orders = null, long lastOrderId = 0, long lastTradeId = 0)
@@ -31,10 +26,10 @@
             this.buyOrderQueue = new PriorityQueue<Order, Order>(new ModifiedOrderPriorityMax());
 
             preOrderQueue = new Queue<Order>();
-          
-            queue = new BlockingQueue();
+
             _lastOrderId = lastOrderId;
             _lastTradeId = lastTradeId;
+
             allOrders = new List<Order>();
 
             foreach (var order in orders ?? new List<Order>())
@@ -54,10 +49,7 @@
         public int AllOrdersCount() => allOrders.Count;
         public IEnumerable<Trade> Trade => trades;
         public int AllTradeCount() => trades.Count;
-        public PriorityQueue<Order, Order> GetSellOrderQueue()
-        {
-            return sellOrderQueue;
-        }
+
         public Queue<Order> GetPreOrderQueue()
         {
             return preOrderQueue;
@@ -66,10 +58,7 @@
         {
             return preOrderQueue.Count;
         }
-        public PriorityQueue<Order, Order> GetBuyOrderQueue()
-        {
-            return buyOrderQueue;
-        }
+
         public int GetBuyOrderCount()
         {
             return buyOrderQueue.Count;
@@ -79,22 +68,7 @@
             return sellOrderQueue.Count;
         }
 
-        public IEnumerable<Trade> GetAllTradeByOrderId(int orderId)
-        {
-            return trades.Where(x => x.Id == orderId).ToList();
-        }
-        public virtual async Task<long?> CancelOrderAsync(long orderId, StockMarketEvents? events = null)
-        {
-            return await queue.ExecuteAsync(async () => await cancelOrderAsync(orderId, events));
-        }
-        public virtual async Task<long> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null, StockMarketEvents events = null)
-        {
-            return await queue.ExecuteAsync(async () => await processOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId, events));
-        }
-        public virtual async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents events = null)
-        {
-            return await queue.ExecuteAsync(async () => await modifieOrder(orderId, price, amount, expirationDate ?? DateTime.MaxValue, events));
-        }
+
         #endregion
 
         #region Private Method
@@ -120,44 +94,27 @@
             return Interlocked.Increment(ref _lastOrderId);
         }
 
-        private async Task<long> preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
+        protected async Task<long> preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
         {
-            setupEvents(events);
-            try
+            var preOrder = await createOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
+
+            allOrders.Add(preOrder);
+
+            if (preOrder.Side == Side.Sell)
             {
-                var preOrder = await createOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
-
-                allOrders.Add(preOrder);
-
-                if (preOrder.Side == Side.Sell)
-                {
-                    this.sellOrderQueue.Enqueue(preOrder, preOrder);
-                    return preOrder.Id;
-                }
-
-                preOrderQueue.Enqueue(preOrder);
-
+                this.sellOrderQueue.Enqueue(preOrder, preOrder);
                 return preOrder.Id;
             }
-            finally
-            {
-                clearEvents();
-            }
+
+            preOrderQueue.Enqueue(preOrder);
+
+            return preOrder.Id;
         }
 
-        private async Task<long> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
+        protected async Task<long> processOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
         {
-            setupEvents(events);
-
-            try
-            {
-                var order = await createOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
-                return await processOrder(order);
-            }
-            finally
-            {
-                clearEvents();
-            }
+            var order = await createOrderRequest(price, amount, side, expireTime, fillAndKill, OrderParentId);
+            return await processOrder(order);
         }
 
         private async Task<long> processOrder(Order order)
@@ -296,65 +253,28 @@
             }
         }
 
-        private async Task<long?> cancelOrderAsync(long orderId, StockMarketEvents? events)
+        protected async Task<long?> cancelOrderAsync(long orderId, StockMarketEvents? events)
         {
-            setupEvents(events);
+            var findOrder = allOrders.Where(a => a.Id == orderId).SingleOrDefault();
+            findOrder?.SetStateCancelled();
 
-            try
-            {
-                var findOrder = allOrders.Where(a => a.Id == orderId).SingleOrDefault();
-                findOrder?.SetStateCancelled();
+            if (onOrderModified != null)
+                await onOrderModified(this, findOrder);
 
-                if (onOrderModified != null)
-                    await onOrderModified(this, findOrder);
+            return findOrder?.Id;
 
-                return findOrder?.Id;
-
-            }
-            finally
-            {
-                clearEvents();
-            }
         }
-        private void setupEvents(StockMarketEvents? events)
-        {
-            if (events != null)
-            {
-                onOrderCreated = events.OnOrderCreated;
-                onOrderModified = events.OnOrderModified;
-                onTradeCreated = events.OnTradeCreated;
-            }
-        }
-        private void clearEvents()
-        {
-            onOrderCreated = null;
-            onOrderModified = null;
-            onTradeCreated = null;
-        }
-        private async Task<long> modifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events)
-        {
-            setupEvents(events);
-            long id;
-            try
-            {
-                await cancelOrderAsync(orderId, events);
 
-                var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
-                id = await processOrderAsync(price, amount, orderSide, expirationDate);
-            }
-            finally
-            {
-                clearEvents();
-            }
+        protected async Task<long> modifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events)
+        {
+            await cancelOrderAsync(orderId, events);
+
+            var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
+            long id = await processOrderAsync(price, amount, orderSide, expirationDate);
 
             return id;
         }
 
         #endregion
-
-        public async ValueTask DisposeAsync()
-        {
-            await queue.DisposeAsync();
-        }
     }
 }

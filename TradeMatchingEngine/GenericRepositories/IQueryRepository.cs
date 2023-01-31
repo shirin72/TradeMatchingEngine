@@ -9,8 +9,8 @@ namespace TradeMatchingEngine.GenericRepositories
 {
     public interface IQueryRepository<T>
     {
-        Task<T> GetById(Expression<Func<T, bool>> expression);
-        Task<IEnumerable<T>> GetAll();
-        Task<long> GetLastId();
+        Task<T?> Get(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? predicate = null);
+        Task<long> GetMax(Expression<Func<T, long?>> selector);
     }
 }

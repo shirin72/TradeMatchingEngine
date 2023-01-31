@@ -1,6 +1,7 @@
 ﻿using Application.OrderService.OrderCommandHandlers;
 using Microsoft.AspNetCore.Mvc;
 using TradeMatchingEngine;
+using TradeMatchingEngine.Orders.Commands;
 
 namespace EndPoints.Controller
 {
@@ -8,11 +9,6 @@ namespace EndPoints.Controller
     [ApiController]
     public class OrderController : ControllerBase
     {
-
-        public OrderController()
-        {
-
-        }
 
         /// <summary>
         /// ProcessOrder
@@ -23,17 +19,19 @@ namespace EndPoints.Controller
         /// <param name="expDate"></param>
         /// <param name="isFillAndKill"></param>
         /// <returns></returns>
-        [HttpPatch]
+        [HttpPost]
         public async Task<long> ProcessOrder([FromServices] IAddOrderCommandHandlers handler, int price, int amount, Side side, bool isFillAndKill, DateTime? expDate)
         {
-            try
+            var command = new AddOrderCommand()
             {
-                return await handler.Handle(price, amount, side, expDate, isFillAndKill);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+                Amount = amount,
+                ExpDate = expDate,
+                Side = side,
+                Price = price,
+                IsFillAndKill = isFillAndKill,
+            };
+
+            return await handler.Handle(command) ?? 0;
         }
 
         /// <summary>
@@ -48,20 +46,22 @@ namespace EndPoints.Controller
         [HttpPut]
         public async Task<long> ModifieOrder([FromServices] IModifieOrderCommandHandler handler, long orderId, int price, int amount, DateTime? expDate)
         {
-            try
+            var modifieCommand = new ModifieOrderCommand()
             {
-                var result = await handler.Handle(orderId, price, amount, expDate);
+                Amount = amount,
+                Price = price,
+                OrderId = orderId,
+                ExpDate = expDate,
+            };
 
-                if (result != null)
-                {
-                    return (long)result;
-                }
-                throw new Exception("Order Not Found");
-            }
-            catch (Exception ex)
+            var result = await handler.Handle(modifieCommand);
+
+            if (result != null)
             {
-                throw;
+                return (long)result;
             }
+
+            throw new Exception("Order Not Found");
         }
 
         /// <summary>
@@ -70,23 +70,16 @@ namespace EndPoints.Controller
         /// <param name="handler"></param>
         /// <param name="orderId"></param>
         /// <returns></returns>
-        [HttpPut]
+        [HttpPatch]
         public async Task<long> CancellOrder([FromServices] ICancellOrderCommandHandler handler, long orderId)
         {
-            try
-            {
-                var result = await handler.Handle(orderId);
+            var result = await handler.Handle(orderId);
 
-                if (result != null)
-                {
-                    return (long)result;
-                }
-                throw new Exception("Order Not Found");
-            }
-            catch (Exception ex)
+            if (result != null)
             {
-                throw;
+                return (long)result;
             }
+            throw new Exception("Order Not Found");
         }
     }
 }

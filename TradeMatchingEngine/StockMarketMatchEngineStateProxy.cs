@@ -1,26 +1,23 @@
 ﻿namespace TradeMatchingEngine
 {
-    public class StockMarketMatchEngineStateProxy: StockMarketMatchEngine,IStockMarketMatchEngineWithState
+    public class StockMarketMatchEngineStateProxy : StockMarketBlockingQueueDecorator, IStockMarketMatchEngineWithState
     {
         private StockMarketState state;
-        private IStockMarketMatchEngine stockMarketMatchEngine;
 
-        public StockMarketMatchEngineStateProxy(IStockMarketMatchEngine stockMarketMatchEngine)
+        public StockMarketMatchEngineStateProxy(List<Order>? orders = null, long lastOrderId = 0, long lastTradeId = 0) : base(orders, lastOrderId, lastTradeId)
         {
-            this.stockMarketMatchEngine = stockMarketMatchEngine;
             state = new Closed(this);
         }
 
         public MarcketState State => state.Code;
 
+        public override Task<long> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null, StockMarketEvents? events = null)
+        {
+            return state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId, events);
+        }
         public override Task<long?> CancelOrderAsync(long orderId, StockMarketEvents? events = null)
         {
-            return state.CancelOrderAsync(orderId,events);
-        }
-
-        public void Close()
-        {
-            state.Close();
+            return state.CancelOrderAsync(orderId, events);
         }
 
         public override Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events = null)
@@ -28,6 +25,10 @@
             return state.ModifieOrder(orderId, price, amount, expirationDate, events);
         }
 
+        public void Close()
+        {
+            state.Close();
+        }
         public void Open()
         {
             state.Open();
@@ -38,12 +39,21 @@
             state.PreOpen();
         }
 
-        public Task<long> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null, StockMarketEvents? events = null)
+
+        private Task<long> myProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null, StockMarketEvents? events = null)
         {
-            return state.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId, events);
+            return base.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId, events);
+        }
+        private Task<long?> myCancelOrderAsync(long orderId, StockMarketEvents? events = null)
+        {
+            return base.CancelOrderAsync(orderId, events);
+        }
+        private Task<long?> myModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events = null)
+        {
+            return base.ModifieOrder(orderId, price, amount, expirationDate, events);
         }
 
-        class StockMarketState :IStockMarketMatchEngine
+        class StockMarketState : IStockMarketMatchEngine
         {
             public MarcketState Code { get; protected set; }
 
@@ -86,6 +96,7 @@
             {
                 await StockMarketMatchEngineProxy.DisposeAsync();
             }
+
         }
         class Closed : StockMarketState
         {
@@ -103,7 +114,7 @@
         {
             public Opened(StockMarketMatchEngineStateProxy stockMarketMatchEngineProxy) : base(stockMarketMatchEngineProxy)
             {
-                Code=MarcketState.Open;
+                Code = MarcketState.Open;
             }
 
             public override void PreOpen()
@@ -113,16 +124,19 @@
 
             public override async Task<long> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null, StockMarketEvents? events = null)
             {
-                return await StockMarketMatchEngineProxy.stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId,events);
+                return await StockMarketMatchEngineProxy.myProcessOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId, events);
             }
 
             public override async Task<long?> CancelOrderAsync(long orderId, StockMarketEvents? events = null)
             {
-                return await StockMarketMatchEngineProxy.stockMarketMatchEngine.CancelOrderAsync(orderId, events);
+                var res = await StockMarketMatchEngineProxy.myCancelOrderAsync(orderId, events);
+                return res;
+
             }
+
             public override async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events = null)
             {
-                return await StockMarketMatchEngineProxy.stockMarketMatchEngine.ModifieOrder(orderId, price, amount, expirationDate, events);
+                return await StockMarketMatchEngineProxy.myModifieOrder(orderId, price, amount, expirationDate, events);
             }
         }
         class PreOpened : StockMarketState
@@ -139,22 +153,22 @@
 
             public override void Open()
             {
-                StockMarketMatchEngineProxy.state = new Opened(StockMarketMatchEngineProxy);              
+                StockMarketMatchEngineProxy.state = new Opened(StockMarketMatchEngineProxy);
             }
 
-            public override async Task<long> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null, StockMarketEvents? events = null)
+            public async override Task<long> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null, StockMarketEvents? events = null)
             {
-                return await StockMarketMatchEngineProxy.stockMarketMatchEngine.ProcessOrderAsync(price, amount, side, expireTime, fillAndKill,orderParentId, events);
+                return await StockMarketMatchEngineProxy.preProcessOrderAsync(price, amount, side, expireTime, fillAndKill);
             }
 
             public override async Task<long?> CancelOrderAsync(long orderId, StockMarketEvents? events = null)
             {
-                return await StockMarketMatchEngineProxy.stockMarketMatchEngine.CancelOrderAsync(orderId, events);
+                return await StockMarketMatchEngineProxy.CancelOrderAsync(orderId, events);
             }
 
             public override async Task<long?> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate, StockMarketEvents? events = null)
             {
-                return await StockMarketMatchEngineProxy.stockMarketMatchEngine.ModifieOrder(orderId, price, amount, expirationDate, events);
+                return await StockMarketMatchEngineProxy.myModifieOrder(orderId, price, amount, expirationDate, events);
             }
         }
     }

@@ -1,9 +1,4 @@
-﻿using Application.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.Factories;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
 using TradeMatchingEngine.Orders.Repositories.Query;
@@ -13,37 +8,15 @@ using TradeMatchingEngine.UnitOfWork;
 
 namespace Application.OrderService.OrderCommandHandlers
 {
-    public class CancellOrderCommandHandler : ICancellOrderCommandHandler
+    public class CancellOrderCommandHandler : CommandHandler<long>, ICancellOrderCommandHandler
     {
-
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly StockMarketUtilities _stockMarketUtilities;
-
-        public CancellOrderCommandHandler(IOrderCommandRepository orderCommandRepository,
-            IUnitOfWork unitOfWork,
-            StockMarketUtilities stockMarketUtilities)
+        public CancellOrderCommandHandler(IUnitOfWork unitOfWork, IStockMarketFactory stockMarketFactory, IOrderCommandRepository orderCommandRepository, IOrderQueryRepository orderQueryRepository, ITradeCommandRepository tradeCommandRepository, ITradeQueryRespository tradeQueryRespository) : base(unitOfWork, stockMarketFactory, orderCommandRepository, orderQueryRepository, tradeCommandRepository, tradeQueryRespository)
         {
-            _unitOfWork = unitOfWork;
-            _stockMarketUtilities = stockMarketUtilities;
         }
 
-        public async Task<long?> Handle(long orderId)
+        protected async override Task<long> SpecificHandle(long orderId, StockMarketEvents? events = null)
         {
-            var stockMarketEngine = await _stockMarketUtilities.GetStockMarket();
-
-
-            var events = new StockMarketEvents()
-            {
-                OnOrderCreated = _stockMarketUtilities.onOrderCreated,
-                OnTradeCreated = _stockMarketUtilities.onTradeCreated,
-                OnOrderModified = _stockMarketUtilities.onOrderModified,
-            };
-
-            var result = await stockMarketEngine.CancelOrderAsync(orderId, events);
-
-            await _unitOfWork.SaveChange();
-
-            return result;
+            return await this._stockMarketMatchEngine.CancelOrderAsync(orderId, events) ?? 0;
         }
     }
 }

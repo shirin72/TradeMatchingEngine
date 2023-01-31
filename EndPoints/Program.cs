@@ -1,5 +1,5 @@
+using Application.Factories;
 using Application.OrderService.OrderCommandHandlers;
-using Application.OrderService.OrderEventHandler;
 using Infrastructure;
 using Infrastructure.Order.CommandRepositories;
 using Infrastructure.Order.QueryRepositories;
@@ -29,6 +29,7 @@ builder.Services.AddScoped<ITradeCommandRepository, TradeCommandRepository>();
 //builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITradeQueryRespository, TradeQueryRepository>();
+builder.Services.AddSingleton<IStockMarketFactory, StockMarketFactory>();
 builder.Services.AddScoped<IModifieOrderCommandHandler, ModifieOrderCommandHandler>();
 builder.Services.AddScoped<ICancellOrderCommandHandler, CancellOrderCommandHandler>();
 builder.Services.AddControllers();

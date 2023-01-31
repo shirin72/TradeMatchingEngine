@@ -1,3 +1,4 @@
+using Application.Factories;
 using FluentAssertions;
 using Moq;
 using System;
@@ -6,7 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
+using TradeMatchingEngine.Orders.Repositories.Query;
 using TradeMatchingEngine.Trades.Repositories.Command;
+using TradeMatchingEngine.Trades.Repositories.Query;
 using Xunit;
 
 
@@ -14,14 +17,27 @@ namespace Test
 {
     public class StocketMarketEngineTest : IAsyncDisposable
     {
-        private StockMarketMatchEngine sut;
+        //private StockMarketFactory stockMarketFactory;
+        //private StockMarketMatchEngineStateProxy sut;
+        //public StocketMarketEngineTest(StockMarketFactory stockMarketFactory, StockMarketMatchEngineStateProxy sut)
+        //{
+        //    this.stockMarketFactory = stockMarketFactory;
+        //    var orderQuery = new Mock<IOrderQueryRepository>();
+        //    orderQuery.Setup(x => x.GetAll(null)).ReturnsAsync(new List<Order>());
+
+        //    var tradeQuery = new Mock<ITradeQueryRespository>();
+        //    tradeQuery.Setup(x => x.GetAll(null)).ReturnsAsync(new List<Trade>());
+
+        //    sut = this.stockMarketFactory.GetStockMarket(orderQueryRep: orderQuery.Object, tradeQueryRep: tradeQuery.Object).GetAwaiter().GetResult() as StockMarketMatchEngineStateProxy;
+        //}
+
+        private StockMarketMatchEngineStateProxy sut;
 
         public StocketMarketEngineTest()
         {
-            sut = new StockMarketMatchEngine();
+            sut = new StockMarketMatchEngineStateProxy();
         }
 
-       
 
         [Fact]
         public async Task ProcessOrderAsync_Should_Enqueue_One_SellOrder_And_NoTrades_Should_be_Created_When_Is_In_Preopen_State()
@@ -91,7 +107,7 @@ namespace Test
             //Arrange
             sut.PreOpen();
             sut.Open();
-            var sellOrderId = await sut.ProcessOrderAsync(100, 10, Side.Sell);
+            var sellOrderId = await sut.ProcessOrderAsync(100, 10, Side.Sell, null, null);
 
             //Act
             var buyOrderId = await sut.ProcessOrderAsync(100, 10, Side.Buy);
@@ -1045,7 +1061,7 @@ namespace Test
                 OnTradeCreated = onTradeCreated
             };
 
-            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell, null, false, null, events);
 
             //Act
             var modifiedOrderId = await sut.CancelOrderAsync(orderId, events);
@@ -1061,24 +1077,65 @@ namespace Test
         public async void ProcessOrderAsync_Initialize_Orders_And_Enqueue_SellOrder_When_State_Is_Open()
         {
             //arrenge
-            var orders = new List<Order>()
-            {
-                new Order(1,Side.Sell,price: 100,amount:2,expireTime: DateTime.Now.AddDays(1))
-            };
-            var sut1 = new StockMarketMatchEngine(orders);
+
+            var sut1 = new StockMarketMatchEngineStateProxy();
+
             sut1.PreOpen();
             sut1.Open();
 
             //Act
-          await sut1.ProcessOrderAsync(90, 15, Side.Sell);
+            await sut1.ProcessOrderAsync(90, 15, Side.Sell);
 
             //assert
             Assert.Equal(0, sut1.TradeCount);
-            Assert.Equal(2, sut1.AllOrdersCount());
+            Assert.Equal(1, sut1.AllOrdersCount());
             Assert.Equal(0, sut1.GetBuyOrderCount());
-            Assert.Equal(2, sut1.GetSellOrderCount());
+            Assert.Equal(1, sut1.GetSellOrderCount());
         }
 
+
+
+        [Fact]
+        public async void ProcessOrderAsync_Enqueue_Multiple_BuyOrder_With_Different_Price_When_Is_In_Open_State()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+             await sut.ProcessOrderAsync(10, 5, Side.Buy);
+             await sut.ProcessOrderAsync(11, 2, Side.Buy);
+             await sut.ProcessOrderAsync(12, 1, Side.Buy);
+
+
+            //Act
+            await sut.ProcessOrderAsync(9, 5, Side.Buy);
+
+            //assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(4, sut.GetBuyOrderCount());
+            Assert.Equal(0, sut.GetSellOrderCount());
+        }
+
+        [Fact]
+        public async void ProcessOrderAsync_Enqueue_Multiple_SellOrder_With_Different_Price_When_Is_In_Open_State()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            await sut.ProcessOrderAsync(10, 5, Side.Sell);
+            await sut.ProcessOrderAsync(11, 2, Side.Sell);
+            await sut.ProcessOrderAsync(12, 1, Side.Sell);
+
+
+            //Act
+            await sut.ProcessOrderAsync(9, 5, Side.Sell);
+
+            //assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(4, sut.GetSellOrderCount());
+        }
 
         public async ValueTask DisposeAsync()
         {

@@ -13,34 +13,25 @@ namespace Infrastructure.GenericServices
     public class QueryRepository<T> : IQueryRepository<T> where T : class
     {
         protected readonly DbContext _dbContext;
-        protected readonly DbSet<T> _querySet;
+        protected readonly IQueryable<T> _querySet;
         public QueryRepository(DbContext dbContext)
         {
             _dbContext = dbContext;
-            _querySet = dbContext.Set<T>();
+            _querySet = dbContext.Set<T>().AsNoTracking();
         }
-        public async Task<IEnumerable<T>> GetAll()
+        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? predicate = null)
         {
-            return await _querySet.AsNoTracking().ToListAsync();
-        }
-
-        public async Task<T> GetById(Expression<Func<T, bool>> expression)
-        {
-            return await _querySet.AsNoTracking().Where(expression).FirstOrDefaultAsync();
+            return await (predicate != null ? _querySet.Where(predicate) : _querySet).ToListAsync();
         }
 
-        public async Task<long> GetLastId()
+        public async Task<T?> Get(Expression<Func<T, bool>> predicate)
         {
-            if (_querySet.Any())
-            {
-                var obj = new { Id = 0 };
+            return await _querySet.Where(predicate).FirstOrDefaultAsync();
+        }
 
-                Expression<Func<T, long>> expression = ((x) => obj.Id);
-
-                return await _querySet.MaxAsync(expression);
-            }
-
-            return 0;
+        public async Task<long> GetMax(Expression<Func<T, long?>> selector)
+        {
+            return await _querySet.MaxAsync(selector) ?? 0;
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using TradeMatchingEngine;
+using TradeMatchingEngine.Orders.Commands;
 
 namespace Application.OrderService.OrderCommandHandlers
 {
-    public interface IAddOrderCommandHandlers
+    public interface IAddOrderCommandHandlers:ICommandHandler<AddOrderCommand>
     {
-        Task<long> Handle(int price, int amount, Side side, DateTime? expDate, bool isFillAndKill);
     }
 }

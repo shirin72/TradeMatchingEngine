@@ -1,6 +1,6 @@
 ﻿namespace TradeMatchingEngine
 {
-    internal interface IStockMarketMatchEngineWithState:IStockMarketMatchEngine
+    public interface IStockMarketMatchEngineWithState:IStockMarketMatchEngine
     {
         void Open();
         void PreOpen();

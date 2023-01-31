@@ -1,7 +1,6 @@
 ﻿namespace Application.OrderService.OrderCommandHandlers
 {
-    public interface ICancellOrderCommandHandler
+    public interface ICancellOrderCommandHandler:ICommandHandler<long>
     {
-        Task<long?> Handle(long orderId);
     }
 }
