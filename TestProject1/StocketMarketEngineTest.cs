@@ -635,21 +635,13 @@ namespace Test
 
         private async Task onOrderModified(StockMarketMatchEngine stockMarketMatchEngine, Order order)
         {
-            try
-            {
-                var _orderCommandRepository = new Mock<IOrderCommandRepository>();
+            var _orderCommandRepository = new Mock<IOrderCommandRepository>();
 
-                _orderCommandRepository.Setup(x => x.Find(order.Id)).ReturnsAsync(() => order);
+            _orderCommandRepository.Setup(x => x.Find(order.Id)).ReturnsAsync(() => order);
 
-                var founndOrder = await _orderCommandRepository.Object.Find(order.Id);
+            var founndOrder = await _orderCommandRepository.Object.Find(order.Id);
 
-                founndOrder.UpdateBy(order);
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            founndOrder.UpdateBy(order);
 
         }
 
@@ -997,6 +989,28 @@ namespace Test
         }
 
         [Fact]
+        public async void ProcessOrderAsync_OrderCancell()
+        {
+            //arrenge
+            sut.PreOpen();
+            sut.Open();
+
+            var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
+
+
+            //Act
+            await sut.CancelOrderAsync(orderId);
+
+            //assert
+            Assert.Equal(0, sut.TradeCount);
+            Assert.Equal(0, sut.Trade.Sum(x => x.Amount));
+            Assert.Equal(0, sut.Trade.Sum(x => x.Price));
+            Assert.Equal(1, sut.AllOrdersCount());
+            Assert.Equal(0, sut.GetBuyOrderCount());
+            Assert.Equal(1, sut.GetSellOrderCount());
+        }
+
+        [Fact]
         public async void ProcessOrderAsync_Cancell_Not_Exist_Order_Should_Throw_Execption_When_Is_In_Open_State()
         {
             //arrenge
@@ -1102,9 +1116,9 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-             await sut.ProcessOrderAsync(10, 5, Side.Buy);
-             await sut.ProcessOrderAsync(11, 2, Side.Buy);
-             await sut.ProcessOrderAsync(12, 1, Side.Buy);
+            await sut.ProcessOrderAsync(10, 5, Side.Buy);
+            await sut.ProcessOrderAsync(11, 2, Side.Buy);
+            await sut.ProcessOrderAsync(12, 1, Side.Buy);
 
 
             //Act

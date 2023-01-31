@@ -38,11 +38,6 @@
             return await executeAsync(async () => await processOrderAsync(price, amount, side, expireTime, fillAndKill, orderParentId), events);
         }
 
-        public virtual async Task<long> PreProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, StockMarketEvents? events = null)
-        {
-            return await executeAsync(async () => await preProcessOrderAsync(price, amount, side, expireTime, fillAndKill));
-        }
-
         private void setupEvents(StockMarketEvents? events)
         {
             if (events != null)

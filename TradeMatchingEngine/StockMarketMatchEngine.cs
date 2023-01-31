@@ -16,8 +16,6 @@
         protected Func<StockMarketMatchEngine, Order, Task> onOrderCreated;
         private bool isInitialized = false;
         public int TradeCount => tradeCount;
-        public Order LastOrder => _lastOrder;
-
         #endregion
 
         public StockMarketMatchEngine(List<Order>? orders = null, long lastOrderId = 0, long lastTradeId = 0)

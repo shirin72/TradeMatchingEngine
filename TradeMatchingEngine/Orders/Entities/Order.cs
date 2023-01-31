@@ -76,6 +76,9 @@ namespace TradeMatchingEngine
             Side = order.Side;
             _state = order.OrderState;
         }
-
+        internal Order Clone()
+        {
+            return new Order(Id, Side, Price, Amount, ExpireTime, IsFillAndKill, OrderParentId);
+        }
     }
 }
