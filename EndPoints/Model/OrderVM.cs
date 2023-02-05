@@ -4,7 +4,7 @@ namespace EndPoints.Model
 {
     public class OrderVM
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public Side Side { get; set; }
 
