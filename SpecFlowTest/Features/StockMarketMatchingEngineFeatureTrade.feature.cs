@@ -138,7 +138,7 @@ this.ScenarioInitialize(scenarioInfo);
 #line 12
  testRunner.And("Order \'BuyOrder\' Has Been Defined", ((string)(null)), table3, "And ");
 #line hidden
-#line 17
+#line 16
  testRunner.When("I Register The Order \'BuyOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
                 TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
@@ -151,8 +151,8 @@ this.ScenarioInitialize(scenarioInfo);
                             "1",
                             "5",
                             "100"});
-#line 20
- testRunner.Then("The following trade will be created", ((string)(null)), table4, "Then ");
+#line 19
+ testRunner.Then("The following \'Trade\' will be created", ((string)(null)), table4, "Then ");
 #line hidden
                 TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
                             "Side",
@@ -166,8 +166,8 @@ this.ScenarioInitialize(scenarioInfo);
                             "0",
                             "false",
                             "2024-02-05 09:30:26.2080000"});
-#line 24
- testRunner.And("Order \'BuyOrder\' Should Be Modified like this", ((string)(null)), table5, "And ");
+#line 23
+ testRunner.And("Order \'BuyOrder\' Should Be Modified  like this", ((string)(null)), table5, "And ");
 #line hidden
                 TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
                             "Side",
@@ -181,7 +181,7 @@ this.ScenarioInitialize(scenarioInfo);
                             "0",
                             "false",
                             "2024-02-05 09:30:26.2080000"});
-#line 29
+#line 28
  testRunner.And("Order \'SellOrder\' Should Be Modified  like this", ((string)(null)), table6, "And ");
 #line hidden
             }

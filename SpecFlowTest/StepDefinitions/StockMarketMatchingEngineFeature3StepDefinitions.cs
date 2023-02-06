@@ -1,8 +1,4 @@
-using EndPoints.Model;
 using Newtonsoft.Json;
-using System;
-using System.Text;
-using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using TradeMatchingEngine;
 
@@ -29,36 +25,34 @@ namespace SpecFlowTest.StepDefinitions
             Given("Order 'SellOrder' Has Been Defined", table1);
             When("I Register The Order 'SellOrder'");
             Then("Order 'SellOrder' Should Be Enqueued");
-
-            context.Add(order, table);
-
         }
 
-        [Then(@"The following trade will be created by ([^']*)")]
-        public async Task ThenTheFollowingTradeWillBeCreated(string order,Table table)
+        [Then(@"The following '([^']*)' will be created")]
+        public async Task ThenTheFollowingWillBeCreated(string trade, Table table)
         {
-            var orderVm = context.Get<Table>(order).CreateInstance<OrderVM>();
+            var getTrades = httpClient.GetAsync("https://localhost:7092/api/Trades/GetAllTrades").GetAwaiter().GetResult();
 
-            var requestBody = new StringContent(JsonConvert.SerializeObject(orderVm), Encoding.UTF8, "application/json");
-            var result = httpClient.PostAsync("https://localhost:7092/api/Order/ProcessOrder", requestBody).GetAwaiter().GetResult();
-            context.Add($"{order}Response", Convert.ToInt64(result.Content.ReadAsStringAsync().Result));
+            var response = JsonConvert.DeserializeObject<IEnumerable<Trade>>(await getTrades.Content.ReadAsStringAsync());
+            var findTrade = response.Where(t => t.BuyOrderId == context.Get<long>($"BuyOrderResponse") &&
+             t.SellOrderId == context.Get<long>($"SellOrderResponse")).FirstOrDefault();
+
+            findTrade.Amount.Should().Be(table.CreateInstance<Trade>().Amount);
+            findTrade.Price.Should().Be(table.CreateInstance<Trade>().Price);
         }
 
-        [Then(@"Order '([^']*)' Should Be Modified like this")]
+
+        [Then(@"Order '([^']*)' Should Be Modified  like this")]
         public async Task ThenOrderShouldBeModifiedLikeThis(string order, Table table)
         {
-            var result = context.Get<long>("response");
-            var expected = context.Get<Table>(order).CreateInstance<Order>();
+            var result = context.Get<long>($"{order}Response");
 
             var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
             var orderDeserialize = JsonConvert.DeserializeObject<Order>(await addedOrderId.Content.ReadAsStringAsync());
 
             orderDeserialize.Id.Should().Be(result);
 
-            orderDeserialize.Amount.Should().Be(expected.Amount);
-            orderDeserialize.Price.Should().Be(expected.Price);
+            orderDeserialize.Amount.Should().Be(table.CreateInstance<Order>().Amount);
+            orderDeserialize.Price.Should().Be(table.CreateInstance<Order>().Price);
         }
-
-
     }
 }
