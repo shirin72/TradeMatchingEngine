@@ -26,17 +26,14 @@ namespace EndPoints.Controller
             this.cancellOrderCommandHandler = cancellOrderCommandHandler;
             this.orderQueryRepository = orderQueryRepository;
         }
+
         /// <summary>
-        /// ProcessOrder
+        /// 
         /// </summary>
-        /// <param name="price"></param>
-        /// <param name="amount"></param>
-        /// <param name="side"></param>
-        /// <param name="expDate"></param>
-        /// <param name="isFillAndKill"></param>
+        /// <param name="orderVM"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<long> ProcessOrder([FromBody]OrderVM orderVM)
+        public async Task<long> ProcessOrder([FromBody] OrderVM orderVM)
         {
             var command = new AddOrderCommand()
             {
@@ -51,23 +48,20 @@ namespace EndPoints.Controller
         }
 
         /// <summary>
-        /// ModifieOrder
+        /// 
         /// </summary>
-        /// <param name="handler"></param>
-        /// <param name="orderId"></param>
-        /// <param name="price"></param>
-        /// <param name="amount"></param>
-        /// <param name="expDate"></param>
+        /// <param name="modifieOrderVM"></param>
         /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         [HttpPut]
-        public async Task<long> ModifieOrder(long orderId, int price, int amount, DateTime? expDate)
+        public async Task<long> ModifieOrder([FromBody] ModifiedOrderVM modifieOrderVM)
         {
             var modifieCommand = new ModifieOrderCommand()
             {
-                Amount = amount,
-                Price = price,
-                OrderId = orderId,
-                ExpDate = expDate,
+                Amount = modifieOrderVM.Amount,
+                Price = modifieOrderVM.Price,
+                OrderId = modifieOrderVM.OrderId,
+                ExpDate = modifieOrderVM.ExpDate,
             };
 
             var result = await modifieOrderCommandHandler.Handle(modifieCommand);
