@@ -14,16 +14,18 @@ namespace Application.OrderService.OrderCommandHandlers
         public AddOrderCommandHandlers(IUnitOfWork unitOfWork, IStockMarketFactory stockMarketFactory, IOrderCommandRepository orderCommandRepository, IOrderQueryRepository orderQueryRepository, ITradeCommandRepository tradeCommandRepository, ITradeQueryRespository tradeQueryRespository) : base(unitOfWork, stockMarketFactory, orderCommandRepository, orderQueryRepository, tradeCommandRepository, tradeQueryRespository)
         {
         }
-        protected async override Task<long> SpecificHandle(AddOrderCommand? command)
+        protected async override Task<ProcessedOrder> SpecificHandle(AddOrderCommand? command)
         {
             var result = await _stockMarketMatchEngine.ProcessOrderAsync(command.Price, command.Amount, command.Side, command.ExpDate, command.IsFillAndKill, command.orderParentId);
 
             await _orderCommandRepository.Add(result.Order);
 
+
             foreach (var order in result.ModifiedOrders)
             {
                 var findOrder = await this._orderCommandRepository.Find(order.Id);
                 findOrder.UpdateBy(order);
+             
             }
 
             foreach (var trade in result.CreatedTrades)
@@ -31,8 +33,9 @@ namespace Application.OrderService.OrderCommandHandlers
                 await _tradeCommandRepository.Add(trade);
             }
 
+            var processedOrder = new ProcessedOrder() { OrderId = result.Order.Id, Trades = result.CreatedTrades };
 
-            return result.Order.Id;
+            return processedOrder;
         }
 
 

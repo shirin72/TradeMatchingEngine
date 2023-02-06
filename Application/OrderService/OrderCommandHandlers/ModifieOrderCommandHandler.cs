@@ -20,7 +20,7 @@ namespace Application.OrderService.OrderCommandHandlers
         {
         }
 
-        protected async override Task<long> SpecificHandle(ModifieOrderCommand? command)
+        protected async override Task<ProcessedOrder> SpecificHandle(ModifieOrderCommand? command)
         {
             var result = await this._stockMarketMatchEngine.ModifieOrder(command.OrderId, command.Price, command.Amount, command.ExpDate);
 
@@ -36,8 +36,7 @@ namespace Application.OrderService.OrderCommandHandlers
             {
                 await _tradeCommandRepository.Add(trade);
             }
-
-            return result.Order.Id;
+            return new ProcessedOrder() { OrderId = result.Order.Id };
         }
     }
 }

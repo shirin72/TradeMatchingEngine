@@ -14,7 +14,7 @@ namespace Application.OrderService.OrderCommandHandlers
         {
         }
 
-        protected async override Task<long> SpecificHandle(long orderId)
+        protected async override Task<ProcessedOrder> SpecificHandle(long orderId)
         {
             try
             {
@@ -34,8 +34,8 @@ namespace Application.OrderService.OrderCommandHandlers
                     }
 
                 }
-
-                return result.ModifiedOrders == null ? 0 : result.ModifiedOrders.FirstOrDefault().Id;
+              
+                return new ProcessedOrder() { OrderId = result.ModifiedOrders == null ? 0 : result.ModifiedOrders.FirstOrDefault().Id };
             }
             catch (Exception ex)
             {

@@ -5,7 +5,7 @@ namespace Application.OrderService.OrderCommandHandlers
 {
     public interface ICommandHandler<T1>
     {
-        Task<long?> Handle(T1 modifieOrcommandderCommand);
+        Task<ProcessedOrder?> Handle(T1 modifieOrcommandderCommand);
     }
     public interface IModifieOrderCommandHandler:ICommandHandler<ModifieOrderCommand>
     {

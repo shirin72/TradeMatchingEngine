@@ -33,7 +33,7 @@ namespace EndPoints.Controller
         /// <param name="orderVM"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<long> ProcessOrder([FromBody] OrderVM orderVM)
+        public async Task<ProcessedOrder> ProcessOrder([FromBody] OrderVM orderVM)
         {
             var command = new AddOrderCommand()
             {
@@ -44,7 +44,7 @@ namespace EndPoints.Controller
                 IsFillAndKill = (bool)orderVM.IsFillAndKill,
             };
 
-            return await addOrderCommandHandlers.Handle(command) ?? 0;
+            return await addOrderCommandHandlers.Handle(command) ;
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace EndPoints.Controller
 
             if (result != null)
             {
-                return (long)result;
+                return result.OrderId;
             }
 
             throw new Exception("Order Not Found");
@@ -89,7 +89,7 @@ namespace EndPoints.Controller
 
                 if (result != null)
                 {
-                    return (long)result;
+                    return (long)result.OrderId;
                 }
                 throw new Exception("Order Not Found");
             }

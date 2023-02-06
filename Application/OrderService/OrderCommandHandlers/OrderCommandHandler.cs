@@ -26,7 +26,7 @@ namespace Application.OrderService.OrderCommandHandlers
             _tradeQuery = tradeQueryRespository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<long ?> Handle(T1 command)
+        public async Task<ProcessedOrder?> Handle(T1 command)
         {
             _stockMarketMatchEngine = await _stockMarketFactory.GetStockMarket(_orderQuery, _tradeQuery);
 
@@ -37,7 +37,7 @@ namespace Application.OrderService.OrderCommandHandlers
             return result;
         }
 
-        protected abstract Task<long> SpecificHandle(T1? command);
+        protected abstract Task<ProcessedOrder> SpecificHandle(T1? command);
 
     }
 }

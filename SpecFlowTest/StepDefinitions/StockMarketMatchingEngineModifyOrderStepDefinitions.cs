@@ -24,7 +24,7 @@ namespace SpecFlowTest.StepDefinitions
         {
             context.Add(modifiedOrder, table);
 
-            var orderId = context.Get<long>($"{sellOrder}Response");
+            var orderId = context.Get<ProcessedOrder>($"{sellOrder}Response").OrderId;
 
             var modifiedOrderVM = table.CreateInstance<ModifiedOrderVM>();
             modifiedOrderVM.OrderId = orderId;

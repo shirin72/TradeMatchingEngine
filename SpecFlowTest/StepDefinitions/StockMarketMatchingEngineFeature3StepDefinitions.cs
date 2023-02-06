@@ -33,8 +33,7 @@ namespace SpecFlowTest.StepDefinitions
             var getTrades = httpClient.GetAsync("https://localhost:7092/api/Trades/GetAllTrades").GetAwaiter().GetResult();
 
             var response = JsonConvert.DeserializeObject<IEnumerable<Trade>>(await getTrades.Content.ReadAsStringAsync());
-            var findTrade = response.Where(t => t.BuyOrderId == context.Get<long>($"BuyOrderResponse") &&
-             t.SellOrderId == context.Get<long>($"SellOrderResponse")).FirstOrDefault();
+            var findTrade = response.Where(t => t.Id == context.Get<ProcessedOrder>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
 
             findTrade.Amount.Should().Be(table.CreateInstance<Trade>().Amount);
             findTrade.Price.Should().Be(table.CreateInstance<Trade>().Price);
@@ -44,7 +43,7 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"Order '([^']*)' Should Be Modified  like this")]
         public async Task ThenOrderShouldBeModifiedLikeThis(string order, Table table)
         {
-            var result = context.Get<long>($"{order}Response");
+            var result = context.Get<ProcessedOrder>($"{order}Response").OrderId;
 
             var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
             var orderDeserialize = JsonConvert.DeserializeObject<Order>(await addedOrderId.Content.ReadAsStringAsync());
