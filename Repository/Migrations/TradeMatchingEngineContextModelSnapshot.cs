@@ -42,7 +42,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("OrderState")
                         .HasColumnType("int");
 
-                    b.Property<int>("OriginalAmount")
+                    b.Property<int?>("OriginalAmount")
                         .HasColumnType("int");
 
                     b.Property<int>("Price")

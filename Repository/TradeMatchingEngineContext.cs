@@ -23,9 +23,9 @@ namespace Infrastructure
                 b.Property(o => o.Amount);
                 b.Property(o => o.IsFillAndKill);
                 b.Property(o => o.ExpireTime);
+                b.Property(o => o.OrderState).HasConversion<int>();
                 b.Property(o => o.OrderParentId);
                 b.Property(o => o.Side).HasConversion<int>();
-                b.Property(o => o.OrderState).HasConversion<int>();
             });
 
 

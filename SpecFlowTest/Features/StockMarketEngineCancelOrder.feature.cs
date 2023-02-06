@@ -19,7 +19,7 @@ namespace SpecFlowTest.Features
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public partial class StockMarketMatchingEngineFeature3Feature : object, Xunit.IClassFixture<StockMarketMatchingEngineFeature3Feature.FixtureData>, System.IDisposable
+    public partial class StockMarketEngineCancelOrderFeature : object, Xunit.IClassFixture<StockMarketEngineCancelOrderFeature.FixtureData>, System.IDisposable
     {
         
         private static TechTalk.SpecFlow.ITestRunner testRunner;
@@ -28,10 +28,10 @@ namespace SpecFlowTest.Features
         
         private Xunit.Abstractions.ITestOutputHelper _testOutputHelper;
         
-#line 1 "StockMarketMatchingEngineFeatureTrade.feature"
+#line 1 "StockMarketEngineCancelOrder.feature"
 #line hidden
         
-        public StockMarketMatchingEngineFeature3Feature(StockMarketMatchingEngineFeature3Feature.FixtureData fixtureData, SpecFlowTest_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public StockMarketEngineCancelOrderFeature(StockMarketEngineCancelOrderFeature.FixtureData fixtureData, SpecFlowTest_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
             this.TestInitialize();
@@ -40,7 +40,7 @@ namespace SpecFlowTest.Features
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "StockMarketMatchingEngineFeature3", "A short summary of the feature", ProgrammingLanguage.CSharp, ((string[])(null)));
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "StockMarketEngineCancelOrder", "A short summary of the feature", ProgrammingLanguage.CSharp, ((string[])(null)));
             testRunner.OnFeatureStart(featureInfo);
         }
         
@@ -80,15 +80,17 @@ namespace SpecFlowTest.Features
             this.TestTearDown();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="TradeOrders")]
-        [Xunit.TraitAttribute("FeatureTitle", "StockMarketMatchingEngineFeature3")]
-        [Xunit.TraitAttribute("Description", "TradeOrders")]
-        public virtual void TradeOrders()
+        [Xunit.SkippableFactAttribute(DisplayName="CancelOrder")]
+        [Xunit.TraitAttribute("FeatureTitle", "StockMarketEngineCancelOrder")]
+        [Xunit.TraitAttribute("Description", "CancelOrder")]
+        [Xunit.TraitAttribute("Category", "tag1")]
+        public virtual void CancelOrder()
         {
-            string[] tagsOfScenario = ((string[])(null));
+            string[] tagsOfScenario = new string[] {
+                    "tag1"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("TradeOrders", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
-#line 5
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("CancelOrder", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 6
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -108,81 +110,26 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-                TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
                             "Side",
                             "Price",
                             "Amount",
                             "IsFillAndKill",
                             "ExpireTime"});
-                table3.AddRow(new string[] {
+                table1.AddRow(new string[] {
                             "0",
                             "100",
                             "5",
                             "false",
                             "2024-02-05 09:30:26.2080000"});
 #line 7
- testRunner.Given("Order \'SellOrder\' Has Been Registerd", ((string)(null)), table3, "Given ");
+ testRunner.Given("Order \'SellOrder\' Has Been Registerd", ((string)(null)), table1, "Given ");
 #line hidden
-                TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
-                            "Side",
-                            "Price",
-                            "Amount",
-                            "IsFillAndKill",
-                            "ExpireTime"});
-                table4.AddRow(new string[] {
-                            "1",
-                            "100",
-                            "5",
-                            "false",
-                            "2024-02-05 09:30:26.2080000"});
-#line 12
- testRunner.And("Order \'BuyOrder\' Has Been Defined", ((string)(null)), table4, "And ");
+#line 11
+ testRunner.When("I Send \'SellOrder\' orderId And Ask For Cancel", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
-#line 16
- testRunner.When("I Register The Order \'BuyOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
-#line hidden
-                TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
-                            "BuyOrderId",
-                            "SellOrderId",
-                            "Amount",
-                            "Price"});
-                table5.AddRow(new string[] {
-                            "2",
-                            "1",
-                            "5",
-                            "100"});
-#line 19
- testRunner.Then("The following \'Trade\' will be created", ((string)(null)), table5, "Then ");
-#line hidden
-                TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
-                            "Side",
-                            "Price",
-                            "Amount",
-                            "IsFillAndKill",
-                            "ExpireTime"});
-                table6.AddRow(new string[] {
-                            "1",
-                            "100",
-                            "0",
-                            "false",
-                            "2024-02-05 09:30:26.2080000"});
-#line 23
- testRunner.And("Order \'BuyOrder\' Should Be Modified  like this", ((string)(null)), table6, "And ");
-#line hidden
-                TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
-                            "Side",
-                            "Price",
-                            "Amount",
-                            "IsFillAndKill",
-                            "ExpireTime"});
-                table7.AddRow(new string[] {
-                            "0",
-                            "100",
-                            "0",
-                            "false",
-                            "2024-02-05 09:30:26.2080000"});
-#line 28
- testRunner.And("Order \'SellOrder\' Should Be Modified  like this", ((string)(null)), table7, "And ");
+#line 13
+ testRunner.Then("The \'SellOrder\' OrderState Should Be Equal to Cancel", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -195,12 +142,12 @@ this.ScenarioInitialize(scenarioInfo);
             
             public FixtureData()
             {
-                StockMarketMatchingEngineFeature3Feature.FeatureSetup();
+                StockMarketEngineCancelOrderFeature.FeatureSetup();
             }
             
             void System.IDisposable.Dispose()
             {
-                StockMarketMatchingEngineFeature3Feature.FeatureTearDown();
+                StockMarketEngineCancelOrderFeature.FeatureTearDown();
             }
         }
     }

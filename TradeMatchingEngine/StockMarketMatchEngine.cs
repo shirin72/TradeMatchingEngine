@@ -71,7 +71,7 @@
         #region Private Method
         private Order createOrderRequest(StockMarketMatchingEngineProcessContext processContext, int price, int amount, Side side, DateTime? expireTime, bool? fillAndKill, long? OrderParentId = null)
         {
-            var order = new Order(id: setId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, isFillAndKill: fillAndKill, orderParentId: OrderParentId);
+            var order = new Order(id: setId(), side: side, price: price, amount: amount, expireTime: expireTime ?? DateTime.MaxValue, orderState: OrderStates.Register,isFillAndKill: fillAndKill, orderParentId: OrderParentId);
 
             processContext.OrderCreated(order);
 
@@ -129,7 +129,7 @@
             {
                 var peekedOrder = otherSideOrdersQueue.Peek();
                 CheckForNotCanceled(peekedOrder);
-                if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now || peekedOrder.GetOrderState() == OrderState.Cancell)
+                if (peekedOrder.IsExpired || peekedOrder.ExpireTime < DateTime.Now || peekedOrder.GetOrderState() == OrderStates.Cancell)
                 {
                     allOrders.Remove(peekedOrder);
                     otherSideOrdersQueue.Dequeue();
@@ -189,7 +189,7 @@
                 {
                     foreach (var item in allOrders)
                     {
-                        if (item.GetOrderState() == OrderState.Cancell)
+                        if (item.GetOrderState() == OrderStates.Cancell)
                         {
                             continue;
                         }
@@ -245,7 +245,7 @@
             {
                 var checkedOrder = allOrders.Where(o => o.Id == order.Id).Single();
 
-                if (checkedOrder.GetOrderState() == OrderState.Cancell)
+                if (checkedOrder.GetOrderState() == OrderStates.Cancell)
                 {
                     order.SetStateCancelled();
 

@@ -5,9 +5,9 @@ namespace TradeMatchingEngine
 
     public class Order
     {
-        private OrderState _state;
+        private OrderStates _state;
 
-        public Order(long id, Side side, int price, int amount, DateTime expireTime, int? originalAmount=null, bool? isFillAndKill = null, long? orderParentId = null)
+        public Order(long id, Side side, int price, int amount, DateTime expireTime, OrderStates? orderState, int? originalAmount = null, bool? isFillAndKill = null, long? orderParentId = null)
         {
             this.Id = id;
             this.Side = side;
@@ -16,11 +16,11 @@ namespace TradeMatchingEngine
             this.OriginalAmount = originalAmount ?? amount;
             this.IsFillAndKill = isFillAndKill;
             this.ExpireTime = expireTime;
-            this._state = OrderState.Register;
+            _state = orderState == null ? OrderStates.Register : (OrderStates)orderState;
             this.OrderParentId = orderParentId;
         }
 
-        public OrderState OrderState { get { return _state; } private set { value = _state; } }
+        public OrderStates? OrderState { get { return _state; } private set { value = _state; } }
         public long Id { get; }
 
         public Side Side { get; private set; }
@@ -57,13 +57,20 @@ namespace TradeMatchingEngine
         public DateTime ExpireTime { get; private set; }
 
         public bool IsExpired => ExpireTime < DateTime.Now;
-        public OrderState GetOrderState() => _state;
+        public OrderStates GetOrderState() => _state;
 
         public void SetStateCancelled()
         {
-            _state = OrderState.Cancell;
+            _state = OrderStates.Cancell;
         }
-
+        public void SetStateRegistered()
+        {
+            _state = OrderStates.Register;
+        }
+        public void SetStateModified()
+        {
+            _state = OrderStates.Modifie;
+        }
         public long? OrderParentId { get; private set; }
 
         public void UpdateBy(Order order)
@@ -74,11 +81,11 @@ namespace TradeMatchingEngine
             ExpireTime = order.ExpireTime;
             IsFillAndKill = order.IsFillAndKill;
             Side = order.Side;
-            _state = order.OrderState;
+            _state =(OrderStates) order.OrderState;
         }
         internal Order Clone(int originalAmount)
         {
-            return new Order(Id, Side, Price, Amount, ExpireTime, originalAmount, IsFillAndKill, OrderParentId);
+            return new Order(Id, Side, Price, Amount, ExpireTime, OrderState, originalAmount, IsFillAndKill, OrderParentId);
         }
     }
 }

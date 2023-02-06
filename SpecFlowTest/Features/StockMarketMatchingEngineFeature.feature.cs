@@ -108,20 +108,20 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-                TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
                             "Side",
                             "Price",
                             "Amount",
                             "IsFillAndKill",
                             "ExpireTime"});
-                table1.AddRow(new string[] {
+                table2.AddRow(new string[] {
                             "0",
                             "100",
                             "5",
                             "false",
                             "2024-02-05 09:30:26.2080000"});
 #line 7
- testRunner.Given("Order \'SellOrder\' Has Been Defined", ((string)(null)), table1, "Given ");
+ testRunner.Given("Order \'SellOrder\' Has Been Defined", ((string)(null)), table2, "Given ");
 #line hidden
 #line 11
  testRunner.When("I Register The Order \'SellOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");

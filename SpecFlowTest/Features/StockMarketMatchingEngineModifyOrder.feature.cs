@@ -110,21 +110,6 @@ this.ScenarioInitialize(scenarioInfo);
             else
             {
                 this.ScenarioStart();
-                TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
-                            "Side",
-                            "Price",
-                            "Amount",
-                            "IsFillAndKill",
-                            "ExpireTime"});
-                table7.AddRow(new string[] {
-                            "0",
-                            "100",
-                            "5",
-                            "false",
-                            "2024-02-05 09:30:26.2080000"});
-#line 7
- testRunner.Given("Order \'SellOrder\' Has Been Registerd", ((string)(null)), table7, "Given ");
-#line hidden
                 TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
                             "Side",
                             "Price",
@@ -134,11 +119,26 @@ this.ScenarioInitialize(scenarioInfo);
                 table8.AddRow(new string[] {
                             "0",
                             "100",
+                            "5",
+                            "false",
+                            "2024-02-05 09:30:26.2080000"});
+#line 7
+ testRunner.Given("Order \'SellOrder\' Has Been Registerd", ((string)(null)), table8, "Given ");
+#line hidden
+                TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Side",
+                            "Price",
+                            "Amount",
+                            "IsFillAndKill",
+                            "ExpireTime"});
+                table9.AddRow(new string[] {
+                            "0",
+                            "100",
                             "10",
                             "false",
                             "2024-02-05 09:30:26.2080000"});
 #line 11
- testRunner.When("I Will Try To Modify The Order \'SellOrder\' with Another Orde \'ModifiedOrder\'", ((string)(null)), table8, "When ");
+ testRunner.When("I Will Try To Modify The Order \'SellOrder\' with Another Orde \'ModifiedOrder\'", ((string)(null)), table9, "When ");
 #line hidden
 #line 15
  testRunner.Then("The order \'ModifiedOrder\' Should Be Found", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");

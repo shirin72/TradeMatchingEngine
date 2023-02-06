@@ -4,10 +4,10 @@ namespace TradeMatchingEngine.Orders.Dto
 {
     public class OrderDto
     {
-        private OrderState _state;
+        private OrderStates _state;
         public OrderDto()
         {
-            _state = OrderState.Register;
+            _state = OrderStates.Register;
         }
 
         public int Id { get; set; }
@@ -28,7 +28,7 @@ namespace TradeMatchingEngine.Orders.Dto
 
         public void SetStateCancelled()
         {
-            _state = OrderState.Cancell;
+            _state = OrderStates.Cancell;
         }
 
     }

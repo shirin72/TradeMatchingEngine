@@ -1,9 +1,9 @@
 ﻿namespace TradeMatchingEngine
 {
-    public enum OrderState
+    public enum OrderStates
     {
+        Register,
         Cancell,
-        Modifie,
-        Register
+        Modifie
     }
 }

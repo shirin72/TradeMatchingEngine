@@ -19,7 +19,7 @@ namespace Infrastructure.Migrations
                     OrderState = table.Column<int>(type: "int", nullable: false),
                     Side = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
-                    OriginalAmount = table.Column<int>(type: "int", nullable: false),
+                    OriginalAmount = table.Column<int>(type: "int", nullable: true),
                     Amount = table.Column<int>(type: "int", nullable: false),
                     IsFillAndKill = table.Column<bool>(type: "bit", nullable: true),
                     ExpireTime = table.Column<DateTime>(type: "datetime2", nullable: false),

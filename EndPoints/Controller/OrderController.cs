@@ -81,15 +81,24 @@ namespace EndPoints.Controller
         /// <param name="orderId"></param>
         /// <returns></returns>
         [HttpPatch]
-        public async Task<long> CancellOrder(long orderId)
+        public async Task<long> CancellOrder([FromBody] CancellOrderVM cancellOrderVM)
         {
-            var result = await cancellOrderCommandHandler.Handle(orderId);
-
-            if (result != null)
+            try
             {
-                return (long)result;
+                var result = await cancellOrderCommandHandler.Handle(cancellOrderVM.OrderId);
+
+                if (result != null)
+                {
+                    return (long)result;
+                }
+                throw new Exception("Order Not Found");
             }
-            throw new Exception("Order Not Found");
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            
         }
 
         [HttpGet]
