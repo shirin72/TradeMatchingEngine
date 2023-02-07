@@ -1,8 +1,6 @@
 using EndPoints.Model;
 using Newtonsoft.Json;
-using System;
 using System.Text;
-using TechTalk.SpecFlow;
 using TradeMatchingEngine;
 
 namespace SpecFlowTest.StepDefinitions
@@ -19,8 +17,6 @@ namespace SpecFlowTest.StepDefinitions
             this.httpClient = new HttpClient();
 
         }
-
-
 
         [When(@"I Send '([^']*)' orderId And Ask For Cancel")]
         public async Task WhenISendOrderIdAndAskForCancelAsync(string order)

@@ -1,37 +1,11 @@
-using Application.Factories;
-using Application.OrderService.OrderCommandHandlers;
 using Infrastructure;
-using Infrastructure.Order.CommandRepositories;
-using Infrastructure.Order.QueryRepositories;
-using Infrastructure.Trade.QueryRepositories;
-using Microsoft.EntityFrameworkCore;
-using TradeMatchingEngine.Orders.Repositories.Command;
-using TradeMatchingEngine.Orders.Repositories.Query;
-using TradeMatchingEngine.Trades.Repositories.Command;
-using TradeMatchingEngine.Trades.Repositories.Query;
-using TradeMatchingEngine.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-builder.Services.AddDbContext<TradeMatchingEngineContext>(options =>
-    {
-        options.UseSqlServer("Server=.;Initial Catalog=TradeMatchingEngine;Integrated Security=true;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=False;TrustServerCertificate=False;Connection Timeout=30;");
-    }
-);
-
-builder.Services.AddScoped<IOrderCommandRepository, OrderCommandRepository>();
-builder.Services.AddScoped<IOrderQueryRepository, OrderQueryRepository>();
-builder.Services.AddScoped<IAddOrderCommandHandlers, AddOrderCommandHandlers>();
-builder.Services.AddScoped<ITradeCommandRepository, TradeCommandRepository>();
-//builder.Services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ITradeQueryRespository, TradeQueryRepository>();
-builder.Services.AddSingleton<IStockMarketFactory, StockMarketFactory>();
-builder.Services.AddScoped<IModifieOrderCommandHandler, ModifieOrderCommandHandler>();
-builder.Services.AddScoped<ICancellOrderCommandHandler, CancellOrderCommandHandler>();
+builder.Services.DependencyHolder();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
