@@ -16,33 +16,24 @@ namespace Application.OrderService.OrderCommandHandlers
 
         protected async override Task<ProcessedOrder> SpecificHandle(long orderId)
         {
-            try
-            {
-                var result = await this._stockMarketMatchEngine.CancelOrderAsync(orderId);
+            var result = await this._stockMarketMatchEngine.CancelOrderAsync(orderId);
 
-                foreach (var order in result.ModifiedOrders)
+            foreach (var order in result.ModifiedOrders)
+            {
+                try
                 {
-                    try
-                    {
-                        var findOrder = await this._orderCommandRepository.Find(order.Id);
-                        findOrder.UpdateBy(order);
-                    }
-                    catch (Exception ex)
-                    {
-
-                        throw;
-                    }
-
+                    var findOrder = await this._orderCommandRepository.Find(order.Id);
+                    findOrder.UpdateBy(order);
                 }
-              
-                return new ProcessedOrder() { OrderId = result.ModifiedOrders == null ? 0 : result.ModifiedOrders.FirstOrDefault().Id };
-            }
-            catch (Exception ex)
-            {
+                catch (Exception ex)
+                {
 
-                throw;
+                    throw;
+                }
+
             }
-        
+
+            return new ProcessedOrder() { OrderId = result.ModifiedOrders == null ? 0 : result.ModifiedOrders.FirstOrDefault().Id } as ProcessedOrder;
         }
     }
 }

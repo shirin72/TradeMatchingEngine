@@ -32,11 +32,4 @@
     <ProjectReference Include="..\TradeMatchingEngine\TradeMatchingEngine.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <SpecFlowFeatureFiles Update="Features\StockMarketMatchingEngineFeatureTrade.feature">
-      <Visible>$(UsingMicrosoftNETSdk)</Visible>
-      <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
-    </SpecFlowFeatureFiles>
-  </ItemGroup>
-
 </Project>

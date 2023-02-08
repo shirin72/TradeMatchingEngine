@@ -80,15 +80,87 @@ namespace SpecFlowTest.Features
             this.TestTearDown();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Enqueue SellOrder")]
+        [Xunit.SkippableTheoryAttribute(DisplayName="Enqueue SellOrder")]
         [Xunit.TraitAttribute("FeatureTitle", "StockMarketMatchingEngineFeature2")]
         [Xunit.TraitAttribute("Description", "Enqueue SellOrder")]
-        public virtual void EnqueueSellOrder()
+        [Xunit.InlineDataAttribute("0", "300", "15", "false", "2024-02-05", new string[0])]
+        [Xunit.InlineDataAttribute("0", "400", "10", "false", "2024-02-05", new string[0])]
+        [Xunit.InlineDataAttribute("0", "500", "10", "false", "2024-02-05", new string[0])]
+        public virtual void EnqueueSellOrder(string sell, string price, string amount, string isFillAndKill, string expireTime, string[] exampleTags)
         {
-            string[] tagsOfScenario = ((string[])(null));
+            string[] tagsOfScenario = exampleTags;
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("Sell", sell);
+            argumentsOfScenario.Add("Price", price);
+            argumentsOfScenario.Add("Amount", amount);
+            argumentsOfScenario.Add("IsFillAndKill", isFillAndKill);
+            argumentsOfScenario.Add("ExpireTime", expireTime);
             TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Enqueue SellOrder", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
 #line 5
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Side",
+                            "Price",
+                            "Amount",
+                            "IsFillAndKill",
+                            "ExpireTime"});
+                table1.AddRow(new string[] {
+                            string.Format("{0}", sell),
+                            string.Format("{0}", price),
+                            string.Format("{0}", amount),
+                            string.Format("{0}", isFillAndKill),
+                            string.Format("{0}", expireTime)});
+#line 7
+ testRunner.Given("Order \'SellOrder\' Has Been Defined", ((string)(null)), table1, "Given ");
+#line hidden
+#line 11
+ testRunner.When("I Register The Order \'SellOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 13
+ testRunner.Then("Order \'SellOrder\' Should Be Enqueued", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableTheoryAttribute(DisplayName="TradeOrders")]
+        [Xunit.TraitAttribute("FeatureTitle", "StockMarketMatchingEngineFeature2")]
+        [Xunit.TraitAttribute("Description", "TradeOrders")]
+        [Xunit.InlineDataAttribute("1", "100", "5", "false", "2024-02-05 09:30:26.2080000", "2", "1", "5", "100", "0", new string[0])]
+        public virtual void TradeOrders(string buy, string price, string amount, string isFillAndKill, string expireTime, string buyOrderId, string sellOrderId, string tradeAmount, string tradePrice, string modifiedAmount, string[] exampleTags)
+        {
+            string[] tagsOfScenario = exampleTags;
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("Buy", buy);
+            argumentsOfScenario.Add("Price", price);
+            argumentsOfScenario.Add("Amount", amount);
+            argumentsOfScenario.Add("IsFillAndKill", isFillAndKill);
+            argumentsOfScenario.Add("ExpireTime", expireTime);
+            argumentsOfScenario.Add("BuyOrderId", buyOrderId);
+            argumentsOfScenario.Add("SellOrderId", sellOrderId);
+            argumentsOfScenario.Add("TradeAmount", tradeAmount);
+            argumentsOfScenario.Add("TradePrice", tradePrice);
+            argumentsOfScenario.Add("ModifiedAmount", modifiedAmount);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("TradeOrders", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 22
 this.ScenarioInitialize(scenarioInfo);
 #line hidden
             bool isScenarioIgnored = default(bool);
@@ -120,14 +192,189 @@ this.ScenarioInitialize(scenarioInfo);
                             "5",
                             "false",
                             "2024-02-05 09:30:26.2080000"});
-#line 7
- testRunner.Given("Order \'SellOrder\' Has Been Defined", ((string)(null)), table2, "Given ");
+#line 24
+ testRunner.Given("Order \'SellOrder\' Has Been Registerd", ((string)(null)), table2, "Given ");
 #line hidden
-#line 11
- testRunner.When("I Register The Order \'SellOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+                TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Side",
+                            "Price",
+                            "Amount",
+                            "IsFillAndKill",
+                            "ExpireTime"});
+                table3.AddRow(new string[] {
+                            string.Format("{0}", buy),
+                            string.Format("{0}", price),
+                            string.Format("{0}", amount),
+                            string.Format("{0}", isFillAndKill),
+                            string.Format("{0}", expireTime)});
+#line 29
+ testRunner.And("Order \'BuyOrder\' Has Been Defined", ((string)(null)), table3, "And ");
 #line hidden
-#line 13
- testRunner.Then("Order \'SellOrder\' Should Be Enqueued", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line 33
+ testRunner.When("I Register The Order \'BuyOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+                TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
+                            "BuyOrderId",
+                            "SellOrderId",
+                            "Amount",
+                            "Price"});
+                table4.AddRow(new string[] {
+                            string.Format("{0}", buyOrderId),
+                            string.Format("{0}", sellOrderId),
+                            string.Format("{0}", tradeAmount),
+                            string.Format("{0}", tradePrice)});
+#line 36
+ testRunner.Then("The following \'Trade\' will be created", ((string)(null)), table4, "Then ");
+#line hidden
+                TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Side",
+                            "Price",
+                            "Amount",
+                            "IsFillAndKill",
+                            "ExpireTime"});
+                table5.AddRow(new string[] {
+                            string.Format("{0}", buy),
+                            string.Format("{0}", price),
+                            string.Format("{0}", modifiedAmount),
+                            "false",
+                            "2024-02-05 09:30:26.2080000"});
+#line 41
+ testRunner.And("Order \'BuyOrder\' Should Be Modified  like this", ((string)(null)), table5, "And ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableTheoryAttribute(DisplayName="ModifyOrder")]
+        [Xunit.TraitAttribute("FeatureTitle", "StockMarketMatchingEngineFeature2")]
+        [Xunit.TraitAttribute("Description", "ModifyOrder")]
+        [Xunit.InlineDataAttribute("0", "1000", "1000", "false", "2024-02-05 09:30:26.2080000", new string[0])]
+        public virtual void ModifyOrder(string sell, string price, string amount, string isFillAndKill, string expireTime, string[] exampleTags)
+        {
+            string[] tagsOfScenario = exampleTags;
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("Sell", sell);
+            argumentsOfScenario.Add("Price", price);
+            argumentsOfScenario.Add("Amount", amount);
+            argumentsOfScenario.Add("IsFillAndKill", isFillAndKill);
+            argumentsOfScenario.Add("ExpireTime", expireTime);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("ModifyOrder", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 51
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Side",
+                            "Price",
+                            "Amount",
+                            "IsFillAndKill",
+                            "ExpireTime"});
+                table6.AddRow(new string[] {
+                            string.Format("{0}", sell),
+                            string.Format("{0}", price),
+                            string.Format("{0}", amount),
+                            string.Format("{0}", isFillAndKill),
+                            string.Format("{0}", expireTime)});
+#line 52
+ testRunner.Given("Order \'SellOrder\' Has Been Registerd", ((string)(null)), table6, "Given ");
+#line hidden
+                TechTalk.SpecFlow.Table table7 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Side",
+                            "Price",
+                            "Amount",
+                            "IsFillAndKill",
+                            "ExpireTime"});
+                table7.AddRow(new string[] {
+                            "0",
+                            "1000",
+                            "10",
+                            "false",
+                            "2024-02-05 09:30:26.2080000"});
+#line 56
+ testRunner.And("Order \'ModifiedOrder\' Has Been Defined", ((string)(null)), table7, "And ");
+#line hidden
+#line 60
+ testRunner.When("I Modify The Order \'SellOrder\' to \'ModifiedOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 63
+ testRunner.Then("The order \'SellOrder\'  Should Be Found like \'ModifiedOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+#line hidden
+            }
+            this.ScenarioCleanup();
+        }
+        
+        [Xunit.SkippableTheoryAttribute(DisplayName="CancelOrder")]
+        [Xunit.TraitAttribute("FeatureTitle", "StockMarketMatchingEngineFeature2")]
+        [Xunit.TraitAttribute("Description", "CancelOrder")]
+        [Xunit.InlineDataAttribute("0", "100", "5", "false", "2024-02-05 09:30:26.2080000", new string[0])]
+        [Xunit.InlineDataAttribute("0", "200", "5", "false", "2024-02-05 09:30:26.2080000", new string[0])]
+        [Xunit.InlineDataAttribute("0", "300", "5", "false", "2024-02-05 09:30:26.2080000", new string[0])]
+        public virtual void CancelOrder(string sell, string price, string amount, string isFillAndKill, string expireTime, string[] exampleTags)
+        {
+            string[] tagsOfScenario = exampleTags;
+            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("Sell", sell);
+            argumentsOfScenario.Add("Price", price);
+            argumentsOfScenario.Add("Amount", amount);
+            argumentsOfScenario.Add("IsFillAndKill", isFillAndKill);
+            argumentsOfScenario.Add("ExpireTime", expireTime);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("CancelOrder", null, tagsOfScenario, argumentsOfScenario, this._featureTags);
+#line 72
+this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            bool isScenarioIgnored = default(bool);
+            bool isFeatureIgnored = default(bool);
+            if ((tagsOfScenario != null))
+            {
+                isScenarioIgnored = tagsOfScenario.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((this._featureTags != null))
+            {
+                isFeatureIgnored = this._featureTags.Where(__entry => __entry != null).Where(__entry => String.Equals(__entry, "ignore", StringComparison.CurrentCultureIgnoreCase)).Any();
+            }
+            if ((isScenarioIgnored || isFeatureIgnored))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                this.ScenarioStart();
+                TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
+                            "Side",
+                            "Price",
+                            "Amount",
+                            "IsFillAndKill",
+                            "ExpireTime"});
+                table8.AddRow(new string[] {
+                            string.Format("{0}", sell),
+                            string.Format("{0}", price),
+                            string.Format("{0}", amount),
+                            string.Format("{0}", isFillAndKill),
+                            string.Format("{0}", expireTime)});
+#line 73
+ testRunner.Given("Order \'SellOrder\' Has Been Registerd", ((string)(null)), table8, "Given ");
+#line hidden
+#line 81
+ testRunner.When("I cancel \'SellOrder\'", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
+#line hidden
+#line 83
+ testRunner.Then("The order \'SellOrder\'  Should Be Cancelled", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();

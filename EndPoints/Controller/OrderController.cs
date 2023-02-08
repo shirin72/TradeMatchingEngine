@@ -15,16 +15,20 @@ namespace EndPoints.Controller
         private readonly IModifieOrderCommandHandler modifieOrderCommandHandler;
         private readonly ICancellOrderCommandHandler cancellOrderCommandHandler;
         private readonly IOrderQueryRepository orderQueryRepository;
+        private readonly ICancellAllOrdersCommandHandler cancellAllOrderCommandHandler;
 
         public OrderController(IAddOrderCommandHandlers addOrderCommandHandlers,
             IModifieOrderCommandHandler modifieOrderCommandHandler,
             ICancellOrderCommandHandler cancellOrderCommandHandler,
-            IOrderQueryRepository orderQueryRepository)
+            IOrderQueryRepository orderQueryRepository,
+                 ICancellAllOrdersCommandHandler cancellAllOrderCommandHandler
+            )
         {
             this.addOrderCommandHandlers = addOrderCommandHandlers;
             this.modifieOrderCommandHandler = modifieOrderCommandHandler;
             this.cancellOrderCommandHandler = cancellOrderCommandHandler;
             this.orderQueryRepository = orderQueryRepository;
+            this.cancellAllOrderCommandHandler = cancellAllOrderCommandHandler;
         }
 
         /// <summary>
@@ -44,7 +48,7 @@ namespace EndPoints.Controller
                 IsFillAndKill = (bool)orderVM.IsFillAndKill,
             };
 
-            return await addOrderCommandHandlers.Handle(command) ;
+            return await addOrderCommandHandlers.Handle(command);
         }
 
         /// <summary>
@@ -98,8 +102,26 @@ namespace EndPoints.Controller
 
                 throw;
             }
-            
+
         }
+
+        /// <summary>
+        /// CancellAllOrders
+        /// </summary>
+        /// <returns></returns>
+        [HttpPatch]
+        public async Task<IEnumerable<long>> CancellAllOrders()
+        {
+            var result = await cancellAllOrderCommandHandler.Handle(null);
+
+            if (result != null)
+            {
+                return result.CancelledOrders;
+            }
+
+            throw new Exception("Order Not Found");
+        }
+
 
         [HttpGet]
         public async Task<Order> GetOrder(long orderId)

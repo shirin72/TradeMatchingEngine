@@ -1,36 +1,40 @@
 using EndPoints.Model;
 using Newtonsoft.Json;
-using System;
 using System.Text;
-using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
 using TradeMatchingEngine;
 
 namespace SpecFlowTest.StepDefinitions
 {
     [Binding]
-    public class StockMarketMatchingEngineFeature2StepDefinitions:Steps
+    public class StockMarketMatchingEngineFeature2StepDefinitions : Steps
     {
-        private FeatureContext context;
+        private ScenarioContext context;
         private readonly HttpClient httpClient;
 
 
-        public StockMarketMatchingEngineFeature2StepDefinitions(FeatureContext context)
+        public StockMarketMatchingEngineFeature2StepDefinitions(ScenarioContext context)
         {
             this.context = context;
             this.httpClient = new HttpClient();
         }
 
+        [BeforeScenario]
+        public async Task CancellAllOrders()
+        {
+            await httpClient.PatchAsync($"https://localhost:7092/api/Order/CancellAllOrders", null);
+        }
+
         [Given(@"Order '([^']*)' Has Been Defined")]
         public void GivenSellOrderHasBeenDefined(string order, Table table)
         {
-            context.Add(order, table);
+            context.Add(order, table.CreateInstance<OrderVM>());
         }
 
         [When(@"I Register The Order '([^']*)'")]
         public async Task WhenIRegisterTheSellOrder(string order)
         {
-            var orderVm = context.Get<Table>(order).CreateInstance<OrderVM>();
+            var orderVm = context.Get<OrderVM>(order);
 
             var requestBody = new StringContent(JsonConvert.SerializeObject(orderVm), Encoding.UTF8, "application/json");
             var result = httpClient.PostAsync("https://localhost:7092/api/Order/ProcessOrder", requestBody).GetAwaiter().GetResult();

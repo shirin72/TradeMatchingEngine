@@ -10,6 +10,10 @@ namespace Infrastructure
             Database.EnsureCreated();
         }
 
+        public void EnsureDatabaseIsDropped()
+        {
+            Database.EnsureDeleted();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,7 +44,7 @@ namespace Infrastructure
                 b.Property(o => o.Amount);
                 b.HasOne<TradeMatchingEngine.Order>().WithMany().HasForeignKey(t => t.BuyOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
                 b.HasOne<TradeMatchingEngine.Order>().WithMany().HasForeignKey(t => t.SellOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
-                b.Property(o => o.SellOrderId)   ;
+                b.Property(o => o.SellOrderId);
                 b.Property(o => o.BuyOrderId);
                 // b.Property(o => o.OwnerId);
             });

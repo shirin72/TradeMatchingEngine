@@ -1,7 +1,7 @@
 using EndPoints.Controller;
+using EndPoints.Model;
 using Newtonsoft.Json;
 using System.Text;
-using TechTalk.SpecFlow.Assist;
 using TradeMatchingEngine;
 
 namespace SpecFlowTest.StepDefinitions
@@ -9,25 +9,30 @@ namespace SpecFlowTest.StepDefinitions
     [Binding]
     public class StockMarketMatchingEngineModifyOrderStepDefinitions
     {
-        private readonly FeatureContext context;
+        private readonly ScenarioContext context;
         private readonly HttpClient httpClient;
 
-        public StockMarketMatchingEngineModifyOrderStepDefinitions(FeatureContext context)
+        public StockMarketMatchingEngineModifyOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
             this.httpClient = new HttpClient();
 
         }
 
-        [When(@"I Will Try To Modify The Order '([^']*)' with Another Orde '([^']*)'")]
-        public async Task WhenIWillTryToModifyTheOrderWithAnotherOrde(string sellOrder, string modifiedOrder, Table table)
+        [When(@"I Modify The Order '([^']*)' to '([^']*)'")]
+        public async Task WhenIModifyTheOrderTo(string sellOrder, string modifiedOrder)
         {
-            context.Add(modifiedOrder, table);
-
             var orderId = context.Get<ProcessedOrder>($"{sellOrder}Response").OrderId;
 
-            var modifiedOrderVM = table.CreateInstance<ModifiedOrderVM>();
-            modifiedOrderVM.OrderId = orderId;
+            var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
+
+            var modifiedOrderVM = new ModifiedOrderVM()
+            {
+                OrderId = orderId,
+                Amount = _modifiedorderVM.Amount,
+                ExpDate = _modifiedorderVM.ExpireTime,
+                Price = _modifiedorderVM.Price,
+            };
 
             var requestBody = new StringContent(JsonConvert.SerializeObject(modifiedOrderVM), Encoding.UTF8, "application/json");
 
@@ -36,16 +41,18 @@ namespace SpecFlowTest.StepDefinitions
             context.Add($"{modifiedOrder}Response", Convert.ToInt64(result.Content.ReadAsStringAsync().Result));
         }
 
-
-        [Then(@"The order '([^']*)' Should Be Found")]
-        public async Task ThenTheOrderShouldBeFound(string order)
+        [Then(@"The order '([^']*)'  Should Be Found like '([^']*)'")]
+        public async Task ThenTheOrderShouldBeFoundLike(string order, string modifiedOrder)
         {
-            var result = context.Get<long>($"{order}Response");
+            var result = context.Get<long>($"{modifiedOrder}Response");
+            var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
+
             var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
             var orderDeserialize = JsonConvert.DeserializeObject<Order>(await addedOrderId.Content.ReadAsStringAsync());
 
             orderDeserialize.Id.Should().Be(result);
-            orderDeserialize.Amount.Should().Be(context.Get<Table>($"{order}").CreateInstance<ModifiedOrderVM>().Amount);
+            orderDeserialize.Amount.Should().Be(_modifiedorderVM.Amount);
         }
+
     }
 }

@@ -37,6 +37,7 @@ namespace Infrastructure
             services.AddSingleton<IStockMarketFactory, StockMarketFactory>();
             services.AddScoped<IModifieOrderCommandHandler, ModifieOrderCommandHandler>();
             services.AddScoped<ICancellOrderCommandHandler, CancellOrderCommandHandler>();
+            services.AddScoped<ICancellAllOrdersCommandHandler, CancellAllOrdersCommandHandler>();
             return services;
         }
     }
