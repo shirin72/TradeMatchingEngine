@@ -4,6 +4,6 @@
     {
         IEnumerable<Trade> CreatedTrades { get; }
         IEnumerable<Order> ModifiedOrders { get; }
-        Order Order { get; }
+        Order? Order { get; }
     }
 }

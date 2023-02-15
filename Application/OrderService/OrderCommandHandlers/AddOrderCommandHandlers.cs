@@ -25,7 +25,7 @@ namespace Application.OrderService.OrderCommandHandlers
             {
                 var findOrder = await this._orderCommandRepository.Find(order.Id);
                 findOrder.UpdateBy(order);
-             
+
             }
 
             foreach (var trade in result.CreatedTrades)
@@ -33,7 +33,7 @@ namespace Application.OrderService.OrderCommandHandlers
                 await _tradeCommandRepository.Add(trade);
             }
 
-            var processedOrder = new ProcessedOrder() { OrderId = result.Order.Id, Trades = result.CreatedTrades };
+            var processedOrder = new ProcessedOrder() { OrderId = result.Order == null ? 0 : result.Order.Id, Trades = result.CreatedTrades };
 
             return processedOrder;
         }
