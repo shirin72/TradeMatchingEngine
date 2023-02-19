@@ -36,7 +36,7 @@ namespace Application.OrderService.OrderCommandHandlers
             {
                 await _tradeCommandRepository.Add(trade);
             }
-            return new ProcessedOrder() { OrderId = result.Order.Id };
+            return new ProcessedOrder() { OrderId = result.Order == null ? 0 : result.Order.Id };
         }
     }
 }

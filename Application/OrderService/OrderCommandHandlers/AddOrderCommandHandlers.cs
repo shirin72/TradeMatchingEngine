@@ -25,7 +25,6 @@ namespace Application.OrderService.OrderCommandHandlers
             {
                 var findOrder = await this._orderCommandRepository.Find(order.Id);
                 findOrder.UpdateBy(order);
-
             }
 
             foreach (var trade in result.CreatedTrades)

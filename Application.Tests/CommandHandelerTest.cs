@@ -27,10 +27,10 @@ namespace Application.Tests
         protected IStockMarketMatchEngineWithState stockMarket;
         protected IStockMarketMatchingEngineProcessContext processContext;
         protected THandler sut;
+
         public CommandHandelerTest()
         {
             unitOfWorkMock = Substitute.For<IUnitOfWork>();
-
             orderCommandRepositoryMock = Substitute.For<IOrderCommandRepository>();
             orderQueryRepositoryMock = Substitute.For<IOrderQueryRepository>();
             tradeQueryRepositoryMock = Substitute.For<ITradeQueryRespository>();
@@ -38,17 +38,6 @@ namespace Application.Tests
             stockMarketFactoryMock = Substitute.For<IStockMarketFactory>();
             stockMarket = Substitute.For<IStockMarketMatchEngineWithState>();
             processContext = Substitute.For<IStockMarketMatchingEngineProcessContext>();
-
-            //var modifiedOrder = new List<Order>();
-            //modifiedOrder.Add(
-            //    new Order(Arg.Any<long>(),
-            //    Arg.Any<Side>(),
-            //    Arg.Any<int>(),
-            //    Arg.Any<int>(),
-            //    Arg.Any<DateTime>(),
-            //    Arg.Any<OrderStates>()));
-
-            //stockMarketFactoryMock.GetStockMarket(Arg.Is<IOrderQueryRepository>(orderQueryRepositoryMock), Arg.Is<ITradeQueryRespository>(tradeQueryRepositoryMock)).Returns(stockMarket);
 
             sut = (THandler)Activator.CreateInstance(typeof(THandler), unitOfWorkMock,
                stockMarketFactoryMock,
@@ -58,11 +47,7 @@ namespace Application.Tests
                tradeQueryRepositoryMock
                );
 
-            //stockMarket.ProcessOrderAsync(10, 10, Side.Buy, null, false, 1).Returns(processContext);
-            //processContext.Order.Returns(new Order(Arg.Is<long>(1), Arg.Is<Side>(Side.Buy), Arg.Is<int>(10), Arg.Is<int>(10), Arg.Is<DateTime>(DateTime.Now.AddDays(1)), Arg.Is<OrderStates>(OrderStates.Register)));
-            //processContext.ModifiedOrders.Returns(modifiedOrder);
 
-            //stockMarket.ProcessOrderAsync(Arg.Is<int>(10), Arg.Is<int>(10), Arg.Is<Side>(Side.Buy), Arg.Is<DateTime>(DateTime.Now.AddDays(1)), Arg.Is<bool>(false), Arg.Is<long>(null)).Returns(processContext);
         }
         [Fact]
         public async Task Handle_Should_Call_GetStockMarket_On_StockMarketFactory_TestAsync()

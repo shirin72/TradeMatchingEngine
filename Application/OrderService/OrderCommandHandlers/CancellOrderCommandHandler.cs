@@ -20,20 +20,11 @@ namespace Application.OrderService.OrderCommandHandlers
 
             foreach (var order in result.ModifiedOrders)
             {
-                try
-                {
-                    var findOrder = await this._orderCommandRepository.Find(order.Id);
-                    findOrder.UpdateBy(order);
-                }
-                catch (Exception ex)
-                {
-
-                    throw;
-                }
-
+                var findOrder = await this._orderCommandRepository.Find(order.Id);
+                findOrder.UpdateBy(order);
             }
 
-            return new ProcessedOrder() { OrderId = result.ModifiedOrders == null ? 0 : result.ModifiedOrders.FirstOrDefault().Id } as ProcessedOrder;
+            return new ProcessedOrder() { OrderId = result.ModifiedOrders == null ? 0 : result.ModifiedOrders.FirstOrDefault() == null ? 0 : result.ModifiedOrders.FirstOrDefault().Id } as ProcessedOrder;
         }
     }
 }
