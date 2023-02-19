@@ -13,6 +13,7 @@ namespace Application.Tests
     public class TestCommandHandler : CommandHandler<TestCommand>,ICallCounter
     {
         public int CallCount { get; set; }
+
         public TestCommandHandler(IUnitOfWork unitOfWork, IStockMarketFactory stockMarketFactory, IOrderCommandRepository orderCommandRepository, IOrderQueryRepository orderQueryRepository, ITradeCommandRepository tradeCommandRepository, ITradeQueryRespository tradeQueryRespository) : base(unitOfWork, stockMarketFactory, orderCommandRepository, orderQueryRepository, tradeCommandRepository, tradeQueryRespository)
         {
         }

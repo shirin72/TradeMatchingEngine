@@ -19,7 +19,8 @@ namespace TradeMatchingEngine
         #region Public
         public Order Order => createdOrder;
         public IEnumerable<Order> ModifiedOrders => modifiedOrders;
-        public IEnumerable<Trade> CreatedTrades => createdTrades; 
+        public IEnumerable<Trade> CreatedTrades => createdTrades;
+
         #endregion
 
         #region Internal

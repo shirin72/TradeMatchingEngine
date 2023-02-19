@@ -28,13 +28,22 @@ namespace Application.OrderService.OrderCommandHandlers
         }
         public async Task<ProcessedOrder?> Handle(T1 command)
         {
-            _stockMarketMatchEngine = await _stockMarketFactory.GetStockMarket(_orderQuery, _tradeQuery);
+            try
+            {
+                _stockMarketMatchEngine = await _stockMarketFactory.GetStockMarket(_orderQuery, _tradeQuery);
 
-            var result = await SpecificHandle(command);
+                var result = await SpecificHandle(command);
 
-            await _unitOfWork.SaveChange();
+                await _unitOfWork.SaveChange();
 
-            return result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+           
         }
 
         protected abstract Task<ProcessedOrder> SpecificHandle(T1? command);

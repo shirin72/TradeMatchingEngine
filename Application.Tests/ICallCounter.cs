@@ -1,7 +1,7 @@
 ﻿namespace Application.Tests
 {
-    internal interface ICallCounter
+    public interface ICallCounter
     {
-
+        public int CallCount { get; set; }
     }
 }

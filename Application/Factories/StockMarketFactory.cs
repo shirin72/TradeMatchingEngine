@@ -10,7 +10,7 @@ namespace Application.Factories
         private StockMarketMatchEngineStateProxy _stockMarketMatchEngine;
 
 
-        public async Task<IStockMarketMatchEngineWithState> GetStockMarket(IOrderQueryRepository orderQueryRep, ITradeQueryRespository tradeQueryRep)
+        public virtual async Task<IStockMarketMatchEngineWithState> GetStockMarket(IOrderQueryRepository orderQueryRep, ITradeQueryRespository tradeQueryRep)
         {
             if (_stockMarketMatchEngine != null)
             {

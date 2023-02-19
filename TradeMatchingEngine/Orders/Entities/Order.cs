@@ -3,7 +3,7 @@
 namespace TradeMatchingEngine
 {
 
-    public class Order
+    public class Order : IOrder
     {
         private OrderStates _state;
 
@@ -81,7 +81,7 @@ namespace TradeMatchingEngine
             ExpireTime = order.ExpireTime;
             IsFillAndKill = order.IsFillAndKill;
             Side = order.Side;
-            _state =(OrderStates) order.OrderState;
+            _state = (OrderStates)order.OrderState;
         }
         internal Order Clone(int originalAmount)
         {
