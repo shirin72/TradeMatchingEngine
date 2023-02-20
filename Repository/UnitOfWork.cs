@@ -18,17 +18,8 @@ namespace Infrastructure
 
         public async Task<int> SaveChange()
         {
-            try
-            {
-                var result = await tradeMatchingEngineContext.SaveChangesAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-           
+            var result = await tradeMatchingEngineContext.SaveChangesAsync();
+            return result;
         }
     }
 }

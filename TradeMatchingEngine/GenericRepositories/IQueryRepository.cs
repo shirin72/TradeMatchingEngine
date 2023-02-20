@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace TradeMatchingEngine.GenericRepositories
 {
-    public interface IQueryRepository<T>
+    public interface IQueryRepository<T,TInterface>
     {
-        Task<T?> Get(Expression<Func<T, bool>> predicate);
-        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? predicate = null);
+        Task<TInterface?> Get(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<TInterface>> GetAll(Expression<Func<T, bool>>? predicate = null);
         Task<long> GetMax(Expression<Func<T, long?>> selector);
     }
 }

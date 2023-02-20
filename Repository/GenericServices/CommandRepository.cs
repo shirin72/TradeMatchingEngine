@@ -3,7 +3,7 @@ using TradeMatchingEngine.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
 {
-    public class CommandRepository<T,TInterface> : ICommandRepository<T,TInterface> where T : class,TInterface
+    public class CommandRepository<T, TInterface> : ICommandRepository<T, TInterface> where T : class, TInterface
     {
         protected readonly DbContext _dbContext;
         protected readonly DbSet<T> _dbSet;
@@ -32,19 +32,9 @@ namespace Infrastructure.Order.QueryRepositories
 
         public async Task<TInterface> Find(long id)
         {
-            try
-            {
-                var res1 = _dbSet;
-                var res = await res1.FindAsync(id);
+            var res = await _dbSet.FindAsync(id);
 
-                return res;
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-
+            return res;
         }
     }
 }

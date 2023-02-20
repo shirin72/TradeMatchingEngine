@@ -10,7 +10,7 @@ using TradeMatchingEngine.GenericRepositories;
 
 namespace Infrastructure.GenericServices
 {
-    public class QueryRepository<T> : IQueryRepository<T> where T : class
+    public class QueryRepository<T, TInterface> : IQueryRepository<T, TInterface> where T : class, TInterface
     {
         protected readonly DbContext _dbContext;
         protected readonly IQueryable<T> _querySet;
@@ -19,12 +19,12 @@ namespace Infrastructure.GenericServices
             _dbContext = dbContext;
             _querySet = dbContext.Set<T>().AsNoTracking();
         }
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? predicate = null)
+        public async Task<IEnumerable<TInterface>> GetAll(Expression<Func<T, bool>>? predicate = null)
         {
             return await (predicate != null ? _querySet.Where(predicate) : _querySet).ToListAsync();
         }
 
-        public async Task<T?> Get(Expression<Func<T, bool>> predicate)
+        public async Task<TInterface?> Get(Expression<Func<T, bool>> predicate)
         {
             return await _querySet.Where(predicate).FirstOrDefaultAsync();
         }

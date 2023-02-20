@@ -28,7 +28,7 @@ namespace Application.Factories
                 var getOrders = await orderQueryRep.GetAll(x => x.Amount != 0 && x.OrderState != OrderStates.Cancell);
                 var lastOrderId = await orderQueryRep.GetMax(o => o.Id);
                 var getLastTrade = await tradeQueryRep.GetMax(t => t.Id);
-                _stockMarketMatchEngine = new StockMarketMatchEngineStateProxy(getOrders.ToList(), lastOrderId, getLastTrade);
+                _stockMarketMatchEngine = new StockMarketMatchEngineStateProxy(getOrders.Select(x => (Order)x).ToList(), lastOrderId, getLastTrade);
                 _stockMarketMatchEngine.PreOpen();
                 _stockMarketMatchEngine.Open();
             }

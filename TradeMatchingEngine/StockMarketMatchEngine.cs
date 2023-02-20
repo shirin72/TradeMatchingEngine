@@ -42,9 +42,9 @@
         #endregion
 
         #region Public Method
-        public IEnumerable<Order> AllOrders => allOrders;
+        public IEnumerable<IOrder> AllOrders => allOrders;
         public int AllOrdersCount() => allOrders.Count;
-        public IEnumerable<Trade> Trade => trades;
+        public IEnumerable<ITrade> Trade => trades;
         public int AllTradeCount() => trades.Count;
 
         public Queue<Order> GetPreOrderQueue()

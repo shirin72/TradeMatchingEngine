@@ -2,7 +2,7 @@
 
 namespace TradeMatchingEngine.Trades.Repositories.Query
 {
-    public interface ITradeQueryRespository:IQueryRepository<Trade>
+    public interface ITradeQueryRespository:IQueryRepository<Trade,ITrade>
     {
      
     }

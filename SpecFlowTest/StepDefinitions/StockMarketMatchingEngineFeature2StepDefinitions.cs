@@ -38,7 +38,6 @@ namespace SpecFlowTest.StepDefinitions
             var orderVm = context.Get<OrderVM>(order);
             var requestBody = new StringContent(JsonConvert.SerializeObject(orderVm), Encoding.UTF8, "application/json");
             var result = httpClient.PostAsync("https://localhost:7092/api/Order/ProcessOrder", requestBody).GetAwaiter().GetResult();
-            var thing = JsonConvert.DeserializeObject<TestProcessedOrder>(await result.Content.ReadAsStringAsync());
             context.Add($"{order}Response", JsonConvert.DeserializeObject<TestProcessedOrder>(await result.Content.ReadAsStringAsync(),
                 new JsonSerializerSettings()
             {
