@@ -1,3 +1,4 @@
+using Application.Tests;
 using Newtonsoft.Json;
 using TechTalk.SpecFlow.Assist;
 using TradeMatchingEngine;
@@ -35,27 +36,32 @@ namespace SpecFlowTest.StepDefinitions
         {
             var getTrades = httpClient.GetAsync("https://localhost:7092/api/Trades/GetAllTrades").GetAwaiter().GetResult();
 
-            var response = JsonConvert.DeserializeObject<IEnumerable<Trade>>(await getTrades.Content.ReadAsStringAsync());
+            var response = JsonConvert.DeserializeObject<IEnumerable<TestTrade>>(await getTrades.Content.ReadAsStringAsync(),
+                new JsonSerializerSettings()
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    TypeNameHandling = TypeNameHandling.Objects
+                });
 
-            var findTrade = response.Where(t => t.Id == context.Get<ProcessedOrder>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
-          
-            findTrade.Amount.Should().Be(table.CreateInstance<Trade>().Amount);
-           
-            findTrade.Price.Should().Be(table.CreateInstance<Trade>().Price);
+            var findTrade = response.Where(t => t.Id == context.Get<TestProcessedOrder>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
+
+            findTrade.Amount.Should().Be(table.CreateInstance<TestTrade>().Amount);
+
+            findTrade.Price.Should().Be(table.CreateInstance<TestTrade>().Price);
         }
 
 
         [Then(@"Order '([^']*)' Should Be Modified  like this")]
         public async Task ThenOrderShouldBeModifiedLikeThis(string order, Table table)
         {
-            var buyOrderId = context.Get<ProcessedOrder>($"{order}Response").OrderId;
+            var buyOrderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
 
             var getBuyOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={buyOrderId}").GetAwaiter().GetResult();
-            var buyOrderDeserialize = JsonConvert.DeserializeObject<Order>(await getBuyOrderId.Content.ReadAsStringAsync());
+            var buyOrderDeserialize = JsonConvert.DeserializeObject<TestOrder>(await getBuyOrderId.Content.ReadAsStringAsync());
 
             buyOrderDeserialize.Id.Should().Be(buyOrderId);
-            buyOrderDeserialize.Amount.Should().Be(table.CreateInstance<Order>().Amount);
-            buyOrderDeserialize.Price.Should().Be(table.CreateInstance<Order>().Price);
+            buyOrderDeserialize.Amount.Should().Be(table.CreateInstance<TestOrder>().Amount);
+            buyOrderDeserialize.Price.Should().Be(table.CreateInstance<TestOrder>().Price);
         }
     }
 }

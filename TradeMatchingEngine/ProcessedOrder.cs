@@ -6,7 +6,7 @@ namespace TradeMatchingEngine
     {
         public long OrderId { get; set; }
 
-        public IEnumerable<Trade>? Trades { get; set; }
+        public  IEnumerable<ITrade>? Trades { get; set; }
 
         public IEnumerable<long> CancelledOrders { get; set; }
     }

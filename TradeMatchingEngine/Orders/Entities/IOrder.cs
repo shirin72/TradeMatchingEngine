@@ -20,6 +20,6 @@ namespace TradeMatchingEngine
         void SetStateCancelled();
         void SetStateModified();
         void SetStateRegistered();
-        void UpdateBy(Order order);
+        void UpdateBy(IOrder order);
     }
 }

@@ -10,8 +10,17 @@ using Xunit;
 
 namespace Application.Tests
 {
-    public class AddOrderCommandHandlerTests : CommandHandelerTest<AddOrderCommandHandlers, AddOrderCommand>
+    public partial class AddOrderCommandHandlerTests : CommandHandelerTest<AddOrderCommandHandlers, AddOrderCommand>
     {
+        private static readonly int SOME_AMOUNT = 10;
+        private static readonly DateTime SOME_EXPIRATION_DATE = new DateTime(2050, 1, 1);
+        private static readonly bool SOME_IS_FILL_AND_KILL = false;
+        private static readonly int SOME_PRICE = 10;
+        private static readonly Side SOME_SIDE = Side.Buy;
+        private static readonly int SOME_ORDER_PARENT_ID = 1;
+        private static readonly int SOME_BUY_ORDER_ID = 1;
+        private static readonly int SOME_SELL_ORDER_ID = 1;
+        private static readonly int SOME_ORDER_ID = 1;
         public AddOrderCommandHandlerTests()
         {
             stockMarketFactoryMock.GetStockMarket(orderQueryRepositoryMock, tradeQueryRepositoryMock).Returns(stockMarket);
@@ -23,6 +32,26 @@ namespace Application.Tests
         {
             //Arrange
             var addOrderCommand = MakeSomeTCommand();
+
+            processContext.Order.Returns(new TestOrder
+            {
+                Id = 10,
+                Amount = SOME_AMOUNT,
+                ExpireTime = SOME_EXPIRATION_DATE,
+                IsFillAndKill = SOME_IS_FILL_AND_KILL,
+                OrderParentId = SOME_ORDER_PARENT_ID,
+                OrderState = OrderStates.Register,
+                Price = SOME_PRICE,
+                Side = SOME_SIDE
+            });
+
+            stockMarket.ProcessOrderAsync(
+               addOrderCommand.Price,
+               addOrderCommand.Amount,
+               addOrderCommand.Side,
+               addOrderCommand.ExpDate,
+               addOrderCommand.IsFillAndKill,
+               addOrderCommand.orderParentId).Returns(processContext);
 
             //Act
             await sut.Handle(addOrderCommand);
@@ -42,12 +71,12 @@ namespace Application.Tests
 
             //Assert
             await stockMarket.Received(1).ProcessOrderAsync(
-               Arg.Is(addOrderCommand.Price),
-               Arg.Is(addOrderCommand.Amount),
-               Arg.Is(addOrderCommand.Side),
-               Arg.Is(addOrderCommand.ExpDate),
-               Arg.Is(addOrderCommand.IsFillAndKill),
-               Arg.Is(addOrderCommand.orderParentId)
+              addOrderCommand.Price,
+               SOME_AMOUNT,
+               addOrderCommand.Side,
+               addOrderCommand.ExpDate,
+               addOrderCommand.IsFillAndKill,
+               addOrderCommand.orderParentId
                );
         }
 
@@ -57,13 +86,22 @@ namespace Application.Tests
             //Arrange
             var addOrderCommand = MakeSomeTCommand();
 
-            processContext.CreatedTrades.Returns(new List<Trade> { new Trade(1, 1, 2, 10, 10) });
-            stockMarket.ProcessOrderAsync(Arg.Is(addOrderCommand.Price),
-               Arg.Is(addOrderCommand.Amount),
-               Arg.Is(addOrderCommand.Side),
-               Arg.Is(addOrderCommand.ExpDate),
-               Arg.Is(addOrderCommand.IsFillAndKill),
-               Arg.Is(addOrderCommand.orderParentId)).Returns(processContext);
+            processContext.CreatedTrades.Returns(
+            new List<TestTrade> {
+                new TestTrade {
+                Amount = SOME_AMOUNT,
+                BuyOrderId =SOME_BUY_ORDER_ID,
+                Id=SOME_ORDER_ID,
+                Price = SOME_PRICE,
+                SellOrderId=SOME_SELL_ORDER_ID } });
+
+            stockMarket.ProcessOrderAsync(
+              addOrderCommand.Price,
+              addOrderCommand.Amount,
+              addOrderCommand.Side,
+              addOrderCommand.ExpDate,
+              addOrderCommand.IsFillAndKill,
+              addOrderCommand.orderParentId).Returns(processContext);
 
             //Act
             await sut.Handle(addOrderCommand);
@@ -80,16 +118,27 @@ namespace Application.Tests
             //Arrange
             var addOrderCommand = MakeSomeTCommand();
 
-            var order = new Order(1, addOrderCommand.Side, addOrderCommand.Price, addOrderCommand.Amount, (DateTime)addOrderCommand.ExpDate, OrderStates.Register, orderParentId: addOrderCommand.orderParentId);
+            var order = new TestOrder
+            {
+                Id = SOME_ORDER_ID,
+                Amount = SOME_AMOUNT,
+                ExpireTime = SOME_EXPIRATION_DATE,
+                IsFillAndKill = SOME_IS_FILL_AND_KILL,
+                OrderParentId = SOME_ORDER_PARENT_ID,
+                OrderState = OrderStates.Register,
+                Price = SOME_PRICE,
+                Side = SOME_SIDE
+            };
 
-            processContext.ModifiedOrders.Returns(new List<Order> { order });
+            processContext.ModifiedOrders.Returns(new List<TestOrder> { order });
 
-            stockMarket.ProcessOrderAsync(Arg.Is(addOrderCommand.Price),
-               Arg.Is(addOrderCommand.Amount),
-               Arg.Is(addOrderCommand.Side),
-               Arg.Is(addOrderCommand.ExpDate),
-               Arg.Is(addOrderCommand.IsFillAndKill),
-               Arg.Is(addOrderCommand.orderParentId)).Returns(processContext);
+            stockMarket.ProcessOrderAsync(
+               addOrderCommand.Price,
+               addOrderCommand.Amount,
+               addOrderCommand.Side,
+               addOrderCommand.ExpDate,
+               addOrderCommand.IsFillAndKill,
+               addOrderCommand.orderParentId).Returns(processContext);
 
             orderCommandRepositoryMock.Find(Arg.Any<long>()).Returns(order);
 
@@ -101,17 +150,17 @@ namespace Application.Tests
             await orderCommandRepositoryMock.Received(1).Find(processContext.ModifiedOrders.ToList().FirstOrDefault().Id);
         }
 
+
         protected override AddOrderCommand MakeSomeTCommand()
         {
             return new AddOrderCommand
             {
-                Amount = 10,
-                ExpDate = new DateTime(2050, 1, 1),
-                IsFillAndKill = false,
-                Price = 10,
-                Side = Side.Buy,
-                orderParentId = 1,
-                events = new StockMarketEvents()
+                Amount = SOME_AMOUNT,
+                ExpDate = SOME_EXPIRATION_DATE,
+                IsFillAndKill = SOME_IS_FILL_AND_KILL,
+                Price = SOME_PRICE,
+                Side = SOME_SIDE,
+                orderParentId = SOME_ORDER_PARENT_ID,
             };
         }
     }

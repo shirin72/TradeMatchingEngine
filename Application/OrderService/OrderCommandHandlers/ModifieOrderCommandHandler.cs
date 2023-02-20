@@ -22,21 +22,30 @@ namespace Application.OrderService.OrderCommandHandlers
 
         protected async override Task<ProcessedOrder> SpecificHandle(ModifieOrderCommand? command)
         {
-            var result = await this._stockMarketMatchEngine.ModifieOrder(command.OrderId, command.Price, command.Amount, command.ExpDate);
-
-            await _orderCommandRepository.Add(result.Order);
-
-            foreach (var order in result.ModifiedOrders)
+            try
             {
-                var findOrder = await this._orderCommandRepository.Find(order.Id);
-                findOrder.UpdateBy(order);
+                var result = await this._stockMarketMatchEngine.ModifieOrder(command.OrderId, command.Price, command.Amount, command.ExpDate);
+
+                await _orderCommandRepository.Add(result.Order);
+
+                foreach (var order in result.ModifiedOrders)
+                {
+                    var findOrder = await this._orderCommandRepository.Find(order.Id);
+                    findOrder.UpdateBy(order);
+                }
+
+                foreach (var trade in result.CreatedTrades)
+                {
+                    await _tradeCommandRepository.Add(trade);
+                }
+                return new ProcessedOrder() { OrderId = result.Order == null ? 0 : result.Order.Id };
+            }
+            catch (Exception ex)
+            {
+
+                throw;
             }
 
-            foreach (var trade in result.CreatedTrades)
-            {
-                await _tradeCommandRepository.Add(trade);
-            }
-            return new ProcessedOrder() { OrderId = result.Order == null ? 0 : result.Order.Id };
         }
     }
 }

@@ -44,7 +44,7 @@ Scenario Outline: TradeOrders
 
 Examples:
 	| Buy | Price | Amount | IsFillAndKill | ExpireTime                  | BuyOrderId | SellOrderId | TradeAmount | TradePrice | ModifiedAmount |
-	| 1   | 100   | 5      | false         | 2024-02-05 09:30:26.2080000 | 2          | 1           | 5            | 100        | 0              |
+	| 1   | 100   | 5      | false         | 2024-02-05 09:30:26.2080000 | 2          | 1           | 5           | 100        | 0              |
 
 
 

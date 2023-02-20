@@ -7,7 +7,7 @@ namespace TradeMatchingEngine
     {
         private OrderStates _state;
 
-        public Order(long id, Side side, int price, int amount, DateTime expireTime, OrderStates? orderState, int? originalAmount = null, bool? isFillAndKill = null, long? orderParentId = null)
+        internal Order(long id, Side side, int price, int amount, DateTime expireTime, OrderStates? orderState, int? originalAmount = null, bool? isFillAndKill = null, long? orderParentId = null)
         {
             this.Id = id;
             this.Side = side;
@@ -73,7 +73,7 @@ namespace TradeMatchingEngine
         }
         public long? OrderParentId { get; private set; }
 
-        public void UpdateBy(Order order)
+        public void UpdateBy(IOrder order)
         {
             Price = order.Price;
             OriginalAmount = order.OriginalAmount;

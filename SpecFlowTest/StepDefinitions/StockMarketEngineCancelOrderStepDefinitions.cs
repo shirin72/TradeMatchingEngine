@@ -1,3 +1,4 @@
+using Application.Tests;
 using EndPoints.Model;
 using Newtonsoft.Json;
 using System.Text;
@@ -21,7 +22,7 @@ namespace SpecFlowTest.StepDefinitions
         [When(@"I cancel '([^']*)'")]
         public async Task WhenICancel(string order)
         {
-            var orderId = context.Get<ProcessedOrder>($"{order}Response").OrderId;
+            var orderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
             var body = new StringContent(JsonConvert.SerializeObject(new CancellOrderVM() { OrderId = orderId }), Encoding.UTF8, "application/json");
             await httpClient.PatchAsync($"https://localhost:7092/api/Order/CancellOrder", body);
         }
@@ -29,9 +30,9 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"The order '([^']*)'  Should Be Cancelled")]
         public async Task ThenTheOrderShouldBeCancelled(string order)
         {
-            var result = context.Get<ProcessedOrder>($"{order}Response").OrderId;
+            var result = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
             var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
-            var orderDeserialize = JsonConvert.DeserializeObject<Order>(await addedOrderId.Content.ReadAsStringAsync());
+            var orderDeserialize = JsonConvert.DeserializeObject<TestOrder>(await addedOrderId.Content.ReadAsStringAsync());
 
             orderDeserialize.OrderState.Should().Be(OrderStates.Cancell);
         }

@@ -15,13 +15,13 @@ namespace EndPoints.Controller
             this.queryRepository = queryRepository;
         }
         [HttpGet]
-        public async Task<IEnumerable<Trade>> GetAllTrades()
+        public async Task<IEnumerable<ITrade>> GetAllTrades()
         {
             return await queryRepository.GetAll();
 
         }
         [HttpGet]
-        public async Task<Trade> GetTrade(long id)
+        public async Task<ITrade> GetTrade(long id)
         {
             return await queryRepository.Get(t=>t.Id == id);
         }

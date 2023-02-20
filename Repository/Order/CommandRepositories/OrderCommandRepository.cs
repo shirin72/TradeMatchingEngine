@@ -3,7 +3,7 @@ using TradeMatchingEngine.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
 {
-    public class OrderCommandRepository :CommandRepository<TradeMatchingEngine.Order>,  IOrderCommandRepository
+    public class OrderCommandRepository :CommandRepository<TradeMatchingEngine.Order, TradeMatchingEngine.IOrder>,  IOrderCommandRepository
     {
         private readonly TradeMatchingEngineContext _tradeMatchingEngineContext;
 

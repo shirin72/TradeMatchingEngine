@@ -1,3 +1,4 @@
+using Application.Tests;
 using EndPoints.Controller;
 using EndPoints.Model;
 using Newtonsoft.Json;
@@ -22,7 +23,7 @@ namespace SpecFlowTest.StepDefinitions
         [When(@"I Modify The Order '([^']*)' to '([^']*)'")]
         public async Task WhenIModifyTheOrderTo(string sellOrder, string modifiedOrder)
         {
-            var orderId = context.Get<ProcessedOrder>($"{sellOrder}Response").OrderId;
+            var orderId = context.Get<TestProcessedOrder>($"{sellOrder}Response").OrderId;
 
             var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
 
@@ -48,7 +49,7 @@ namespace SpecFlowTest.StepDefinitions
             var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
 
             var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
-            var orderDeserialize = JsonConvert.DeserializeObject<Order>(await addedOrderId.Content.ReadAsStringAsync());
+            var orderDeserialize = JsonConvert.DeserializeObject<TestOrder>(await addedOrderId.Content.ReadAsStringAsync());
 
             orderDeserialize.Id.Should().Be(result);
             orderDeserialize.Amount.Should().Be(_modifiedorderVM.Amount);

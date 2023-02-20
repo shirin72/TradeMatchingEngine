@@ -2,7 +2,7 @@
 {
     public class Trade : ITrade
     {
-        public Trade(long id,  long buyOrderId, long sellOrderId, int amount, int price)
+        internal Trade(long id,  long buyOrderId, long sellOrderId, int amount, int price)
         {
             Id = id;
            // OwnerId = ownerId;

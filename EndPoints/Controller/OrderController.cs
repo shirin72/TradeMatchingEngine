@@ -124,7 +124,7 @@ namespace EndPoints.Controller
 
 
         [HttpGet]
-        public async Task<Order> GetOrder(long orderId)
+        public async Task<IOrder> GetOrder(long orderId)
         {
             return await orderQueryRepository.Get(o => o.Id == orderId);
         }

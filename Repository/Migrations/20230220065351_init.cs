@@ -16,7 +16,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false),
-                    OrderState = table.Column<int>(type: "int", nullable: false),
+                    OrderState = table.Column<int>(type: "int", nullable: true),
                     Side = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<int>(type: "int", nullable: false),
                     OriginalAmount = table.Column<int>(type: "int", nullable: true),

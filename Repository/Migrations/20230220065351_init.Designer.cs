@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(TradeMatchingEngineContext))]
-    [Migration("20230206103630_init")]
+    [Migration("20230220065351_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -42,7 +42,7 @@ namespace Infrastructure.Migrations
                     b.Property<long?>("OrderParentId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("OrderState")
+                    b.Property<int?>("OrderState")
                         .HasColumnType("int");
 
                     b.Property<int?>("OriginalAmount")

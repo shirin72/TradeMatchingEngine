@@ -2,8 +2,8 @@
 {
     public interface IStockMarketMatchingEngineProcessContext
     {
-        IEnumerable<Trade> CreatedTrades { get;  }
-        IEnumerable<Order> ModifiedOrders { get;  }
-        Order? Order { get;  }
+        IEnumerable<ITrade> CreatedTrades { get;  }
+        IEnumerable<IOrder> ModifiedOrders { get;  }
+        IOrder? Order { get;  }
     }
 }

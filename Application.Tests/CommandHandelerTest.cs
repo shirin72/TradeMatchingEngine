@@ -85,6 +85,8 @@ namespace Application.Tests
             //Assert
             var calcounter = (ICallCounter)sut;
             Assert.Equal(1, calcounter.CallCount);
+
+
         }
     }
 }

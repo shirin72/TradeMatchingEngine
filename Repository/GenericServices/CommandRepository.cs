@@ -3,7 +3,7 @@ using TradeMatchingEngine.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
 {
-    public class CommandRepository<T> : ICommandRepository<T> where T : class
+    public class CommandRepository<T,TInterface> : ICommandRepository<T,TInterface> where T : class,TInterface
     {
         protected readonly DbContext _dbContext;
         protected readonly DbSet<T> _dbSet;
@@ -19,13 +19,18 @@ namespace Infrastructure.Order.QueryRepositories
             await _dbSet.AddAsync(entity).ConfigureAwait(false);
         }
 
+        public async Task Add(TInterface order)
+        {
+            await Add((T)order);
+        }
+
         public async Task Delete(long id)
         {
             var entiryToRemove = await _dbSet.FindAsync(id);
             _dbSet.Remove(entiryToRemove);
         }
 
-        public async Task<T> Find(long id)
+        public async Task<TInterface> Find(long id)
         {
             try
             {
