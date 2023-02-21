@@ -30,7 +30,7 @@ namespace Application.Factories
                 var getLastTrade = await tradeQueryRep.GetMax(t => t.Id);
                 _stockMarketMatchEngine = new StockMarketMatchEngineStateProxy(getOrders.Select(x => (Order)x).ToList(), lastOrderId, getLastTrade);
                 _stockMarketMatchEngine.PreOpen();
-                //_stockMarketMatchEngine.Open();
+                _stockMarketMatchEngine.Open();
             }
             finally
             {
