@@ -53,6 +53,11 @@
             return base.ModifieOrder(orderId, price, amount, expirationDate);
         }
 
+        private Task<IStockMarketMatchingEngineProcessContext> preModifieOrder(long orderId, int price, int amount, DateTime? expirationDate)
+        {
+            return base.PreModifieOrder(orderId, price, amount, expirationDate);
+        }
+
         class StockMarketState : IStockMarketMatchEngine
         {
             public MarcketState Code { get; protected set; }
@@ -166,7 +171,7 @@
 
             public override async Task<IStockMarketMatchingEngineProcessContext> ModifieOrder(long orderId, int price, int amount, DateTime? expirationDate)
             {
-                return await StockMarketMatchEngineProxy.myModifieOrder(orderId, price, amount, expirationDate);
+                return await StockMarketMatchEngineProxy.preModifieOrder(orderId, price, amount, expirationDate);
             }
         }
     }

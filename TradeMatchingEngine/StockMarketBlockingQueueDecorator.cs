@@ -37,6 +37,11 @@
             return await executeAsync(() => Task.FromResult(modifieOrder(orderId, price, amount, expirationDate)));
         }
 
+        public virtual async Task<IStockMarketMatchingEngineProcessContext?> PreModifieOrder(long orderId, int price, int amount, DateTime? expirationDate)
+        {
+            return await executeAsync(() => Task.FromResult(preModifieOrder(orderId, price, amount, expirationDate)));
+        }
+
         public virtual async Task<IStockMarketMatchingEngineProcessContext> ProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? orderParentId = null)
         {
             return await executeAsync(() =>

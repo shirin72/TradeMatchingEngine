@@ -90,9 +90,9 @@
             return Interlocked.Increment(ref _lastOrderId);
         }
 
-        protected IStockMarketMatchingEngineProcessContext preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null)
+        protected IStockMarketMatchingEngineProcessContext preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null, StockMarketMatchingEngineProcessContext? processContext = null)
         {
-            var processContext = new StockMarketMatchingEngineProcessContext();
+            processContext = processContext ?? new StockMarketMatchingEngineProcessContext();
             var preOrder = createOrderRequest(processContext, price, amount, side, expireTime, fillAndKill, OrderParentId);
 
             allOrders.Add(preOrder);
@@ -281,6 +281,19 @@
             var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
 
             processOrderAsync(price, amount, orderSide, expirationDate, processContext: processContext);
+
+            return processContext;
+        }
+
+        protected IStockMarketMatchingEngineProcessContext preModifieOrder(long orderId, int price, int amount, DateTime? expirationDate)
+        {
+            var processContext = new StockMarketMatchingEngineProcessContext();
+
+            var cancelledOrder= cancelOrderAsync(orderId, processContext);
+
+            var orderSide = allOrders.Where(o => o.Id == orderId).Single().Side;
+
+            preProcessOrderAsync(price, amount, orderSide, expirationDate,processContext: cancelledOrder as StockMarketMatchingEngineProcessContext);
 
             return processContext;
         }
