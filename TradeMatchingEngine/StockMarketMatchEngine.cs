@@ -46,7 +46,6 @@
         public int AllOrdersCount() => allOrders.Count;
         public IEnumerable<ITrade> Trade => trades;
         public int AllTradeCount() => trades.Count;
-
         public Queue<Order> GetPreOrderQueue()
         {
             return preOrderQueue;
@@ -55,7 +54,6 @@
         {
             return preOrderQueue.Count;
         }
-
         public int GetBuyOrderCount()
         {
             return buyOrderQueue.Count;
@@ -64,8 +62,6 @@
         {
             return sellOrderQueue.Count;
         }
-
-
         #endregion
 
         #region Private Method

@@ -2,7 +2,6 @@ using Application.Factories;
 using Application.OrderService.OrderCommandHandlers;
 using NSubstitute;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
@@ -85,8 +84,6 @@ namespace Application.Tests
             //Assert
             var calcounter = (ICallCounter)sut;
             Assert.Equal(1, calcounter.CallCount);
-
-
         }
     }
 }

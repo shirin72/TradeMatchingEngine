@@ -1,9 +1,6 @@
 using Application.Tests;
 using EndPoints.Controller;
 using EndPoints.Model;
-using Newtonsoft.Json;
-using System.Text;
-using TradeMatchingEngine;
 
 namespace SpecFlowTest.StepDefinitions
 {
@@ -11,13 +8,10 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineModifyOrderStepDefinitions
     {
         private readonly ScenarioContext context;
-        private readonly HttpClient httpClient;
-
+        private static readonly string ROOT_URL = "https://localhost:7092/api/Order/";
         public StockMarketMatchingEngineModifyOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            this.httpClient = new HttpClient();
-
         }
 
         [When(@"I Modify The Order '([^']*)' to '([^']*)'")]
@@ -35,11 +29,11 @@ namespace SpecFlowTest.StepDefinitions
                 Price = _modifiedorderVM.Price,
             };
 
-            var requestBody = new StringContent(JsonConvert.SerializeObject(modifiedOrderVM), Encoding.UTF8, "application/json");
+            string url = $"{ROOT_URL}ModifieOrder";
 
-            var result = await httpClient.PutAsync("https://localhost:7092/api/Order/ModifieOrder", requestBody);
+            var response = await HttpClientWorker.Execute<ModifiedOrderVM, long>(url, modifiedOrderVM, HttpMethod.Put);
 
-            context.Add($"{modifiedOrder}Response", Convert.ToInt64(result.Content.ReadAsStringAsync().Result));
+            context.Add($"{modifiedOrder}Response", Convert.ToInt64(response));
         }
 
         [Then(@"The order '([^']*)'  Should Be Found like '([^']*)'")]
@@ -47,12 +41,11 @@ namespace SpecFlowTest.StepDefinitions
         {
             var result = context.Get<long>($"{modifiedOrder}Response");
             var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
+            string url = $"{ROOT_URL}GetOrder?orderId={result}";
+            var response = await HttpClientWorker.Execute<object, TestOrder>(url, null, HttpMethod.Get);
 
-            var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
-            var orderDeserialize = JsonConvert.DeserializeObject<TestOrder>(await addedOrderId.Content.ReadAsStringAsync());
-
-            orderDeserialize.Id.Should().Be(result);
-            orderDeserialize.Amount.Should().Be(_modifiedorderVM.Amount);
+            response.Id.Should().Be(result);
+            response.Amount.Should().Be(_modifiedorderVM.Amount);
         }
 
     }

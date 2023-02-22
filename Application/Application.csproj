@@ -10,8 +10,4 @@
     <ProjectReference Include="..\TradeMatchingEngine\TradeMatchingEngine.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="OrderService\OrderEventHandler\" />
-  </ItemGroup>
-
 </Project>

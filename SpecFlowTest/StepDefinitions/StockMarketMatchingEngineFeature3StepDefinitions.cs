@@ -1,7 +1,5 @@
 using Application.Tests;
-using Newtonsoft.Json;
 using TechTalk.SpecFlow.Assist;
-using TradeMatchingEngine;
 
 namespace SpecFlowTest.StepDefinitions
 {
@@ -9,12 +7,10 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineFeature3StepDefinitions : Steps
     {
         private readonly ScenarioContext context;
-        private readonly HttpClient httpClient;
-
+        private static readonly string ROOT_URL = "https://localhost:7092/api/";
         public StockMarketMatchingEngineFeature3StepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            this.httpClient = new HttpClient();
         }
 
         [Given(@"Order '([^']*)' Has Been Registerd")]
@@ -34,14 +30,9 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"The following '([^']*)' will be created")]
         public async Task ThenTheFollowingWillBeCreated(string trade, Table table)
         {
-            var getTrades = httpClient.GetAsync("https://localhost:7092/api/Trades/GetAllTrades").GetAwaiter().GetResult();
+            string url = $"{ROOT_URL}Trades/GetAllTrades";
 
-            var response = JsonConvert.DeserializeObject<IEnumerable<TestTrade>>(await getTrades.Content.ReadAsStringAsync(),
-                new JsonSerializerSettings()
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    TypeNameHandling = TypeNameHandling.Objects
-                });
+            var response = await HttpClientWorker.Execute<object, IEnumerable<TestTrade>>(url, null, HttpMethod.Get);
 
             var findTrade = response.Where(t => t.Id == context.Get<TestProcessedOrder>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
 
@@ -56,8 +47,8 @@ namespace SpecFlowTest.StepDefinitions
         {
             var buyOrderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
 
-            var getBuyOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={buyOrderId}").GetAwaiter().GetResult();
-            var buyOrderDeserialize = JsonConvert.DeserializeObject<TestOrder>(await getBuyOrderId.Content.ReadAsStringAsync());
+            string url = $"{ROOT_URL}Order/GetOrder?orderId={buyOrderId}";
+            var buyOrderDeserialize = await HttpClientWorker.Execute<object, TestOrder>(url, null, HttpMethod.Get);
 
             buyOrderDeserialize.Id.Should().Be(buyOrderId);
             buyOrderDeserialize.Amount.Should().Be(table.CreateInstance<TestOrder>().Amount);

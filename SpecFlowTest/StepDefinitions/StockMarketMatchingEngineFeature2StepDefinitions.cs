@@ -1,9 +1,6 @@
 using Application.Tests;
 using EndPoints.Model;
-using Newtonsoft.Json;
-using System.Text;
 using TechTalk.SpecFlow.Assist;
-using TradeMatchingEngine;
 
 namespace SpecFlowTest.StepDefinitions
 {
@@ -11,19 +8,17 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineFeature2StepDefinitions : Steps
     {
         private ScenarioContext context;
-        private readonly HttpClient httpClient;
-
+        private static readonly string ROOT_URL = "https://localhost:7092/api/Order/";
 
         public StockMarketMatchingEngineFeature2StepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            this.httpClient = new HttpClient();
         }
 
         [BeforeScenario]
         public async Task CancellAllOrders()
         {
-            await httpClient.PatchAsync($"https://localhost:7092/api/Order/CancellAllOrders", null);
+            await HttpClientWorker.Execute($"{ROOT_URL}CancellAllOrders", HttpMethod.Patch);
         }
 
         [Given(@"Order '([^']*)' Has Been Defined")]
@@ -36,14 +31,9 @@ namespace SpecFlowTest.StepDefinitions
         public async Task WhenIRegisterTheSellOrder(string order)
         {
             var orderVm = context.Get<OrderVM>(order);
-            var requestBody = new StringContent(JsonConvert.SerializeObject(orderVm), Encoding.UTF8, "application/json");
-            var result = httpClient.PostAsync("https://localhost:7092/api/Order/ProcessOrder", requestBody).GetAwaiter().GetResult();
-            context.Add($"{order}Response", JsonConvert.DeserializeObject<TestProcessedOrder>(await result.Content.ReadAsStringAsync(),
-                new JsonSerializerSettings()
-            {
-                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-                TypeNameHandling = TypeNameHandling.Objects
-            }));
+            string url = $"{ROOT_URL}ProcessOrder";
+            var result = await HttpClientWorker.Execute<OrderVM, TestProcessedOrder>(url, orderVm, HttpMethod.Post);
+            context.Add($"{order}Response", result);
         }
 
 
@@ -51,10 +41,11 @@ namespace SpecFlowTest.StepDefinitions
         public async Task ThenOrderShouldBeEnqueuedAsync(string order)
         {
             var result = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
-            var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
-            var orderDeserialize = JsonConvert.DeserializeObject<TestOrder>(await addedOrderId.Content.ReadAsStringAsync());
-            orderDeserialize.Id.Should().Be(result);
-        }
+            string url = $"{ROOT_URL}GetOrder?orderId={result}";
+            var addedOrderId = await HttpClientWorker.Execute<OrderVM, TestOrder>(url, null, HttpMethod.Get);
 
+            addedOrderId.Id.Should().Be(result);
+
+        }
     }
 }

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Commands;
 using Xunit;
-using static Application.Tests.AddOrderCommandHandlerTests;
 
 namespace Application.Tests
 {
@@ -22,6 +21,8 @@ namespace Application.Tests
         private static readonly int SOME_ORDER_ID = 1;
         private static readonly int SOME_BUY_ORDER_ID = 1;
         private static readonly int SOME_SELL_ORDER_ID = 1;
+        private static readonly OrderStates SOME_ORDER_STATE = OrderStates.Register;
+
         public ModifieOrderCommandHandlerTest()
         {
             stockMarketFactoryMock.GetStockMarket(orderQueryRepositoryMock, tradeQueryRepositoryMock).Returns(stockMarket);
@@ -53,21 +54,21 @@ namespace Application.Tests
             processContext.Order.Returns(
                 new TestOrder
                 {
-                    Id = 10,
+                    Id = SOME_ORDER_ID,
                     Amount = SOME_AMOUNT,
                     ExpireTime = SOME_EXPIRATION_DATE,
                     IsFillAndKill = SOME_IS_FILL_AND_KILL,
                     OrderParentId = SOME_ORDER_PARENT_ID,
-                    OrderState = OrderStates.Register,
+                    OrderState = SOME_ORDER_STATE,
                     Price = SOME_PRICE,
                     Side = SOME_SIDE
                 });
 
             stockMarket.ModifieOrder(
-               addOrderCommand.OrderId,
-               addOrderCommand.Price,
-               addOrderCommand.Amount,
-               addOrderCommand.ExpDate).Returns(processContext);
+             SOME_ORDER_ID,
+             SOME_PRICE,
+             SOME_AMOUNT,
+             SOME_EXPIRATION_DATE).Returns(processContext);
 
             //Act
             await sut.Handle(addOrderCommand);
@@ -89,7 +90,7 @@ namespace Application.Tests
                 ExpireTime = SOME_EXPIRATION_DATE,
                 IsFillAndKill = SOME_IS_FILL_AND_KILL,
                 OrderParentId = SOME_ORDER_PARENT_ID,
-                OrderState = OrderStates.Register,
+                OrderState = SOME_ORDER_STATE,
                 Price = SOME_PRICE,
                 Side = SOME_SIDE
             };
@@ -97,10 +98,10 @@ namespace Application.Tests
             processContext.ModifiedOrders.Returns(new List<TestOrder> { order });
 
             stockMarket.ModifieOrder(
-               addOrderCommand.OrderId,
-               addOrderCommand.Price,
-               addOrderCommand.Amount,
-               addOrderCommand.ExpDate).Returns(processContext);
+             SOME_ORDER_ID,
+             SOME_PRICE,
+             SOME_AMOUNT,
+             SOME_EXPIRATION_DATE).Returns(processContext);
 
             orderCommandRepositoryMock.Find(Arg.Any<long>()).Returns(order);
 
@@ -130,16 +131,17 @@ namespace Application.Tests
             });
 
             stockMarket.ModifieOrder(
-               addOrderCommand.OrderId,
-               addOrderCommand.Price,
-               addOrderCommand.Amount,
-               addOrderCommand.ExpDate).Returns(processContext);
+             SOME_ORDER_ID,
+             SOME_PRICE,
+             SOME_AMOUNT,
+             SOME_EXPIRATION_DATE).Returns(processContext);
 
             //Act
             await sut.Handle(addOrderCommand);
-            var trade = processContext.CreatedTrades.ToList().FirstOrDefault();
+
 
             //Assert
+            var trade = processContext.CreatedTrades.FirstOrDefault();
             await tradeCommandRepositoryMock.Received(1).Add(trade);
         }
 
