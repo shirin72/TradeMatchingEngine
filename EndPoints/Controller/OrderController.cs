@@ -87,13 +87,21 @@ namespace EndPoints.Controller
         [HttpPatch]
         public async Task<long> CancellOrder([FromBody] CancellOrderVM cancellOrderVM)
         {
-            var result = await cancellOrderCommandHandler.Handle(cancellOrderVM.OrderId);
-
-            if (result != null)
+            try
             {
-                return (long)result.OrderId;
+                var result = await cancellOrderCommandHandler.Handle(cancellOrderVM.OrderId);
+
+                if (result != null)
+                {
+                    return result.OrderId;
+                }
+                throw new Exception("Order Not Found");
             }
-            throw new Exception("Order Not Found");
+            catch (Exception)
+            {
+                throw;
+            }
+
         }
 
         /// <summary>

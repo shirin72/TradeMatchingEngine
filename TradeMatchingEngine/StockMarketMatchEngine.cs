@@ -257,15 +257,20 @@
             processContext = processContext ?? new StockMarketMatchingEngineProcessContext();
 
             var findOrder = allOrders.Where(a => a.Id == orderId).SingleOrDefault();
-            findOrder?.SetStateCancelled();
 
-            processContext.OrderModified(findOrder);
+            if (findOrder != null)
+            {
+                findOrder?.SetStateCancelled();
 
-            //if (onOrderModified != null)
-            //    await onOrderModified(this, findOrder);
+                processContext.OrderModified(findOrder);
 
-            return processContext;
+                //if (onOrderModified != null)
+                //    await onOrderModified(this, findOrder);
 
+                return processContext;
+            }
+
+            throw new Exception(message: "Order Has Not Been Defined");
         }
 
         protected IStockMarketMatchingEngineProcessContext modifieOrder(long orderId, int price, int amount, DateTime? expirationDate)

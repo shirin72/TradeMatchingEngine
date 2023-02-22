@@ -18,7 +18,7 @@ namespace SpecFlowTest.StepDefinitions
         [BeforeScenario]
         public async Task CancellAllOrders()
         {
-            await HttpClientWorker.Execute($"{ROOT_URL}CancellAllOrders", HttpMethod.Patch);
+            await HttpClientWorker.Execute<object, object>($"{ROOT_URL}CancellAllOrders", HttpMethod.Patch);
         }
 
         [Given(@"Order '([^']*)' Has Been Defined")]
@@ -32,7 +32,7 @@ namespace SpecFlowTest.StepDefinitions
         {
             var orderVm = context.Get<OrderVM>(order);
             string url = $"{ROOT_URL}ProcessOrder";
-            var result = await HttpClientWorker.Execute<OrderVM, TestProcessedOrder>(url, orderVm, HttpMethod.Post);
+            var result = await HttpClientWorker.Execute<OrderVM, TestProcessedOrder>(url, HttpMethod.Post, orderVm);
             context.Add($"{order}Response", result);
         }
 
@@ -42,7 +42,7 @@ namespace SpecFlowTest.StepDefinitions
         {
             var result = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
             string url = $"{ROOT_URL}GetOrder?orderId={result}";
-            var addedOrderId = await HttpClientWorker.Execute<OrderVM, TestOrder>(url, null, HttpMethod.Get);
+            var addedOrderId = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
 
             addedOrderId.Id.Should().Be(result);
 

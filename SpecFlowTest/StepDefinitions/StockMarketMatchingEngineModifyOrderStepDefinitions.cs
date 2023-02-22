@@ -31,7 +31,7 @@ namespace SpecFlowTest.StepDefinitions
 
             string url = $"{ROOT_URL}ModifieOrder";
 
-            var response = await HttpClientWorker.Execute<ModifiedOrderVM, long>(url, modifiedOrderVM, HttpMethod.Put);
+            var response = await HttpClientWorker.Execute<ModifiedOrderVM, long>(url, HttpMethod.Put, modifiedOrderVM);
 
             context.Add($"{modifiedOrder}Response", Convert.ToInt64(response));
         }
@@ -42,7 +42,7 @@ namespace SpecFlowTest.StepDefinitions
             var result = context.Get<long>($"{modifiedOrder}Response");
             var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
             string url = $"{ROOT_URL}GetOrder?orderId={result}";
-            var response = await HttpClientWorker.Execute<object, TestOrder>(url, null, HttpMethod.Get);
+            var response = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
 
             response.Id.Should().Be(result);
             response.Amount.Should().Be(_modifiedorderVM.Amount);

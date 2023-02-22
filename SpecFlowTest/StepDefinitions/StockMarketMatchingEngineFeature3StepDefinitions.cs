@@ -32,7 +32,7 @@ namespace SpecFlowTest.StepDefinitions
         {
             string url = $"{ROOT_URL}Trades/GetAllTrades";
 
-            var response = await HttpClientWorker.Execute<object, IEnumerable<TestTrade>>(url, null, HttpMethod.Get);
+            var response = await HttpClientWorker.Execute<object, IEnumerable<TestTrade>>(url, HttpMethod.Get);
 
             var findTrade = response.Where(t => t.Id == context.Get<TestProcessedOrder>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
 
@@ -48,7 +48,7 @@ namespace SpecFlowTest.StepDefinitions
             var buyOrderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
 
             string url = $"{ROOT_URL}Order/GetOrder?orderId={buyOrderId}";
-            var buyOrderDeserialize = await HttpClientWorker.Execute<object, TestOrder>(url, null, HttpMethod.Get);
+            var buyOrderDeserialize = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
 
             buyOrderDeserialize.Id.Should().Be(buyOrderId);
             buyOrderDeserialize.Amount.Should().Be(table.CreateInstance<TestOrder>().Amount);

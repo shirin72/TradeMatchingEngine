@@ -22,12 +22,13 @@ namespace TradeMatchingEngine
                     {
                         var i = blockingCollection.Take();
                         await i.Execute();
-
                     }
                     catch (Exception ex)
                     {
-                       continue;
+                        if (ex is ObjectDisposedException || ex is InvalidOperationException)
+                            continue;
                     }
+
                 }
             });
         }
@@ -43,7 +44,7 @@ namespace TradeMatchingEngine
         {
             var item = new QueueItem<T>(function);
             blockingCollection.Add(item);
-            
+
             return item.Completion;
         }
     }
