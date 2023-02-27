@@ -41,14 +41,18 @@ namespace SpecFlowTest
             factory = container.Resolve<IHttpClientFactory>();
         }
 
+        public async static Task Execute(string url, HttpMethod httpMethod)
+        {
+            await Execute<object>(url, httpMethod);
+        }
         public async static Task<TOutput> Execute<TOutput>(string url, HttpMethod httpMethod)
         {
-            return await Execute<object,TOutput>(url, httpMethod, null);
+            return await Execute<object, TOutput>(url, httpMethod, null);
         }
         public async static Task<TOutput> Execute<TInput, TOutput>(string url, HttpMethod httpMethod, TInput input = default(TInput))
         {
             var cb = connections.First(i => url.StartsWith(i.Key)).Value;
-            return await cb.ExecuteService(input,i=>execute<TInput,TOutput>(url,httpMethod,i));
+            return await cb.ExecuteService(input, i => execute<TInput, TOutput>(url, httpMethod, i));
         }
 
         private async static Task<TOutput> execute<TInput, TOutput>(string url, HttpMethod httpMethod, TInput input = default(TInput))
@@ -89,7 +93,7 @@ namespace SpecFlowTest
 
                 return serializer.Deserialize<TOutput>(textReader);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 throw ex;
             }

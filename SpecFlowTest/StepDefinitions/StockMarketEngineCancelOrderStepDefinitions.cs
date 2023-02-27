@@ -14,14 +14,13 @@ namespace SpecFlowTest.StepDefinitions
         public StockMarketEngineCancelOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
-
         }
 
         [When(@"I cancel '([^']*)'")]
         public async Task WhenICancel(string order)
         {
             var orderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
-            await HttpClientWorker.Execute<object>($"{ROOT_URL}{orderId}", HttpMethod.Patch);
+            await HttpClientWorker.Execute($"{ROOT_URL}{orderId}", HttpMethod.Patch);
         }
 
         [Then(@"The order '([^']*)'  Should Be Cancelled")]
