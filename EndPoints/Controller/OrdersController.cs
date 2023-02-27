@@ -7,9 +7,9 @@ using TradeMatchingEngine.Orders.Repositories.Query;
 
 namespace EndPoints.Controller
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class OrdersController : ControllerBase
     {
         private readonly IAddOrderCommandHandlers addOrderCommandHandlers;
         private readonly IModifieOrderCommandHandler modifieOrderCommandHandler;
@@ -17,7 +17,7 @@ namespace EndPoints.Controller
         private readonly IOrderQueryRepository orderQueryRepository;
         private readonly ICancellAllOrdersCommandHandler cancellAllOrderCommandHandler;
 
-        public OrderController(IAddOrderCommandHandlers addOrderCommandHandlers,
+        public OrdersController(IAddOrderCommandHandlers addOrderCommandHandlers,
             IModifieOrderCommandHandler modifieOrderCommandHandler,
             ICancellOrderCommandHandler cancellOrderCommandHandler,
             IOrderQueryRepository orderQueryRepository,
@@ -84,12 +84,12 @@ namespace EndPoints.Controller
         /// <param name="handler"></param>
         /// <param name="orderId"></param>
         /// <returns></returns>
-        [HttpPatch]
-        public async Task<long> CancellOrder([FromBody] CancellOrderVM cancellOrderVM)
+        [HttpPatch("{orderId}")]
+        public async Task<long> CancellOrder(long orderId)
         {
             try
             {
-                var result = await cancellOrderCommandHandler.Handle(cancellOrderVM.OrderId);
+                var result = await cancellOrderCommandHandler.Handle(orderId);
 
                 if (result != null)
                 {
@@ -122,7 +122,7 @@ namespace EndPoints.Controller
         }
 
 
-        [HttpGet]
+        [HttpGet("{orderId}")]
         public async Task<IOrder> GetOrder(long orderId)
         {
             return await orderQueryRepository.Get(o => o.Id == orderId);

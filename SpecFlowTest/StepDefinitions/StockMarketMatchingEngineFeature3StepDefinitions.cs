@@ -11,6 +11,7 @@ namespace SpecFlowTest.StepDefinitions
         public StockMarketMatchingEngineFeature3StepDefinitions(ScenarioContext context)
         {
             this.context = context;
+
         }
 
         [Given(@"Order '([^']*)' Has Been Registerd")]
@@ -30,7 +31,9 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"The following '([^']*)' will be created")]
         public async Task ThenTheFollowingWillBeCreated(string trade, Table table)
         {
-            string url = $"{ROOT_URL}Trades/GetAllTrades";
+            string url = $"{ROOT_URL}Trades";
+
+            HttpClientWorker.AddConnection(url);
 
             var response = await HttpClientWorker.Execute<object, IEnumerable<TestTrade>>(url, HttpMethod.Get);
 
@@ -47,7 +50,7 @@ namespace SpecFlowTest.StepDefinitions
         {
             var buyOrderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
 
-            string url = $"{ROOT_URL}Order/GetOrder?orderId={buyOrderId}";
+            string url = $"{ROOT_URL}Orders/{buyOrderId}";
             var buyOrderDeserialize = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
 
             buyOrderDeserialize.Id.Should().Be(buyOrderId);

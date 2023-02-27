@@ -2,6 +2,8 @@ using Application.Factories;
 using Application.OrderService.OrderCommandHandlers;
 using NSubstitute;
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
@@ -84,6 +86,22 @@ namespace Application.Tests
             //Assert
             var calcounter = (ICallCounter)sut;
             Assert.Equal(1, calcounter.CallCount);
+        }
+
+        [Fact]
+        public async Task test1()
+        {
+            //Arrange
+            var sut = new ConcurrentDictionary<string, int>();
+            sut.AddOrUpdate("http://wwww.google.com", key => 10, (key, ov) => ov);
+            sut.AddOrUpdate("http://wwww.linkedin.com", key => 20, (key, ov) => ov);
+            var url = "http://wwww.google.com/trades";
+            //Act
+
+            var actual = sut.First(i => url.StartsWith(i.Key)).Value;
+
+            //Assert
+            Assert.Equal(10, actual);
         }
     }
 }

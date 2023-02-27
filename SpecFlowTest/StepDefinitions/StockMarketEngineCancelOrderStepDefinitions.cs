@@ -10,12 +10,10 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketEngineCancelOrderStepDefinitions
     {
         private readonly ScenarioContext context;
-        private readonly HttpClient httpClient;
-
+        private static readonly string ROOT_URL = "https://localhost:7092/api/Orders/";
         public StockMarketEngineCancelOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            this.httpClient = new HttpClient();
 
         }
 
@@ -23,18 +21,17 @@ namespace SpecFlowTest.StepDefinitions
         public async Task WhenICancel(string order)
         {
             var orderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
-            var body = new StringContent(JsonConvert.SerializeObject(new CancellOrderVM() { OrderId = orderId }), Encoding.UTF8, "application/json");
-            await httpClient.PatchAsync($"https://localhost:7092/api/Order/CancellOrder", body);
+            await HttpClientWorker.Execute<object>($"{ROOT_URL}{orderId}", HttpMethod.Patch);
         }
 
         [Then(@"The order '([^']*)'  Should Be Cancelled")]
         public async Task ThenTheOrderShouldBeCancelled(string order)
         {
             var result = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
-            var addedOrderId = httpClient.GetAsync($"https://localhost:7092/api/Order/GetOrder?orderId={result}").GetAwaiter().GetResult();
-            var orderDeserialize = JsonConvert.DeserializeObject<TestOrder>(await addedOrderId.Content.ReadAsStringAsync());
 
-            orderDeserialize.OrderState.Should().Be(OrderStates.Cancell);
+            var addedOrderId = await HttpClientWorker.Execute<TestOrder>($"{ROOT_URL}{result}", HttpMethod.Get);
+
+            addedOrderId.OrderState.Should().Be(OrderStates.Cancell);
         }
     }
 }

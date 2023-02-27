@@ -4,7 +4,7 @@ using TradeMatchingEngine.Trades.Repositories.Query;
 
 namespace EndPoints.Controller
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class TradesController : ControllerBase
     {
@@ -18,9 +18,8 @@ namespace EndPoints.Controller
         public async Task<IEnumerable<ITrade>> GetAllTrades()
         {
             return await queryRepository.GetAll();
-
         }
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<ITrade> GetTrade(long id)
         {
             return await queryRepository.Get(t=>t.Id == id);

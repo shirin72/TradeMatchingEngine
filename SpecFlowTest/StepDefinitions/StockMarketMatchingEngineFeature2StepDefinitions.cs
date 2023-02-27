@@ -8,17 +8,20 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineFeature2StepDefinitions : Steps
     {
         private ScenarioContext context;
-        private static readonly string ROOT_URL = "https://localhost:7092/api/Order/";
+        private static readonly string ROOT_URL = "https://localhost:7092/api/Orders/";
 
         public StockMarketMatchingEngineFeature2StepDefinitions(ScenarioContext context)
         {
             this.context = context;
+            HttpClientWorker.AddConnection(ROOT_URL);
         }
+
+        public string BaseAddress { get; }
 
         [BeforeScenario]
         public async Task CancellAllOrders()
         {
-            await HttpClientWorker.Execute<object, object>($"{ROOT_URL}CancellAllOrders", HttpMethod.Patch);
+            await HttpClientWorker.Execute<object, object>($"{ROOT_URL}", HttpMethod.Patch);
         }
 
         [Given(@"Order '([^']*)' Has Been Defined")]
@@ -31,7 +34,7 @@ namespace SpecFlowTest.StepDefinitions
         public async Task WhenIRegisterTheSellOrder(string order)
         {
             var orderVm = context.Get<OrderVM>(order);
-            string url = $"{ROOT_URL}ProcessOrder";
+            string url = $"{ROOT_URL}";
             var result = await HttpClientWorker.Execute<OrderVM, TestProcessedOrder>(url, HttpMethod.Post, orderVm);
             context.Add($"{order}Response", result);
         }
@@ -41,7 +44,7 @@ namespace SpecFlowTest.StepDefinitions
         public async Task ThenOrderShouldBeEnqueuedAsync(string order)
         {
             var result = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
-            string url = $"{ROOT_URL}GetOrder?orderId={result}";
+            string url = $"{ROOT_URL}{result}";
             var addedOrderId = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
 
             addedOrderId.Id.Should().Be(result);

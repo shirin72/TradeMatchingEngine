@@ -8,7 +8,7 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineModifyOrderStepDefinitions
     {
         private readonly ScenarioContext context;
-        private static readonly string ROOT_URL = "https://localhost:7092/api/Order/";
+        private static readonly string ROOT_URL = "https://localhost:7092/api/Orders/";
         public StockMarketMatchingEngineModifyOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
@@ -29,9 +29,7 @@ namespace SpecFlowTest.StepDefinitions
                 Price = _modifiedorderVM.Price,
             };
 
-            string url = $"{ROOT_URL}ModifieOrder";
-
-            var response = await HttpClientWorker.Execute<ModifiedOrderVM, long>(url, HttpMethod.Put, modifiedOrderVM);
+            var response = await HttpClientWorker.Execute<ModifiedOrderVM, long>(ROOT_URL, HttpMethod.Put, modifiedOrderVM);
 
             context.Add($"{modifiedOrder}Response", Convert.ToInt64(response));
         }
@@ -41,7 +39,7 @@ namespace SpecFlowTest.StepDefinitions
         {
             var result = context.Get<long>($"{modifiedOrder}Response");
             var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
-            string url = $"{ROOT_URL}GetOrder?orderId={result}";
+            string url = $"{ROOT_URL}{result}";
             var response = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
 
             response.Id.Should().Be(result);
