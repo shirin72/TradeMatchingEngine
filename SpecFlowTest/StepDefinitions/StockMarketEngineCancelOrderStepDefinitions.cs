@@ -13,7 +13,7 @@ namespace SpecFlowTest.StepDefinitions
         public StockMarketEngineCancelOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
+            //this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
         }
 
         [When(@"I cancel '([^']*)'")]

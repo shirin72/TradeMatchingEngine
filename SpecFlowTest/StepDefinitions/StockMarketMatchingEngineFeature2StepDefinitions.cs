@@ -12,12 +12,14 @@ namespace SpecFlowTest.StepDefinitions
         public StockMarketMatchingEngineFeature2StepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
+
         }
 
         [BeforeScenario]
         public async Task CancellAllOrders()
         {
+            this.context.Add("smc", new StockMarketClient("https://localhost:7092/api"));
+
             var client = this.context.Get<StockMarketClient>("smc");
             await client.CancelAllOrders();
         }

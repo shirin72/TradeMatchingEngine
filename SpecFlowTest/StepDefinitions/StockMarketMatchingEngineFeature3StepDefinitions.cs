@@ -10,7 +10,7 @@ namespace SpecFlowTest.StepDefinitions
         public StockMarketMatchingEngineFeature3StepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
+            //this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
         }
 
         [Given(@"Order '([^']*)' Has Been Registerd")]
