@@ -8,6 +8,5 @@
         public DateTime? ExpDate { get; set; }
         public bool IsFillAndKill { get; set; }
         public long? orderParentId {get;set;}
-        public StockMarketEvents? events { get; set; }
     }
 }

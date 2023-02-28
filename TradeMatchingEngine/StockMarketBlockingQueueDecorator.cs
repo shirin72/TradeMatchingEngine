@@ -13,7 +13,7 @@
         }
 
 
-        private async Task<T?> executeAsync<T>(Func<Task<T>> function, StockMarketEvents? events = null)
+        private async Task<T?> executeAsync<T>(Func<Task<T>> function)
         {
             return await queue.ExecuteAsync(async () =>
             {

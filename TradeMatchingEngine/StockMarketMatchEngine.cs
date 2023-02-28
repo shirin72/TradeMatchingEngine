@@ -86,7 +86,7 @@
             return Interlocked.Increment(ref _lastOrderId);
         }
 
-        protected IStockMarketMatchingEngineProcessContext preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketEvents? events = null, StockMarketMatchingEngineProcessContext? processContext = null)
+        protected IStockMarketMatchingEngineProcessContext preProcessOrderAsync(int price, int amount, Side side, DateTime? expireTime = null, bool? fillAndKill = null, long? OrderParentId = null, StockMarketMatchingEngineProcessContext? processContext = null)
         {
             processContext = processContext ?? new StockMarketMatchingEngineProcessContext();
             var preOrder = createOrderRequest(processContext, price, amount, side, expireTime, fillAndKill, OrderParentId);

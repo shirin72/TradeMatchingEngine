@@ -1,18 +1,22 @@
 using FluentAssertions;
 using Moq;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TradeMatchingEngine;
 using TradeMatchingEngine.Orders.Repositories.Command;
 using TradeMatchingEngine.Trades.Repositories.Command;
 using Xunit;
-
+using Xunit.Abstractions;
 
 namespace Test
 {
     public class StocketMarketEngineTest : IAsyncDisposable
     {
+        private readonly ITestOutputHelper output;
         //private StockMarketFactory stockMarketFactory;
         //private StockMarketMatchEngineStateProxy sut;
         //public StocketMarketEngineTest(StockMarketFactory stockMarketFactory, StockMarketMatchEngineStateProxy sut)
@@ -29,9 +33,10 @@ namespace Test
 
         private StockMarketMatchEngineStateProxy sut;
 
-        public StocketMarketEngineTest()
+        public StocketMarketEngineTest(ITestOutputHelper output)
         {
             sut = new StockMarketMatchEngineStateProxy();
+            this.output = output;
         }
 
 
@@ -85,7 +90,7 @@ namespace Test
 
             sut.AllOrders
                 .Where(o => o.Id == buyOrderId.Order.Id)
-                
+
                 .FirstOrDefault()
                 .Should()
                 .BeEquivalentTo(new
@@ -558,29 +563,7 @@ namespace Test
             });
         }
 
-        //[Fact]
-        //public async void ProcessOrderAsync_SixEventShouldBeRaised()
-        //{
-        //    //arrenge
-        //    sut.PreOpen();
-        //    sut.Open();
 
-        //    await sut.ProcessOrderAsync(10, 5, Side.Sell);
-        //    await sut.ProcessOrderAsync(10, 1, Side.Sell);
-
-        //    //Act
-        //    await sut.ProcessOrderAsync(10, 6, Side.Buy);
-
-        //    //assert
-        //    Assert.Equal(2, sut.TradeCount);
-        //    Assert.Equal(5, sut.Trade.First().Amount);
-        //    Assert.Equal(1, sut.Trade.Last().Amount);
-        //    Assert.Equal(6, sut.Trade.Sum(x => x.Amount));
-        //    Assert.Equal(10, sut.Trade.First().Price);
-        //    Assert.Equal(0, sut.GetBuyOrderCount());
-        //    Assert.Equal(0, sut.GetSellOrderCount());
-
-        //}
 
         [Fact]
         public async void ProcessOrderAsync_ShouldOneTradeCreatedAndFiveEventBeRaised()
@@ -588,12 +571,6 @@ namespace Test
             //arrenge
             sut.PreOpen();
             sut.Open();
-
-            var events = new StockMarketEvents()
-            {
-                OnOrderCreated = onOrderCreated,
-                OnTradeCreated = onTradeCreated
-            };
 
             await sut.ProcessOrderAsync(100, 10, Side.Sell);
             await sut.ProcessOrderAsync(100, 5, Side.Sell);
@@ -609,39 +586,6 @@ namespace Test
             Assert.Equal(0, sut.GetBuyOrderCount());
             Assert.Equal(1, sut.GetSellOrderCount());
         }
-
-        private async Task onOrderCreated(StockMarketMatchEngine stockMarketMatchEngine, Order order)
-        {
-
-            var _orderCommandRepository = new Mock<IOrderCommandRepository>();
-
-            _orderCommandRepository.Setup(x => x.Add(It.IsAny<Order>()));
-
-            await _orderCommandRepository.Object.Add(order);
-        }
-
-        private async Task onTradeCreated(StockMarketMatchEngine stockMarketMatchEngine, Trade trade)
-        {
-
-            var _tradeCommandRepository = new Mock<ITradeCommandRepository>();
-
-            _tradeCommandRepository.Setup(x => x.Add(It.IsAny<Trade>()));
-
-            await _tradeCommandRepository.Object.Add(trade);
-        }
-
-        private async Task onOrderModified(StockMarketMatchEngine stockMarketMatchEngine, Order order)
-        {
-            var _orderCommandRepository = new Mock<IOrderCommandRepository>();
-
-            _orderCommandRepository.Setup(x => x.Find(order.Id)).ReturnsAsync(() => order);
-
-            var founndOrder = await _orderCommandRepository.Object.Find(order.Id);
-
-            founndOrder.UpdateBy(order);
-
-        }
-
 
         [Fact]
         public async void ProcessOrderAsync_One_Trade_Should_Be_Created_With_Seller_Price_When_Is_In_Open_State()
@@ -1025,7 +969,7 @@ namespace Test
             sut.PreOpen();
             sut.Open();
 
-           
+
 
             var orderId = await sut.ProcessOrderAsync(90, 15, Side.Sell);
             var sellOrderId = await sut.ProcessOrderAsync(110, 15, Side.Sell);
@@ -1141,6 +1085,46 @@ namespace Test
         public async ValueTask DisposeAsync()
         {
             await sut.DisposeAsync();
+        }
+
+        [Fact]
+        public async Task test2Async()
+        {
+            var bc = new BlockingCollection<(int, TaskCompletionSource<int>)>();
+            var tasks = new List<Task>();
+            var c = 0;
+            for (int i = 1; i < 21; i++)
+            {
+                tasks.Add(Task.Run(async () =>
+               {
+                   Interlocked.Increment(ref c);
+                   (int, TaskCompletionSource<int>) item = new(c, new TaskCompletionSource<int>());
+                   bc.Add(item);
+                   await item.Item2.Task;
+               }));
+            }
+            var t3 = Task.Run(() =>
+            {
+                var ls = new List<int>();
+                while (!bc.IsCompleted)
+                {
+                    (int, TaskCompletionSource<int>)? num = null;
+                    try
+                    {
+                        num = bc.Take();
+                        ls.Add(num.Value.Item1);
+                        num.Value.Item2.SetResult(num.Value.Item1);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                output.WriteLine(string.Join(':', ls));
+            });
+            await Task.WhenAll(tasks);
+            bc.CompleteAdding();
+            await t3;
+
         }
     }
 }
