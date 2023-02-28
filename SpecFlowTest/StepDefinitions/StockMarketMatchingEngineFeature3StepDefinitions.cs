@@ -7,11 +7,10 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineFeature3StepDefinitions : Steps
     {
         private readonly ScenarioContext context;
-        private static readonly string ROOT_URL = "https://localhost:7092/api/";
         public StockMarketMatchingEngineFeature3StepDefinitions(ScenarioContext context)
         {
             this.context = context;
-
+            this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
         }
 
         [Given(@"Order '([^']*)' Has Been Registerd")]
@@ -31,11 +30,8 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"The following '([^']*)' will be created")]
         public async Task ThenTheFollowingWillBeCreated(string trade, Table table)
         {
-            string url = $"{ROOT_URL}Trades";
-
-            HttpClientWorker.AddConnection(url);
-
-            var response = await HttpClientWorker.Execute<object, IEnumerable<TestTrade>>(url, HttpMethod.Get);
+            var stockMarketClient =context.Get<StockMarketClient>("smc");
+            var response = await stockMarketClient.GetTrades();
 
             var findTrade = response.Where(t => t.Id == context.Get<TestProcessedOrder>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
 
@@ -50,12 +46,12 @@ namespace SpecFlowTest.StepDefinitions
         {
             var buyOrderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
 
-            string url = $"{ROOT_URL}Orders/{buyOrderId}";
-            var buyOrderDeserialize = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
+            var stockMarketClient = context.Get<StockMarketClient>("smc");
+            var response = await stockMarketClient.GetOrderById(buyOrderId);
 
-            buyOrderDeserialize.Id.Should().Be(buyOrderId);
-            buyOrderDeserialize.Amount.Should().Be(table.CreateInstance<TestOrder>().Amount);
-            buyOrderDeserialize.Price.Should().Be(table.CreateInstance<TestOrder>().Price);
+            response.Id.Should().Be(buyOrderId);
+            response.Amount.Should().Be(table.CreateInstance<TestOrder>().Amount);
+            response.Price.Should().Be(table.CreateInstance<TestOrder>().Price);
         }
     }
 }

@@ -58,7 +58,7 @@ namespace EndPoints.Controller
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         [HttpPut]
-        public async Task<long> ModifieOrder([FromBody] ModifiedOrderVM modifieOrderVM)
+        public async Task<long> ModifyOrder([FromBody] ModifiedOrderVM modifieOrderVM)
         {
             var modifieCommand = new ModifieOrderCommand()
             {
@@ -84,7 +84,7 @@ namespace EndPoints.Controller
         /// <param name="handler"></param>
         /// <param name="orderId"></param>
         /// <returns></returns>
-        [HttpPatch("{orderId}")]
+        [HttpDelete("{orderId}")]
         public async Task<long> CancellOrder(long orderId)
         {
             try
@@ -108,7 +108,7 @@ namespace EndPoints.Controller
         /// CancellAllOrders
         /// </summary>
         /// <returns></returns>
-        [HttpPatch]
+        [HttpDelete]
         public async Task<IEnumerable<long>> CancellAllOrders()
         {
             var result = await cancellAllOrderCommandHandler.Handle(null);

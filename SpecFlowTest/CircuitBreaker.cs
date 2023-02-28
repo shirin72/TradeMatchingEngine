@@ -41,7 +41,7 @@ namespace SpecFlowTest
                 catch (Exception e)
                 {
                     _trackErrors(e);
-                    throw e;
+                    throw;
                 }
             }
 
@@ -62,10 +62,10 @@ namespace SpecFlowTest
             public CircuitBreakerOpen(CircuitBreaker owner)
                 : base(owner)
             {
-                new Timer(_ =>
-                {
+                Task.Run(async () => { 
+                    await Task.Delay(Config.CircuitOpenTimeout);
                     owner._state = new CircuitBreakerHalfOpen(owner);
-                }, null, Config.CircuitOpenTimeout, Timeout.Infinite);
+                });
             }
 
             public override async Task<TOutput> ExecuteService<TInput, TOutput>(TInput input, Func<TInput, Task<TOutput>> func)
@@ -88,7 +88,7 @@ namespace SpecFlowTest
                 try
                 {
                     var result = await func(input);
-                    _successCount += _successCount;
+                    _successCount += 1;
 
                     if (_successCount > Config.CircuitHalfOpenSuccessLimit)
                     {

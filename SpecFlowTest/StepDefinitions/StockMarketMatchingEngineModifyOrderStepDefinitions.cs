@@ -8,10 +8,10 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineModifyOrderStepDefinitions
     {
         private readonly ScenarioContext context;
-        private static readonly string ROOT_URL = "https://localhost:7092/api/Orders/";
         public StockMarketMatchingEngineModifyOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
+            this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
         }
 
         [When(@"I Modify The Order '([^']*)' to '([^']*)'")]
@@ -29,7 +29,8 @@ namespace SpecFlowTest.StepDefinitions
                 Price = _modifiedorderVM.Price,
             };
 
-            var response = await HttpClientWorker.Execute<ModifiedOrderVM, long>(ROOT_URL, HttpMethod.Put, modifiedOrderVM);
+            var stockMarketClient = context.Get<StockMarketClient>("smc");
+            var response = await stockMarketClient.ModifyOrder(modifiedOrderVM);
 
             context.Add($"{modifiedOrder}Response", Convert.ToInt64(response));
         }
@@ -39,8 +40,9 @@ namespace SpecFlowTest.StepDefinitions
         {
             var result = context.Get<long>($"{modifiedOrder}Response");
             var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
-            string url = $"{ROOT_URL}{result}";
-            var response = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
+
+            var stockMarketClient = context.Get<StockMarketClient>("smc");
+            var response = await stockMarketClient.GetOrderById(result);
 
             response.Id.Should().Be(result);
             response.Amount.Should().Be(_modifiedorderVM.Amount);

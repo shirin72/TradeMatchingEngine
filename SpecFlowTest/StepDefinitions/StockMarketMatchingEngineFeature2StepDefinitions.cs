@@ -8,20 +8,18 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketMatchingEngineFeature2StepDefinitions : Steps
     {
         private ScenarioContext context;
-        private static readonly string ROOT_URL = "https://localhost:7092/api/Orders/";
 
         public StockMarketMatchingEngineFeature2StepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            HttpClientWorker.AddConnection(ROOT_URL);
+            this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
         }
-
-        public string BaseAddress { get; }
 
         [BeforeScenario]
         public async Task CancellAllOrders()
         {
-            await HttpClientWorker.Execute<object, object>($"{ROOT_URL}", HttpMethod.Patch);
+            var client = this.context.Get<StockMarketClient>("smc");
+            await client.CancelAllOrders();
         }
 
         [Given(@"Order '([^']*)' Has Been Defined")]
@@ -33,9 +31,8 @@ namespace SpecFlowTest.StepDefinitions
         [When(@"I Register The Order '([^']*)'")]
         public async Task WhenIRegisterTheSellOrder(string order)
         {
-            var orderVm = context.Get<OrderVM>(order);
-            string url = $"{ROOT_URL}";
-            var result = await HttpClientWorker.Execute<OrderVM, TestProcessedOrder>(url, HttpMethod.Post, orderVm);
+            var client = this.context.Get<StockMarketClient>("smc");
+            var result = await client.ProcessOrder(context.Get<OrderVM>(order));
             context.Add($"{order}Response", result);
         }
 
@@ -43,11 +40,11 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"Order '([^']*)' Should Be Enqueued")]
         public async Task ThenOrderShouldBeEnqueuedAsync(string order)
         {
-            var result = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
-            string url = $"{ROOT_URL}{result}";
-            var addedOrderId = await HttpClientWorker.Execute<object, TestOrder>(url, HttpMethod.Get);
+            var orderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
+            var client = this.context.Get<StockMarketClient>("smc");
+            var addedOrderId = await client.GetOrderById(orderId);
 
-            addedOrderId.Id.Should().Be(result);
+            addedOrderId.Id.Should().Be(orderId);
 
         }
     }

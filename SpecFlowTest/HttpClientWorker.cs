@@ -1,5 +1,4 @@
-﻿using Application.Tests;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -9,21 +8,7 @@ using System.Net.Http.Headers;
 
 namespace SpecFlowTest
 {
-    public class StockMarketClient
-    {
-        public StockMarketClient(string baseAddress)
-        {
-            BaseAddress = baseAddress;
-            HttpClientWorker.AddConnection(baseAddress);
-        }
 
-        public string BaseAddress { get; }
-
-        public Task<IEnumerable<TestTrade>> GetTrades()
-        {
-            return HttpClientWorker.Execute<IEnumerable<TestTrade>>($"{BaseAddress}//trades", HttpMethod.Get);
-        }
-    }
     public static class HttpClientWorker
     {
         static ConcurrentDictionary<string, ICircuitBreaker> connections =

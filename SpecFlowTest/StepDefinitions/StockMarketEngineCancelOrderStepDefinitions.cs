@@ -10,27 +10,26 @@ namespace SpecFlowTest.StepDefinitions
     public class StockMarketEngineCancelOrderStepDefinitions
     {
         private readonly ScenarioContext context;
-        private static readonly string ROOT_URL = "https://localhost:7092/api/Orders/";
         public StockMarketEngineCancelOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
+            this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
         }
 
         [When(@"I cancel '([^']*)'")]
         public async Task WhenICancel(string order)
         {
-            var orderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
-            await HttpClientWorker.Execute($"{ROOT_URL}{orderId}", HttpMethod.Patch);
+            var stockMarketClient = this.context.Get<StockMarketClient>("smc");
+            await stockMarketClient.CancelOrder(context.Get<TestProcessedOrder>($"{order}Response").OrderId);
         }
 
         [Then(@"The order '([^']*)'  Should Be Cancelled")]
         public async Task ThenTheOrderShouldBeCancelled(string order)
         {
-            var result = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
+            var stockMarketClient = this.context.Get<StockMarketClient>("smc");
+            var addedOrder = await stockMarketClient.GetOrderById(context.Get<TestProcessedOrder>($"{order}Response").OrderId);
 
-            var addedOrderId = await HttpClientWorker.Execute<TestOrder>($"{ROOT_URL}{result}", HttpMethod.Get);
-
-            addedOrderId.OrderState.Should().Be(OrderStates.Cancell);
+            addedOrder.OrderState.Should().Be(OrderStates.Cancell);
         }
     }
 }
