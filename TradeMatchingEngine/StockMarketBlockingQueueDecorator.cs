@@ -50,23 +50,6 @@
             });
         }
 
-        //private void setupEvents(StockMarketEvents? events)
-        //{
-        //    if (events != null)
-        //    {
-        //        onOrderCreated = events.OnOrderCreated;
-        //        onOrderModified = events.OnOrderModified;
-        //        onTradeCreated = events.OnTradeCreated;
-        //    }
-        //}
-
-        //private void clearEvents()
-        //{
-        //    onOrderCreated = null;
-        //    onOrderModified = null;
-        //    onTradeCreated = null;
-        //}
-
         public async ValueTask DisposeAsync()
         {
             await queue.DisposeAsync();
