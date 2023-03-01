@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TradeMatchingEngine.GenericRepositories
+namespace Domain.GenericRepositories
 {
     public interface IQueryRepository<T,TInterface>
     {

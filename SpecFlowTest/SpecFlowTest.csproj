@@ -32,7 +32,7 @@
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\EndPoints\EndPoints.csproj" />
     <ProjectReference Include="..\Repository\Infrastructure.csproj" />
-    <ProjectReference Include="..\TradeMatchingEngine\TradeMatchingEngine.csproj" />
+    <ProjectReference Include="..\TradeMatchingEngine\Domain.csproj" />
   </ItemGroup>
 
 </Project>

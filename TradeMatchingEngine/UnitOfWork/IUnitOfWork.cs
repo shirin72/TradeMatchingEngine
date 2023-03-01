@@ -1,4 +1,4 @@
-﻿namespace TradeMatchingEngine.UnitOfWork
+﻿namespace Domain.UnitOfWork
 {
     public interface IUnitOfWork:IAsyncDisposable
     {

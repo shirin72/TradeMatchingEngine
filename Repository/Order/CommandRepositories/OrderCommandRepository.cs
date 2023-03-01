@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using TradeMatchingEngine.Orders.Repositories.Command;
+using Domain.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
 {
-    public class OrderCommandRepository :CommandRepository<TradeMatchingEngine.Order, TradeMatchingEngine.IOrder>,  IOrderCommandRepository
+    public class OrderCommandRepository :CommandRepository<Domain.Order, Domain.IOrder>,  IOrderCommandRepository
     {
         private readonly TradeMatchingEngineContext _tradeMatchingEngineContext;
 

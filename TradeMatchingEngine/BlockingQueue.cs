@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TradeMatchingEngine
+namespace Domain
 {
     public partial class BlockingQueue : IAsyncDisposable
     {

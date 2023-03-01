@@ -1,9 +1,9 @@
 ﻿using Application.OrderService.OrderCommandHandlers;
 using EndPoints.Model;
 using Microsoft.AspNetCore.Mvc;
-using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Commands;
-using TradeMatchingEngine.Orders.Repositories.Query;
+using Domain;
+using Domain.Orders.Commands;
+using Domain.Orders.Repositories.Query;
 
 namespace EndPoints.Controller
 {
@@ -37,7 +37,7 @@ namespace EndPoints.Controller
         /// <param name="orderVM"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ProcessedOrder> ProcessOrder([FromBody] OrderVM orderVM)
+        public async Task<IActionResult> ProcessOrder([FromBody] OrderVM orderVM)
         {
             var command = new AddOrderCommand()
             {
@@ -48,7 +48,11 @@ namespace EndPoints.Controller
                 IsFillAndKill = (bool)orderVM.IsFillAndKill,
             };
 
-            return await addOrderCommandHandlers.Handle(command);
+            return CreatedAtAction(
+               "ProcessOrder",
+                "Orders",
+                null,
+                await addOrderCommandHandlers.Handle(command));
         }
 
         /// <summary>
@@ -58,7 +62,7 @@ namespace EndPoints.Controller
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         [HttpPut]
-        public async Task<long> ModifyOrder([FromBody] ModifiedOrderVM modifieOrderVM)
+        public async Task<IActionResult> ModifyOrder([FromBody] ModifiedOrderVM modifieOrderVM)
         {
             var modifieCommand = new ModifieOrderCommand()
             {
@@ -72,10 +76,12 @@ namespace EndPoints.Controller
 
             if (result != null)
             {
-                return result.OrderId;
+                return AcceptedAtAction("ModifyOrder",
+                              "Orders",
+                null, result.OrderId);
             }
 
-            throw new Exception("Order Not Found");
+            return BadRequest(modifieOrderVM);
         }
 
         /// <summary>
@@ -85,7 +91,7 @@ namespace EndPoints.Controller
         /// <param name="orderId"></param>
         /// <returns></returns>
         [HttpDelete("{orderId}")]
-        public async Task<long> CancellOrder(long orderId)
+        public async Task<IActionResult> CancellOrder(long orderId)
         {
             try
             {
@@ -93,13 +99,18 @@ namespace EndPoints.Controller
 
                 if (result != null)
                 {
-                    return result.OrderId;
+                    return AcceptedAtAction(
+                                           "CancellOrder",
+                                         "Orders",
+                                            null, result.OrderId);
+
                 }
-                throw new Exception("Order Not Found");
+
+                return BadRequest(orderId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return BadRequest(ex.Message);
             }
 
         }
@@ -109,23 +120,26 @@ namespace EndPoints.Controller
         /// </summary>
         /// <returns></returns>
         [HttpDelete]
-        public async Task<IEnumerable<long>> CancellAllOrders()
+        public async Task<IActionResult> CancellAllOrders()
         {
             var result = await cancellAllOrderCommandHandler.Handle(null);
 
             if (result != null)
             {
-                return result.CancelledOrders;
+                return AcceptedAtAction(
+                    "CancellAllOrders",
+                      "Orders",
+                        null, result.CancelledOrders);
             }
 
-            throw new Exception("Order Not Found");
+            return BadRequest();
         }
 
 
         [HttpGet("{orderId}")]
-        public async Task<IOrder> GetOrder(long orderId)
+        public async Task<IActionResult> GetOrder(long orderId)
         {
-            return await orderQueryRepository.Get(o => o.Id == orderId);
+            return Ok(await orderQueryRepository.Get(o => o.Id == orderId));
         }
     }
 }

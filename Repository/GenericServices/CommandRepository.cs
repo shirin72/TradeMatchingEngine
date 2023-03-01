@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TradeMatchingEngine.Orders.Repositories.Command;
+using Domain.Orders.Repositories.Command;
 
 namespace Infrastructure.Order.QueryRepositories
 {

@@ -1,10 +1,10 @@
 ﻿using Infrastructure.GenericServices;
 using Microsoft.EntityFrameworkCore;
-using TradeMatchingEngine.Orders.Repositories.Query;
+using Domain.Orders.Repositories.Query;
 
 namespace Infrastructure.Order.CommandRepositories
 {
-    public class OrderQueryRepository :QueryRepository<TradeMatchingEngine.Order, TradeMatchingEngine.IOrder>, IOrderQueryRepository
+    public class OrderQueryRepository :QueryRepository<Domain.Order, Domain.IOrder>, IOrderQueryRepository
     {
         private readonly TradeMatchingEngineContext tradeMatchingEngineContext;
 

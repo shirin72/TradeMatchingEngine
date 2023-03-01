@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TradeMatchingEngine
+namespace Domain
 {
 
     public class Order : IOrder

@@ -1,6 +1,6 @@
-﻿using TradeMatchingEngine.GenericRepositories;
+﻿using Domain.GenericRepositories;
 
-namespace TradeMatchingEngine.Trades.Repositories.Query
+namespace Domain.Trades.Repositories.Query
 {
     public interface ITradeQueryRespository:IQueryRepository<Trade,ITrade>
     {

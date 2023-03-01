@@ -1,6 +1,6 @@
-﻿using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Repositories.Query;
-using TradeMatchingEngine.Trades.Repositories.Query;
+﻿using Domain;
+using Domain.Orders.Repositories.Query;
+using Domain.Trades.Repositories.Query;
 
 namespace Application.Factories
 {

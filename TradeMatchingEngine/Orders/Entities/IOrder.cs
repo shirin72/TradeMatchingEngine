@@ -1,5 +1,5 @@
 ﻿
-namespace TradeMatchingEngine
+namespace Domain
 {
     public interface IOrder
     {

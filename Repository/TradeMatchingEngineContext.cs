@@ -19,7 +19,7 @@ namespace Infrastructure
         {
             //OrderEntity
 
-            modelBuilder.Entity<TradeMatchingEngine.Order>(b =>
+            modelBuilder.Entity<Domain.Order>(b =>
             {
                 b.HasKey(o => o.Id);
                 b.Property(o => o.Id).ValueGeneratedNever();
@@ -36,14 +36,14 @@ namespace Infrastructure
 
             //TradeEntity
 
-            modelBuilder.Entity<TradeMatchingEngine.Trade>(b =>
+            modelBuilder.Entity<Domain.Trade>(b =>
             {
                 b.HasKey(o => o.Id);
                 b.Property(o => o.Id).ValueGeneratedNever();
                 b.Property(o => o.Price);
                 b.Property(o => o.Amount);
-                b.HasOne<TradeMatchingEngine.Order>().WithMany().HasForeignKey(t => t.BuyOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
-                b.HasOne<TradeMatchingEngine.Order>().WithMany().HasForeignKey(t => t.SellOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                b.HasOne<Domain.Order>().WithMany().HasForeignKey(t => t.BuyOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                b.HasOne<Domain.Order>().WithMany().HasForeignKey(t => t.SellOrderId).IsRequired().OnDelete(DeleteBehavior.Restrict);
                 b.Property(o => o.SellOrderId);
                 b.Property(o => o.BuyOrderId);
                 // b.Property(o => o.OwnerId);
@@ -51,7 +51,7 @@ namespace Infrastructure
 
         }
 
-        public DbSet<TradeMatchingEngine.Order> Orders { get; set; }
-        public DbSet<TradeMatchingEngine.Trade> Trades { get; set; }
+        public DbSet<Domain.Order> Orders { get; set; }
+        public DbSet<Domain.Trade> Trades { get; set; }
     }
 }

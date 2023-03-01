@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Commands;
+using Domain;
+using Domain.Orders.Commands;
 using Xunit;
 
 namespace Application.Tests

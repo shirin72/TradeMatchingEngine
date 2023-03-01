@@ -1,4 +1,4 @@
-﻿namespace TradeMatchingEngine
+﻿namespace Domain
 {
     public class StockMarketMatchEngine
     {

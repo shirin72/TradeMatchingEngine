@@ -1,6 +1,6 @@
-﻿using TradeMatchingEngine;
+﻿using Domain;
 
-namespace TradeMatchingEngine
+namespace Domain
 {
     public class StockMarketMatchingEngineProcessContext : IStockMarketMatchingEngineProcessContext
     {

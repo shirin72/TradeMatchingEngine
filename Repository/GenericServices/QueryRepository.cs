@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using TradeMatchingEngine.GenericRepositories;
+using Domain.GenericRepositories;
 
 namespace Infrastructure.GenericServices
 {

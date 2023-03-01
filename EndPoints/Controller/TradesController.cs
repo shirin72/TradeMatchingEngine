@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TradeMatchingEngine;
-using TradeMatchingEngine.Trades.Repositories.Query;
+using Domain;
+using Domain.Trades.Repositories.Query;
 
 namespace EndPoints.Controller
 {
@@ -15,14 +15,14 @@ namespace EndPoints.Controller
             this.queryRepository = queryRepository;
         }
         [HttpGet]
-        public async Task<IEnumerable<ITrade>> GetAllTrades()
+        public async Task<IActionResult> GetAllTrades()
         {
-            return await queryRepository.GetAll();
+            return Ok(await queryRepository.GetAll());
         }
         [HttpGet("{id}")]
-        public async Task<ITrade> GetTrade(long id)
+        public async Task<IActionResult> GetTrade(long id)
         {
-            return await queryRepository.Get(t=>t.Id == id);
+            return Ok(await queryRepository.Get(t => t.Id == id));
         }
     }
 }

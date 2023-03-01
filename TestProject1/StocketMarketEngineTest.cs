@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Repositories.Command;
-using TradeMatchingEngine.Trades.Repositories.Command;
+using Domain;
+using Domain.Orders.Repositories.Command;
+using Domain.Trades.Repositories.Command;
 using Xunit;
 using Xunit.Abstractions;
 

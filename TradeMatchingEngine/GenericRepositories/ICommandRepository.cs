@@ -1,4 +1,4 @@
-﻿namespace TradeMatchingEngine.Orders.Repositories.Command
+﻿namespace Domain.Orders.Repositories.Command
 {
     public interface ICommandRepository<T,TInterface> where T:TInterface
     {

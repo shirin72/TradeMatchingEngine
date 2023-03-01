@@ -1,12 +1,12 @@
 ﻿using Application.Factories;
 using Application.OrderService.OrderCommandHandlers;
 using System.Threading.Tasks;
-using TradeMatchingEngine;
-using TradeMatchingEngine.Orders.Repositories.Command;
-using TradeMatchingEngine.Orders.Repositories.Query;
-using TradeMatchingEngine.Trades.Repositories.Command;
-using TradeMatchingEngine.Trades.Repositories.Query;
-using TradeMatchingEngine.UnitOfWork;
+using Domain;
+using Domain.Orders.Repositories.Command;
+using Domain.Orders.Repositories.Query;
+using Domain.Trades.Repositories.Command;
+using Domain.Trades.Repositories.Query;
+using Domain.UnitOfWork;
 
 namespace Application.Tests
 {
