@@ -139,7 +139,24 @@ namespace EndPoints.Controller
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrder(long orderId)
         {
+            var order= await orderQueryRepository.Get(o => o.Id == orderId);
+            var result=res
             return Ok(await orderQueryRepository.Get(o => o.Id == orderId));
+        }
+
+        private List<(string, string, long)> getherActions(HttpMethod method)
+        {
+            var actionList=new List<(string, string, long)>();
+
+            if (method==HttpMethod.Get)
+            {
+
+                actionList.Add(((nameof(ModifyOrder)), "PUT", 0));
+                actionList.Add(((nameof(CancellOrder)), "PUT", 0));
+
+            }
+
+            return actionList;
         }
     }
 }
