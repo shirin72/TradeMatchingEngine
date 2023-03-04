@@ -16,7 +16,7 @@ namespace EndPoints.Controller
         private readonly ICancellOrderCommandHandler cancellOrderCommandHandler;
         private readonly IOrderQueryRepository orderQueryRepository;
         private readonly ICancellAllOrdersCommandHandler cancellAllOrderCommandHandler;
-
+        private readonly IUrlHelper urlHelper;
         public OrdersController(IAddOrderCommandHandlers addOrderCommandHandlers,
             IModifieOrderCommandHandler modifieOrderCommandHandler,
             ICancellOrderCommandHandler cancellOrderCommandHandler,
@@ -36,7 +36,7 @@ namespace EndPoints.Controller
         /// </summary>
         /// <param name="orderVM"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost(Name = nameof(ProcessOrder))]
         public async Task<IActionResult> ProcessOrder([FromBody] OrderVM orderVM)
         {
             var command = new AddOrderCommand()
@@ -61,7 +61,7 @@ namespace EndPoints.Controller
         /// <param name="modifieOrderVM"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        [HttpPut]
+        [HttpPut(Name = nameof(ModifyOrder))]
         public async Task<IActionResult> ModifyOrder([FromBody] ModifiedOrderVM modifieOrderVM)
         {
             var modifieCommand = new ModifieOrderCommand()
@@ -90,7 +90,7 @@ namespace EndPoints.Controller
         /// <param name="handler"></param>
         /// <param name="orderId"></param>
         /// <returns></returns>
-        [HttpDelete("{orderId}")]
+        [HttpDelete("{orderId}", Name = nameof(CancellOrder))]
         public async Task<IActionResult> CancellOrder(long orderId)
         {
             try
@@ -99,10 +99,23 @@ namespace EndPoints.Controller
 
                 if (result != null)
                 {
+
+                    var tuples = new List<Tuple<string, string, string, object?>>();
+                    tuples.Add(new(nameof(this.ModifyOrder), "self", "PUT", null));
+                    tuples.Add(new(nameof(this.GetOrder), "self", "Get", new { orderId = result.OrderId }));
+                    tuples.Add(new(nameof(this.ProcessOrder), "self", "POST", null));
+
                     return AcceptedAtAction(
                                            "CancellOrder",
-                                         "Orders",
-                                            null, result.OrderId);
+                                           "Orders",
+                                            null,
+                                            new ProcessedOrderDto()
+                                            {
+                                                CancelledOrders = result.CancelledOrders,
+                                                OrderId = orderId,
+                                                Trades = result.Trades,
+                                                Links = Links(tuples)
+                                            });
 
                 }
 
@@ -119,7 +132,7 @@ namespace EndPoints.Controller
         /// CancellAllOrders
         /// </summary>
         /// <returns></returns>
-        [HttpDelete]
+        [HttpDelete(Name = nameof(CancellAllOrders))]
         public async Task<IActionResult> CancellAllOrders()
         {
             var result = await cancellAllOrderCommandHandler.Handle(null);
@@ -135,11 +148,22 @@ namespace EndPoints.Controller
             return BadRequest();
         }
 
-
-        [HttpGet("{orderId}")]
+        [HttpGet("{orderId}", Name = nameof(GetOrder))]
         public async Task<IActionResult> GetOrder(long orderId)
         {
             return Ok(await orderQueryRepository.Get(o => o.Id == orderId));
+        }
+
+        private List<LinkDto> Links(List<Tuple<string, string, string, object?>> linkDtos)
+        {
+            var linkDto = new List<LinkDto>();
+
+            foreach (var item in linkDtos)
+            {
+                linkDto.Add(new LinkDto(Url.RouteUrl(item.Item1, item.Item4), item.Item2, item.Item3));
+            }
+
+            return linkDto;
         }
     }
 }

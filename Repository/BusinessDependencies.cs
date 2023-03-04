@@ -15,6 +15,9 @@ using Domain.Orders.Repositories.Query;
 using Domain.Trades.Repositories.Command;
 using Domain.Trades.Repositories.Query;
 using Domain.UnitOfWork;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Infrastructure
 {
@@ -38,6 +41,8 @@ namespace Infrastructure
             services.AddScoped<IModifieOrderCommandHandler, ModifieOrderCommandHandler>();
             services.AddScoped<ICancellOrderCommandHandler, CancellOrderCommandHandler>();
             services.AddScoped<ICancellAllOrdersCommandHandler, CancellAllOrdersCommandHandler>();
+
+
             return services;
         }
     }
