@@ -7,24 +7,36 @@ namespace EndPoints.Controller
 
     public class BaseController : ControllerBase
     {
+        #region Const
         private static readonly string HTTPMETHOD_GET = "GET";
         private static readonly string HTTPMETHOD_POST = "POST";
         private static readonly string HTTPMETHOD_PUT = "PUT";
-        private static readonly string HTTPMETHOD_PATCH = "PATCH";
         private static readonly string HTTPMETHOD_DELETE = "DELETE";
         private static readonly string REL_CANCELL_ORDER = "cancell_order";
         private static readonly string REL_GET_ORDER = "get_order";
         private static readonly string REL_GET_TRADE = "get_trade";
         private static readonly string REL_PUT_ORDER = "modify_order";
         private static readonly string REL_POST_ORDER = "post_order";
+        #endregion
+
         protected ProcessedOrderVM CreateResponse(ProcessedOrder? result, List<Tuple<string, string, string, object?>> linkDtos)
         {
-            var lst = new List<TradeVM>();
+            List<TradeVM> tradeList = ConvertItradToTradeVM(result, linkDtos);
+
+            List<TradeVM> trades = CreateTradesLink(tradeList, linkDtos.Where(l => l.Item1 == nameof(TradesController.GetTrade)).ToList());
+
+            return CreateProcessedOrder(result, trades, linkDtos.Where(l => l.Item1 != nameof(TradesController.GetTrade)).ToList());
+        }
+
+        private List<TradeVM> ConvertItradToTradeVM(ProcessedOrder? result, List<Tuple<string, string, string, object>> linkDtos)
+        {
+            var tradeList = new List<TradeVM>();
+
             if (result.Trades != null)
             {
                 foreach (var item in result.Trades)
                 {
-                    lst.Add(new TradeVM()
+                    tradeList.Add(new TradeVM()
                     {
                         Amount = item.Amount,
                         BuyOrderId = item.BuyOrderId,
@@ -34,11 +46,11 @@ namespace EndPoints.Controller
                     });
                 }
 
-                List<TradeVM> trades = CreateTrades(lst, linkDtos.Where(l => l.Item1 == nameof(TradesController.GetTrade)).ToList());
             }
 
-            return CreateProcessedOrder(result, lst, linkDtos.Where(l => l.Item1 != nameof(TradesController.GetTrade)).ToList());
+            return tradeList;
         }
+
         protected ProcessedOrderVM CreateProcessedOrder(ProcessedOrder? result, List<TradeVM> trades, List<Tuple<string, string, string, object?>> linkDtos)
         {
             return new ProcessedOrderVM()
@@ -67,7 +79,7 @@ namespace EndPoints.Controller
 
             return links;
         }
-        protected List<TradeVM> CreateTrades(List<TradeVM>? trades, List<Tuple<string, string, string, object?>> linkDtos)
+        protected List<TradeVM> CreateTradesLink(List<TradeVM>? trades, List<Tuple<string, string, string, object?>> linkDtos)
         {
             if (trades != null)
             {
@@ -82,9 +94,9 @@ namespace EndPoints.Controller
             tuples.Add(new(nameof(OrdersController.GetOrder), REL_GET_ORDER, HTTPMETHOD_GET, orderId));
             tuples.Add(new(nameof(OrdersController.ModifyOrder), REL_PUT_ORDER, HTTPMETHOD_PUT, null));
 
-            foreach (var trade in trades)
+            if (trades != null)
             {
-                tuples.Add(new(nameof(TradesController.GetTrade), REL_GET_TRADE, HTTPMETHOD_GET, trade.Id));
+                addTradeLink(tuples, trades);
             }
 
             return tuples;
@@ -94,20 +106,27 @@ namespace EndPoints.Controller
             tuples.Add(new(nameof(OrdersController.CancellOrder), REL_CANCELL_ORDER, HTTPMETHOD_DELETE, orderId));
             tuples.Add(new(nameof(OrdersController.GetOrder), REL_GET_ORDER, HTTPMETHOD_GET, orderId));
             tuples.Add(new(nameof(OrdersController.ProcessOrder), REL_POST_ORDER, HTTPMETHOD_POST, null));
+
             if (trades != null)
             {
-                foreach (var trade in trades)
-                {
-                    tuples.Add(new(nameof(TradesController.GetTrade), REL_GET_TRADE, HTTPMETHOD_GET, trade.Id));
-                }
+                addTradeLink(tuples, trades);
             }
 
             return tuples;
         }
+
+        protected void addTradeLink(List<Tuple<string, string, string, object>> tuples, IEnumerable<ITrade> trades)
+        {
+            foreach (var trade in trades)
+            {
+                tuples.Add(new(nameof(TradesController.GetTrade), REL_GET_TRADE, HTTPMETHOD_GET, trade.Id));
+            }
+        }
+
         protected List<Tuple<string, string, string, object?>> addAllowedGetOrderLinks(List<Tuple<string, string, string, object?>> tuples, IEnumerable<ITrade> trades = null, long? orderId = null)
         {
             tuples.Add(new(nameof(OrdersController.CancellOrder), REL_CANCELL_ORDER, HTTPMETHOD_DELETE, orderId));
-            tuples.Add(new(nameof(OrdersController.ProcessOrder), REL_POST_ORDER, HTTPMETHOD_POST, null));
+            tuples.Add(new(nameof(OrdersController.ModifyOrder), REL_PUT_ORDER, HTTPMETHOD_PUT, null));
             return tuples;
         }
         protected List<Tuple<string, string, string, object?>> createTupleObject()
