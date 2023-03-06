@@ -11,15 +11,14 @@ namespace SpecFlowTest.StepDefinitions
         public StockMarketMatchingEngineModifyOrderStepDefinitions(ScenarioContext context)
         {
             this.context = context;
-            //this.context.TryAdd("smc", new StockMarketClient("https://localhost:7092/api"));
         }
 
         [When(@"I Modify The Order '([^']*)' to '([^']*)'")]
         public async Task WhenIModifyTheOrderTo(string sellOrder, string modifiedOrder)
         {
-            var orderId = context.Get<TestProcessedOrder>($"{sellOrder}Response").OrderId;
+            var orderId = context.Get<ProcessedOrderVM>($"{sellOrder}Response").RegisteredOrder.OrderId;
 
-            var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
+            var _modifiedorderVM = context.Get<RegisterOrderVM>($"{modifiedOrder}");
 
             var modifiedOrderVM = new ModifiedOrderVM()
             {
@@ -32,14 +31,14 @@ namespace SpecFlowTest.StepDefinitions
             var stockMarketClient = context.Get<StockMarketClient>("smc");
             var response = await stockMarketClient.ModifyOrder(modifiedOrderVM);
 
-            context.Add($"{modifiedOrder}Response", Convert.ToInt64(response));
+            context.Add($"{modifiedOrder}Response", Convert.ToInt64(response.RegisteredOrder.OrderId));
         }
 
         [Then(@"The order '([^']*)'  Should Be Found like '([^']*)'")]
         public async Task ThenTheOrderShouldBeFoundLike(string order, string modifiedOrder)
         {
             var result = context.Get<long>($"{modifiedOrder}Response");
-            var _modifiedorderVM = context.Get<OrderVM>($"{modifiedOrder}");
+            var _modifiedorderVM = context.Get<RegisterOrderVM>($"{modifiedOrder}");
 
             var stockMarketClient = context.Get<StockMarketClient>("smc");
             var response = await stockMarketClient.GetOrderById(result);

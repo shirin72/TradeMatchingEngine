@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Domain;
+﻿using Domain;
 using Domain.Trades.Repositories.Query;
+using EndPoints.Model;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EndPoints.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TradesController : ControllerBase
+    public class TradesController : BaseController
     {
         private readonly ITradeQueryRespository queryRepository;
 
@@ -14,12 +15,14 @@ namespace EndPoints.Controller
         {
             this.queryRepository = queryRepository;
         }
-        [HttpGet]
+
+        [HttpGet(Name = nameof(GetAllTrades))]
         public async Task<IActionResult> GetAllTrades()
         {
             return Ok(await queryRepository.GetAll());
         }
-        [HttpGet("{id}")]
+
+        [HttpGet("{id}", Name = nameof(GetTrade))]
         public async Task<IActionResult> GetTrade(long id)
         {
             return Ok(await queryRepository.Get(t => t.Id == id));

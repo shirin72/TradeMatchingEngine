@@ -1,4 +1,3 @@
-using Application.Tests;
 using EndPoints.Model;
 using TechTalk.SpecFlow.Assist;
 
@@ -27,14 +26,14 @@ namespace SpecFlowTest.StepDefinitions
         [Given(@"Order '([^']*)' Has Been Defined")]
         public void GivenSellOrderHasBeenDefined(string order, Table table)
         {
-            context.Add(order, table.CreateInstance<OrderVM>());
+            context.Add(order, table.CreateInstance<RegisterOrderVM>());
         }
 
         [When(@"I Register The Order '([^']*)'")]
         public async Task WhenIRegisterTheSellOrder(string order)
         {
             var client = this.context.Get<StockMarketClient>("smc");
-            var result = await client.ProcessOrder(context.Get<OrderVM>(order));
+            var result = await client.ProcessOrder(context.Get<RegisterOrderVM>(order));
             context.Add($"{order}Response", result);
         }
 
@@ -42,7 +41,7 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"Order '([^']*)' Should Be Enqueued")]
         public async Task ThenOrderShouldBeEnqueuedAsync(string order)
         {
-            var orderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
+            var orderId = context.Get<ProcessedOrderVM>($"{order}Response").RegisteredOrder.OrderId;
             var client = this.context.Get<StockMarketClient>("smc");
             var addedOrderId = await client.GetOrderById(orderId);
 

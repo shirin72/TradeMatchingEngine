@@ -14,13 +14,13 @@ namespace SpecFlowTest
 
         public string BaseAddress { get; }
 
-        public Task<IEnumerable<TestTrade>> GetTrades()
+        public async Task<IEnumerable<TestTrade>> GetTrades()
         {
-            return HttpClientWorker.Execute<IEnumerable<TestTrade>>($"{BaseAddress}/trades", HttpMethod.Get);
+            return await HttpClientWorker.Execute<IEnumerable<TestTrade>>($"{BaseAddress}/trades", HttpMethod.Get);
         }
-        public Task<TestTrade> GetTradeById(long id)
+        public async Task<TestTrade> GetTradeById(long id)
         {
-            return HttpClientWorker.Execute<long, TestTrade>($"{BaseAddress}/trades", HttpMethod.Get, id);
+            return await HttpClientWorker.Execute<long, TestTrade>($"{BaseAddress}/trades", HttpMethod.Get, id);
         }
         public Task CancelAllOrders()
         {
@@ -30,18 +30,18 @@ namespace SpecFlowTest
         {
             return HttpClientWorker.Execute($"{BaseAddress}/orders/{id}", HttpMethod.Delete);
         }
-        public Task<TestOrder> GetOrderById(long id)
+        public async Task<TestOrder> GetOrderById(long id)
         {
-            return HttpClientWorker.Execute<TestOrder>($"{BaseAddress}/orders/{id}", HttpMethod.Get);
+            return await HttpClientWorker.Execute<TestOrder>($"{BaseAddress}/orders/{id}", HttpMethod.Get);
         }
-        public Task<TestProcessedOrder> ProcessOrder(OrderVM order)
+        public async Task<ProcessedOrderVM> ProcessOrder(RegisterOrderVM order)
         {
-            return HttpClientWorker.Execute<OrderVM, TestProcessedOrder>($"{BaseAddress}/orders", HttpMethod.Post, order);
+            return await HttpClientWorker.Execute<RegisterOrderVM, ProcessedOrderVM>($"{BaseAddress}/orders", HttpMethod.Post, order);
         }
 
-        public Task<long> ModifyOrder(ModifiedOrderVM order)
+        public async Task<ProcessedOrderVM> ModifyOrder(ModifiedOrderVM order)
         {
-            return HttpClientWorker.Execute<ModifiedOrderVM, long>($"{BaseAddress}/orders", HttpMethod.Put, order);
+            return await HttpClientWorker.Execute<ModifiedOrderVM, ProcessedOrderVM>($"{BaseAddress}/orders", HttpMethod.Put, order);
         }
     }
 }

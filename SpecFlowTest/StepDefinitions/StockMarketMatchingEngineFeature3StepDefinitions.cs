@@ -1,4 +1,5 @@
 using Application.Tests;
+using EndPoints.Model;
 using TechTalk.SpecFlow.Assist;
 
 namespace SpecFlowTest.StepDefinitions
@@ -30,10 +31,10 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"The following '([^']*)' will be created")]
         public async Task ThenTheFollowingWillBeCreated(string trade, Table table)
         {
-            var stockMarketClient =context.Get<StockMarketClient>("smc");
+            var stockMarketClient = context.Get<StockMarketClient>("smc");
             var response = await stockMarketClient.GetTrades();
 
-            var findTrade = response.Where(t => t.Id == context.Get<TestProcessedOrder>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
+            var findTrade = response.Where(t => t.Id == context.Get<ProcessedOrderVM>($"BuyOrderResponse").Trades.First().Id).FirstOrDefault();
 
             findTrade.Amount.Should().Be(table.CreateInstance<TestTrade>().Amount);
 
@@ -44,7 +45,7 @@ namespace SpecFlowTest.StepDefinitions
         [Then(@"Order '([^']*)' Should Be Modified  like this")]
         public async Task ThenOrderShouldBeModifiedLikeThis(string order, Table table)
         {
-            var buyOrderId = context.Get<TestProcessedOrder>($"{order}Response").OrderId;
+            var buyOrderId = context.Get<ProcessedOrderVM>($"{order}Response").RegisteredOrder.OrderId;
 
             var stockMarketClient = context.Get<StockMarketClient>("smc");
             var response = await stockMarketClient.GetOrderById(buyOrderId);
