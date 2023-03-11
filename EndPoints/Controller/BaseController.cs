@@ -21,14 +21,14 @@ namespace EndPoints.Controller
 
         protected ProcessedOrderVM CreateResponse(ProcessedOrder? result, List<Tuple<string, string, string, object?>> linkDtos)
         {
-            List<TradeVM> tradeList = ConvertItradToTradeVM(result, linkDtos);
+            List<TradeVM> tradeList = ConvertItradToTradeVM(result);
 
             List<TradeVM> trades = CreateTradesLink(tradeList, linkDtos.Where(l => l.Item1 == nameof(TradesController.GetTrade)).ToList());
 
             return CreateProcessedOrder(result, trades, linkDtos.Where(l => l.Item1 != nameof(TradesController.GetTrade)).ToList());
         }
 
-        private List<TradeVM> ConvertItradToTradeVM(ProcessedOrder? result, List<Tuple<string, string, string, object>> linkDtos)
+        private List<TradeVM> ConvertItradToTradeVM(ProcessedOrder? result)
         {
             var tradeList = new List<TradeVM>();
 
@@ -45,7 +45,6 @@ namespace EndPoints.Controller
                         SellOrderId = item.SellOrderId,
                     });
                 }
-
             }
 
             return tradeList;

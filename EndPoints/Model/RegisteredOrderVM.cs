@@ -2,8 +2,13 @@
 {
     public class RegisteredOrderVM
     {
-        public IEnumerable<LinkVM> Links { get; set; }
+        public RegisteredOrderVM()
+        {
+            Links = new List<LinkVM>();
+        }
 
         public long OrderId { get; set; }
+
+        public IEnumerable<LinkVM> Links { get; set; }
     }
 }
