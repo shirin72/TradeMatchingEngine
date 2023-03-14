@@ -7,7 +7,7 @@ namespace Infrastructure
     {
         public TradeMatchingEngineContext(DbContextOptions<TradeMatchingEngineContext> options) : base(options)
         {
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
         public void EnsureDatabaseIsDropped()
